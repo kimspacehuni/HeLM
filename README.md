@@ -161,14 +161,11 @@ HeLM/
 ```bash
 git clone <repo-url> && cd HeLM
 
-conda create -n helm python=3.10 -y
-conda activate helm
-
-pip install torch torchvision
-pip install transformers peft accelerate bitsandbytes
-pip install lerobot
-pip install streamlit pillow tqdm
+conda env create -f environment.yml
+conda activate HeLM
 ```
+
+> `flash-attn` is included in `environment.yml` but requires a matching CUDA version to build. If installation fails, install it separately following the [flash-attention installation guide](https://github.com/Dao-AILab/flash-attention).
 
 > For real-robot evaluation: AgileX PiPER arm with Intel RealSense D455 (workspace) and L515 (wrist) cameras. See `common/robot_devices/` for device setup.
 
