@@ -1,6 +1,5 @@
 # HeLM: Hierarchical Explicit Language Memory for VLM-Guided Non-Markovian Manipulation
 
-> **RSS 2026** | Paper ID [128]
 
 Most robot policies operate under a **Markovian assumption** — mapping only the current observation to an action — which causes them to fail at tasks requiring working memory (e.g., counting button presses, maintaining order of actions across episodes). **HeLM** addresses this by incorporating memory as a natural language into the robot's control loop, inspired by how humans use an *inner monologue* to track progress.
 
