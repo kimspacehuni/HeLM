@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Subtask Annotator</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Subtask Annotator</div>
+  <div class="ep-select">
+    <label for="episodeSelect">Episode</label>
+    <select id="episodeSelect"></select>
+    <span id="episodeMeta" class="meta"></span>
+  </div>
+  <div class="annotator">
+    <label for="annotatorInput">Annotator</label>
+    <input id="annotatorInput" type="text" placeholder="your name" />
+  </div>
+</header>
+
+<main>
+  <section class="viewer">
+    <div class="cams">
+      <figure class="cam">
+        <img id="camLeft" alt="ego_left" />
+        <video id="videoLeft" class="cam-video" muted playsinline preload="none" hidden></video>
+        <figcaption id="camLeftLabel"></figcaption>
+      </figure>
+      <figure class="cam">
+        <img id="camRight" alt="ego_right" />
+        <video id="videoRight" class="cam-video" muted playsinline preload="none" hidden></video>
+        <figcaption id="camRightLabel"></figcaption>
+      </figure>
+    </div>
+
+    <div class="controls">
+      <button id="btnPrev10" title="Shift+Left: -10">&laquo;</button>
+      <button id="btnPrev" title="Left: -1">&lsaquo;</button>
+      <button id="btnPlay" title="Space: play/pause">&#9654;</button>
+      <button id="btnNext" title="Right: +1">&rsaquo;</button>
+      <button id="btnNext10" title="Shift+Right: +10">&raquo;</button>
+      <input type="range" id="timeline" min="0" value="0" />
+      <span class="frame-indicator">
+        <input id="frameInput" type="number" min="0" value="0" />
+        <span id="frameTotal">/ 0</span>
+      </span>
+    </div>
+    <div id="subtaskBars" class="subtask-bars" aria-label="subtask overview"></div>
+
+    <div class="segment-bar">
+      <span class="hint">
+        scroll / <kbd>&larr;</kbd><kbd>&rarr;</kbd> step &nbsp;
+        <kbd>[</kbd> mark start &nbsp;
+        click label / <kbd>1</kbd>..<kbd>9</kbd> save &nbsp;
+        <kbd>Esc</kbd> clear
+      </span>
+      <span id="pendingRange" class="pending"></span>
+    </div>
+  </section>
+
+  <aside class="sidebar">
+    <section class="labels-panel">
+      <div class="panel-head">
+        <h2>Labels</h2>
+        <button id="btnEditLabels" type="button" class="mini">edit</button>
+      </div>
+      <div id="labelButtons" class="label-buttons"></div>
+      <div id="labelEditor" class="label-editor" hidden>
+        <ul id="labelEditList" class="label-edit-list"></ul>
+        <form id="labelAddForm" class="label-add">
+          <input id="labelAddInput" type="text" placeholder="new label" autocomplete="off" />
+          <button type="submit">add</button>
+        </form>
+        <div class="label-editor-actions">
+          <button id="btnCloseEdit" type="button">done</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="subtasks-panel">
+      <h2>Subtasks</h2>
+      <ul id="subtaskList" class="subtask-list"></ul>
+    </section>
+  </aside>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

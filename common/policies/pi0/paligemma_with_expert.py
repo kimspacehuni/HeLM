@@ -16,10 +16,10 @@ from typing import List, Optional, Union
 
 import torch
 import torch.version
-from pytest import Cache
 from torch import nn
 from transformers import (
     AutoConfig,
+    Cache,
     GemmaForCausalLM,
     PaliGemmaForConditionalGeneration,
     PretrainedConfig,

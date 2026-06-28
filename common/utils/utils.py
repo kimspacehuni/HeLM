@@ -94,20 +94,23 @@ def get_safe_dtype(dtype: torch.dtype, device: str | torch.device):
 
 def is_torch_device_available(try_device: str) -> bool:
     try_device = str(try_device)  # Ensure try_device is a string
-    if try_device == "cuda":
+    # Accept indexed forms ("cuda:0", "mps:0") by stripping the index.
+    base = try_device.split(":", 1)[0]
+    if base == "cuda":
         return torch.cuda.is_available()
-    elif try_device == "mps":
+    elif base == "mps":
         return torch.backends.mps.is_available()
-    elif try_device == "cpu":
+    elif base == "cpu":
         return True
     else:
         raise ValueError(f"Unknown device {try_device}. Supported devices are: cuda, mps or cpu.")
 
 
 def is_amp_available(device: str):
-    if device in ["cuda", "cpu"]:
+    base = str(device).split(":", 1)[0]
+    if base in ["cuda", "cpu"]:
         return True
-    elif device == "mps":
+    elif base == "mps":
         return False
     else:
         raise ValueError(f"Unknown device '{device}.")

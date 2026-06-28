@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import logging
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple
 
 import torch
 from torch import nn
@@ -31,9 +31,6 @@ from configs.policies import PreTrainedConfig
 from configs.types import FeatureType
 from common.policies.extensions import ExtendedConfig
 
-from common.policies.adalora import AdaLoraConfig
-from common.utils.model_utils import freeze_non_adapters
-
 
 def get_policy_class(name: str) -> PreTrainedPolicy:
     """Get the policy's class and config class given a name (matching the policy class' `name` attribute)."""
@@ -42,16 +39,6 @@ def get_policy_class(name: str) -> PreTrainedPolicy:
         from common.policies.pi0.modeling_pi0 import PI0Policy
 
         return PI0Policy
-
-    elif name == "pi0_pcmb":
-        from common.policies.pi0_pcmb.modeling_pi0 import PI0_PCMB_Policy
-
-        return PI0_PCMB_Policy
-
-    elif name == "pi0_memory":
-        from common.policies.pi0_memory.modeling_pi0 import PI0_MEMORY_Policy
-
-        return PI0_MEMORY_Policy
 
     elif name == "smolvla":
         from common.policies.smolvla.modeling_smolvla import SmolVLAPolicy
@@ -136,16 +123,12 @@ def make_policy(
     return policy
 
 
-def _get_lora_cfg_obj(
+def _apply_method(
     policy: nn.Module,
-    cfg: ExtendedConfig,
     method: str,
     is_master: bool,
     device: str | torch.device = "cpu",
-) -> Tuple[PreTrainedPolicy | nn.Module, bool]:
-    train_router_loss = False
-    lora_cfg_obj = None
-
+) -> nn.Module:
     if method == "train_linear_only":
         policy.unfreeze_linear_layers()
         policy = policy.to(device=device)
@@ -158,21 +141,6 @@ def _get_lora_cfg_obj(
         if is_master:
             logging.info("Unfreezed action output projection")
 
-    elif method == "adalora":
-        lora_cfg_obj = cfg.lora_cfg if hasattr(cfg, "lora_cfg") else AdaLoraConfig()
-        if is_master:
-            logging.info("Injected AdaLoRA modules")
-            if is_master:
-                logging.info(f"AdaLoRA effective cfg: {getattr(lora_cfg_obj, '__dict__', lora_cfg_obj)}")
-
-    elif method == "qadalora":
-        lora_cfg_obj = cfg.lora_cfg if hasattr(cfg, "lora_cfg") else AdaLoraConfig()
-        lora_cfg_obj.quantize = True
-        if is_master:
-            logging.info("Injected QAdaLoRA modules")
-            if is_master:
-                logging.info(f"QAdaLoRA effective cfg: {getattr(lora_cfg_obj, '__dict__', lora_cfg_obj)}")
-
     elif method == "vanilla":
         if is_master:
             logging.info("Using Vanilla model")
@@ -180,7 +148,7 @@ def _get_lora_cfg_obj(
     else:
         raise NotImplementedError(f"{method} not implemented")
 
-    return policy, train_router_loss, lora_cfg_obj
+    return policy
 
 
 def wrap_policy(
@@ -188,24 +156,13 @@ def wrap_policy(
     cfg: ExtendedConfig,
     is_master: bool = True,
     device: str | torch.device = "cpu",
-) -> Tuple[nn.Module, List[str] | str]:
-    method = cfg.core
-    policy, train_router_loss, lora_cfg_obj = _get_lora_cfg_obj(policy, cfg, method, is_master, device)
-
-    if lora_cfg_obj is not None:
-        policy = policy.to(device=device)
-        freeze_non_adapters(policy)
-        policy.train_aux_loss = True
+) -> Tuple[nn.Module, str]:
+    policy = _apply_method(policy, cfg.core, is_master, device)
 
     if cfg.is_train:
-        res = f"Not Injecting Adapters"
-
-        if train_router_loss:
-            policy.enable_router_loss()
-
+        res = "Not Injecting Adapters"
     else:
-        raise Exception(f"No adapter_file_path provided")
-
+        raise Exception("No adapter_file_path provided")
 
     return policy, res
 

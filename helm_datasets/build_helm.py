@@ -356,7 +356,8 @@ def build_for_task(
     seed: int,
     shard_size: int,
     taskspecs_dir: Path,
-) -> None:
+) -> Dict[str, Any]:
+    """Returns per-task stats dict (used by main() to print a summary)."""
     # 전체 episode 목록
     all_pairs = iter_all_episodes(data_root, fps_out=fps_out)
     train_pairs, val_pairs = split_episodes(all_pairs, val_ratio=val_ratio, seed=seed)
@@ -446,7 +447,33 @@ def build_for_task(
     shard_write_jsonl(update_train_rows, update_out, "train", shard_size)
     shard_write_jsonl(update_val_rows, update_out, "val", shard_size)
 
-    # meta 저장
+    # ===== STATS =====
+    from collections import Counter
+
+    def _count(rows):
+        return dict(Counter(r.get("label", "UNKNOWN") for r in rows))
+
+    stats = {
+        "n_episodes_train": len(train_eps),
+        "n_episodes_val": len(val_eps),
+        "detect": {
+            "train": {"total": len(detect_train_rows), "by_label": _count(detect_train_rows)},
+            "val":   {"total": len(detect_val_rows),   "by_label": _count(detect_val_rows)},
+        },
+        "update": {
+            "train": {"total": len(update_train_rows), "by_label": _count(update_train_rows)},
+            "val":   {"total": len(update_val_rows),   "by_label": _count(update_val_rows)},
+        },
+    }
+
+    print(f"\n[stats] task_id={spec.task_id}")
+    print(f"  episodes:  train={stats['n_episodes_train']}, val={stats['n_episodes_val']}")
+    print(f"  detect:    train={stats['detect']['train']['total']:5d} {stats['detect']['train']['by_label']}")
+    print(f"             val  ={stats['detect']['val']['total']:5d} {stats['detect']['val']['by_label']}")
+    print(f"  update:    train={stats['update']['train']['total']:5d} {stats['update']['train']['by_label']}")
+    print(f"             val  ={stats['update']['val']['total']:5d} {stats['update']['val']['by_label']}")
+
+    # meta + stats 저장
     meta = {
         "task_id": spec.task_id,
         "fps_out": fps_out,
@@ -455,8 +482,11 @@ def build_for_task(
         "seed": seed,
         "transition_frame_pos": TRANSITION_FRAME_POS,
         "note": "v3: DETECT=memory_grid×frame, UPDATE=intra over all event frames + transition (0,last)->(1,0) at inter=1 step0.",
+        "stats": stats,
     }
     (task_out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    (task_out / "stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"task_id": spec.task_id, **stats}
 
 
 def main() -> None:
@@ -481,11 +511,12 @@ def main() -> None:
     # if --tasks is not provided (or empty), build all tasks under taskspecs_dir
     task_ids = args.tasks if args.tasks else sorted(specs.keys())
 
+    all_stats = []
     for task_id in task_ids:
         if task_id not in specs:
             raise KeyError(f"task_id not found in taskspecs_dir: {task_id}")
 
-        build_for_task(
+        ts = build_for_task(
             specs[task_id],
             out_root=out_root,
             data_root=data_root,
@@ -496,8 +527,15 @@ def main() -> None:
             shard_size=args.shard_size,
             taskspecs_dir=taskspecs_dir,
         )
+        all_stats.append(ts)
 
-    print("[v4] build complete.")
+    # cross-task summary
+    summary_path = out_root / "build_summary.json"
+    out_root.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text(json.dumps({"tasks": all_stats}, ensure_ascii=False, indent=2),
+                            encoding="utf-8")
+    print(f"\n[v4] build complete. {len(all_stats)} task(s) built.")
+    print(f"     summary: {summary_path}")
 
 
 if __name__ == "__main__":

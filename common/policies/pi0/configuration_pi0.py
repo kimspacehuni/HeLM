@@ -57,6 +57,35 @@ class PI0Config(PreTrainedConfig):
     # Gripper dimensions will remain in absolute values.
     use_delta_joint_actions_aloha: bool = False
 
+    # If true, transform the action chunk into chunk-relative cumulative form
+    # at training time (target = cumsum(deltas)) and invert back to per-step
+    # deltas at inference (delta_t = cum_t - cum_{t-1}). Helps when the raw
+    # data is bang-bang discrete delta (e.g., LIBERO-Mem teleop) — pi0 then
+    # learns continuous trajectory shapes instead of collapsing to majority
+    # delta on OOD inputs.
+    action_chunk_relative: bool = False
+
+    # If true, the dataset's action[:, 0:3] has been pre-transformed offline to
+    # absolute EEF xyz target (= state[t+1, 0:3] from observation.state). pi0
+    # learns continuous trajectories in robot-base coords instead of bang-bang
+    # delta. At inference, select_action converts predicted abs xyz back to per-
+    # step delta using the current observation EEF as the chunk anchor:
+    #   delta[0] = abs[0] - current_eef
+    #   delta[i] = abs[i] - abs[i-1]   for i >= 1
+    # action[:, 3:7] (rotation delta + gripper) is unchanged in the dataset and
+    # passed through at inference.
+    action_abs_xyz: bool = False
+
+    # Gain applied to the per-step abs-xyz diff at inference to match LIBERO's
+    # OSC_POSE controller scale. OSC interprets `action ∈ [-1, +1]` where 1 maps
+    # to a 0.05 m position offset target, and the PD loop achieves ~25% of that
+    # per 20 Hz step → measured per-step state diff in demos is ~0.005 m while
+    # the commanded action saturated at ±0.4 (= ±0.02 m offset). Empirical
+    # ratio commanded / achieved ≈ 80, so multiply by 80 then clip to ±1 to
+    # reproduce demo speed when sending diffs back through OSC. Override at the
+    # CLI for tuning.
+    action_abs_xyz_gain: float = 80.0
+
     # Tokenizer
     tokenizer_max_length: int = 48
 
@@ -84,6 +113,40 @@ class PI0Config(PreTrainedConfig):
     scheduler_warmup_steps: int = 1_000
     scheduler_decay_steps: int = 30_000
     scheduler_decay_lr: float = 2.5e-6
+    optimizer_grad_clip_norm: float = 1.0
+
+    # ----- Fields stored by the upstream lerobot/openpi pi0 checkpoint format. -----
+    # We keep them on the dataclass so draccus accepts the checkpoint's config.json
+    # without raising on unknown keys. They are not used by HeLM's training/eval
+    # paths (which read num_steps / resize_imgs_with_padding instead), but loading
+    # a pretrained ckpt requires the schema to match.
+
+    # HuggingFace Hub publishing metadata
+    push_to_hub: bool = True
+    repo_id: str | None = None
+    private: bool | None = None
+    tags: list[str] | None = None
+    license: str | None = None
+
+    # Architecture variants
+    paligemma_variant: str = "gemma_2b"
+    action_expert_variant: str = "gemma_300m"
+    dtype: str = "float32"
+
+    # Flow-matching inference parameters (mirror of num_steps)
+    num_inference_steps: int = 10
+    time_sampling_beta_alpha: float = 1.5
+    time_sampling_beta_beta: float = 1.0
+    min_period: float = 0.004
+    max_period: float = 4.0
+
+    # Image input (mirror of resize_imgs_with_padding)
+    image_resolution: tuple[int, int] = (224, 224)
+
+    # Runtime
+    gradient_checkpointing: bool = False
+    compile_model: bool = False
+    compile_mode: str = "max-autotune"
 
     # TODO: Add EMA
 

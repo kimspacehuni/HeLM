@@ -1,47 +1,96 @@
 {
   "task_id": "liftput_bowl_5",
   "inter": 0,
-  "intra": [5],
+  "intra": [10],
   "task_text": [
     "lift the bowl and place it back on the plate 5 times"
   ],
   "episode_filters": [
     [
-      { "tasks": "lift and place the bowl" },
-      { "tasks": "lift and place the bowl" },
-      { "tasks": "lift and place the bowl" }
+      { "tasks": "['lift_bowl']" },
+      { "tasks": "['place_bowl']" },
+      { "tasks": "['lift_bowl']" },
+      { "tasks": "['place_bowl']" },
+      { "tasks": "['lift_bowl']" },
+      { "tasks": "['place_bowl']" },
+      { "tasks": "['lift_bowl']" },
+      { "tasks": "['place_bowl']" },
+      { "tasks": "['lift_bowl']" },
+      { "tasks": "['place_bowl']" }
     ]
   ],
-  "llp_commands": "bowl lift and placed\n",
-  "event_list": "bowl lift and placed\n",
+  "llp_commands": "lift_bowl\nplace_bowl\ndone",
+  "event_list": "lift_bowl\nplace_bowl\nnone\ndone",
   "event_grid": [
     [
-      "bowl lift and placed",
-      "bowl lift and placed",
-      "bowl lift and placed"
+      "lift_bowl",
+      "place_bowl",
+      "lift_bowl",
+      "place_bowl",
+      "lift_bowl",
+      "place_bowl",
+      "lift_bowl",
+      "place_bowl",
+      "lift_bowl",
+      "place_bowl"
     ]
   ],
   "memory_grid": [
     [
       {
-        "Action_Command": "bowl lift and placed",
-        "Working_Memory": "Count: 0 (Goal: 3)",
+        "Action_Command": "lift_bowl",
+        "Working_Memory": "Count: 0 (Goal: 5)",
         "Episodic_Context": "None"
       },
       {
-        "Action_Command": "lift and place the bowl",
-        "Working_Memory": "Count: 1 (Goal: 3)",
+        "Action_Command": "place_bowl",
+        "Working_Memory": "Count: 0 (Goal: 5), holding bowl",
         "Episodic_Context": "None"
       },
       {
-        "Action_Command": "lift and place the bowl",
-        "Working_Memory": "Count: 2 (Goal: 3)",
+        "Action_Command": "lift_bowl",
+        "Working_Memory": "Count: 1 (Goal: 5)",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "place_bowl",
+        "Working_Memory": "Count: 1 (Goal: 5), holding bowl",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "lift_bowl",
+        "Working_Memory": "Count: 2 (Goal: 5)",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "place_bowl",
+        "Working_Memory": "Count: 2 (Goal: 5), holding bowl",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "lift_bowl",
+        "Working_Memory": "Count: 3 (Goal: 5)",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "place_bowl",
+        "Working_Memory": "Count: 3 (Goal: 5), holding bowl",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "lift_bowl",
+        "Working_Memory": "Count: 4 (Goal: 5)",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "place_bowl",
+        "Working_Memory": "Count: 4 (Goal: 5), holding bowl",
         "Episodic_Context": "None"
       },
       {
         "Action_Command": "done",
         "Working_Memory": "task done (None)",
-        "Episodic_Context": "Previous_Count: 3"
+        "Episodic_Context": "Previous_Count: 5"
       }
     ]
   ]

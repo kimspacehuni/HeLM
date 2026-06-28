@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import math
+import os
 from collections import deque
 
 import torch
@@ -76,7 +77,8 @@ class PI0Policy(PreTrainedPolicy):
             config.output_features, config.normalization_mapping, dataset_stats
         )
 
-        self.language_tokenizer = AutoTokenizer.from_pretrained("google/paligemma-3b-pt-224")
+        tokenizer_path = os.environ.get("PI0_TOKENIZER_PATH", "google/paligemma-3b-pt-224")
+        self.language_tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
         self.model = PI0FlowMatching(config)
 
         self.reset()
@@ -159,6 +161,18 @@ class PI0Policy(PreTrainedPolicy):
         if self.config.adapt_to_pi_aloha:
             batch[OBS_ROBOT] = self._pi_aloha_decode_state(batch[OBS_ROBOT])
 
+        # Snapshot raw current EEF xyz BEFORE normalize_inputs — needed below
+        # to convert predicted abs xyz back to per-step delta. observation.state
+        # layout for LIBERO is [x, y, z, qx, qy, qz, qw, gripper], so [:, :, :3]
+        # is the absolute EEF position in robot-base coords.
+        current_eef_xyz = None
+        if getattr(self.config, "action_abs_xyz", False):
+            obs_state = batch[OBS_ROBOT]
+            if obs_state.ndim == 3:
+                current_eef_xyz = obs_state[:, 0, :3].clone()  # (B, 3)
+            else:
+                current_eef_xyz = obs_state[:, :3].clone()
+
         batch = self.normalize_inputs(batch)
 
         # Action queue logic for n_action_steps > 1. When the action_queue is depleted, populate it by
@@ -175,11 +189,40 @@ class PI0Policy(PreTrainedPolicy):
             self.logged_time = self.model.logged_time
             del self.model.logged_time
 
+            # Option B inverse: pi0 was trained on cumulative-in-chunk targets,
+            # so its raw output is a cumulative trajectory in normalized space.
+            # Convert back to per-step normalized deltas BEFORE unnormalize
+            # (otherwise unnormalize would add `mean` once per cumulative step).
+            if getattr(self.config, "action_chunk_relative", False):
+                first_step = actions[:, :1, :]
+                rest_steps = actions[:, 1:, :] - actions[:, :-1, :]
+                actions = torch.cat([first_step, rest_steps], dim=1)
+
             # Unpad actions
             original_action_dim = self.config.action_feature.shape[0]
             actions = actions[:, :, :original_action_dim]
 
             actions = self.unnormalize_outputs({"action": actions})["action"]
+
+            # action_abs_xyz inverse: dataset was pre-transformed so action[:, 0:3]
+            # holds absolute EEF xyz target for each chunk step. The LIBERO env
+            # only accepts deltas (OSC_POSE), so convert here using the current
+            # observation EEF as the i=-1 anchor, then scale to match the OSC
+            # commanded-vs-achieved ratio (see action_abs_xyz_gain in the
+            # config) and clip to OSC's [-1, +1] input range:
+            #   delta_m[0] = abs[0] - current_eef
+            #   delta_m[i] = abs[i] - abs[i-1]      for i >= 1
+            #   command    = clip(delta_m * gain, -1, +1)
+            # Drift accumulates within the chunk (open-loop after step 0), but
+            # client-side action_horizon (typ. 10) re-queries with fresh obs.
+            if getattr(self.config, "action_abs_xyz", False):
+                assert current_eef_xyz is not None, "action_abs_xyz requires obs state with EEF xyz"
+                anchor = current_eef_xyz.unsqueeze(1)              # (B, 1, 3)
+                extended = torch.cat([anchor, actions[:, :, :3]], dim=1)  # (B, T+1, 3)
+                delta_xyz_m = extended[:, 1:, :] - extended[:, :-1, :]    # (B, T, 3) meters
+                gain = float(getattr(self.config, "action_abs_xyz_gain", 80.0))
+                cmd_xyz = torch.clamp(delta_xyz_m * gain, min=-1.0, max=1.0)
+                actions = torch.cat([cmd_xyz, actions[:, :, 3:]], dim=2)
 
             if self.config.adapt_to_pi_aloha:
                 actions = self._pi_aloha_encode_actions(actions)

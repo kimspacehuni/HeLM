@@ -1,0 +1,56 @@
+{
+  "task_id": "swap_TR2BL_BR2TR_BL2BR",
+  "inter": 0,
+  "intra": [
+    3
+  ],
+  "task_text": [
+    "swap the 2 bowls on their plates using the empty plate"
+  ],
+  "episode_filters": [
+    [
+      {
+        "tasks": "['move_topright_bowl_to_bottomleft']"
+      },
+      {
+        "tasks": "['move_bottomright_bowl_to_topright']"
+      },
+      {
+        "tasks": "['move_bottomleft_bowl_to_bottomright']"
+      }
+    ]
+  ],
+  "llp_commands": "move_topleft_bowl_to_topright\nmove_topleft_bowl_to_bottomleft\nmove_topleft_bowl_to_bottomright\nmove_topright_bowl_to_topleft\nmove_topright_bowl_to_bottomleft\nmove_topright_bowl_to_bottomright\nmove_bottomleft_bowl_to_topleft\nmove_bottomleft_bowl_to_topright\nmove_bottomleft_bowl_to_bottomright\nmove_bottomright_bowl_to_topleft\nmove_bottomright_bowl_to_topright\nmove_bottomright_bowl_to_bottomleft\ndone",
+  "event_list": "move_topleft_bowl_to_topright\nmove_topleft_bowl_to_bottomleft\nmove_topleft_bowl_to_bottomright\nmove_topright_bowl_to_topleft\nmove_topright_bowl_to_bottomleft\nmove_topright_bowl_to_bottomright\nmove_bottomleft_bowl_to_topleft\nmove_bottomleft_bowl_to_topright\nmove_bottomleft_bowl_to_bottomright\nmove_bottomright_bowl_to_topleft\nmove_bottomright_bowl_to_topright\nmove_bottomright_bowl_to_bottomleft\nnone\ndone",
+  "event_grid": [
+    [
+      "move_topright_bowl_to_bottomleft",
+      "move_bottomright_bowl_to_topright",
+      "move_bottomleft_bowl_to_bottomright"
+    ]
+  ],
+  "memory_grid": [
+    [
+      {
+        "Action_Command": "move_topright_bowl_to_bottomleft",
+        "Working_Memory": "Bowls: topright, bottomright; Empty: bottomleft; Done: 0/3; Goal: swap",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "move_bottomright_bowl_to_topright",
+        "Working_Memory": "Bowls: bottomleft, bottomright; Empty: topright; Done: 1/3; Last_Placed: bottomleft",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "move_bottomleft_bowl_to_bottomright",
+        "Working_Memory": "Bowls: bottomleft, topright; Empty: bottomright; Done: 2/3; Last_Placed: topright",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "done",
+        "Working_Memory": "task done (None)",
+        "Episodic_Context": "Bowls were at topright, bottomright; swapped via bottomleft"
+      }
+    ]
+  ]
+}
