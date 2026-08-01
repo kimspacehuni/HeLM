@@ -89,17 +89,22 @@ The agent must retain information across task boundaries and episode resets.
 
 | Method | A1 | A2 | A3 | A4 | A5 | **Avg** |
 |---|---|---|---|---|---|---|
-| **HeLM (Ours)** | **100** | **92.2** | **96.6** | **79.2** | **73.3** | **85.7** |
-| Keyframe-HLP | 90 | 91.1 | 60 | 66.6 | 44.4 | 72.9 |
-| PCMB-π0 | 39.5 | 31.1 | 33.3 | 32.9 | 6.7 | 39.5* |
-| Naïve-π0 | 16.7 | 6.6 | 33.3 | 8.3 | 4.4 | 16.7* |
+| **HeLM (Ours)** | **100** | **92.2** | **96.6** | **66.6** | **73.3** | **85.7** |
+| Keyframe-HLP | 90* | 91.1 | 60 | 79.2* | 44.4 | 72.9 |
+| PCMB-π0 | 100 | 24.4 | 33.3 | 32.9 | 6.7 | 39.5** |
+| Naïve-π0 | 31.1 | 6.6 | 33.3 | 8.3 | 4.4 | 16.7** |
+
+\* Keyframe-HLP fails to detect termination in A1 and A4.
+\*\* PCMB-π0 and Naïve-π0 fail both sequencing and termination across all trials.
 
 ### Inter-Episode (Success Rate %)
 
 | Method | E1 | E2 | E3 | E4 | E5 | **Avg** |
 |---|---|---|---|---|---|---|
 | **HeLM (Ours)** | **90.5** | **87.7** | **90** | **80** | **97.7** | **89.2** |
-| Keyframe-HLP | 27.6 | 0 | 33.3 | 0 | 22.2 | 16.6 |
+| Keyframe-HLP | 27.6* | 0 | 33.3 | 0 | 22.2 | 16.6 |
+
+\* Keyframe-HLP fails to detect termination.
 
 PCMB-π0 and Naïve-π0 are excluded from inter-episode comparison as they reset internal states at episode boundaries.
 
@@ -108,7 +113,9 @@ PCMB-π0 and Naïve-π0 are excluded from inter-episode comparison as they reset
 | Method | A1' | A2' | A3' | A4' | A5' | **Avg** |
 |---|---|---|---|---|---|---|
 | **HeLM (Ours)** | **100** | **95** | **67** | **67** | **61** | **78** |
-| Keyframe-HLP | 100 | 63.9 | 77.8 | 38.9 | 48.1 | 65.7 |
+| Keyframe-HLP | 100* | 63.9 | 77.8 | 38.9* | 48.1* | 65.7 |
+
+\* Keyframe-HLP fails to detect termination in A1', A4', and A5'.
 
 ### Computational Efficiency
 
