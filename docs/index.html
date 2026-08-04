@@ -6,10 +6,17 @@
 <title>HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation</title>
 <meta name="description" content="HeLM establishes explicit natural language as a memory representation for VLA-based robot manipulation, with a working-episodic structure and event-triggered updates.">
 
+<!-- og:image must be an absolute URL — scrapers do not resolve relative paths.
+     It is also a JPEG rather than the WebP source, since some scrapers
+     (LinkedIn in particular) still do not render WebP previews. -->
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://kimspacehuni.github.io/HeLM/">
 <meta property="og:title" content="HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation">
 <meta property="og:description" content="Explicit language as a memory representation for VLA-based manipulation. +13% over baselines, 78% zero-shot, 4.5x more compute-efficient than keyframe memory.">
-<meta property="og:image" content="static/figures/fig1_teaser.webp">
+<meta property="og:image" content="https://kimspacehuni.github.io/HeLM/static/images/og_card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="626">
+<meta property="og:image:alt" content="A vanilla VLA presses the red button twice and fails, while HeLM tracks progress in language memory and completes the red-green-blue sequence.">
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="stylesheet" href="static/css/style.css">
@@ -377,6 +384,17 @@ Previous_Progress: blue, green, red</pre>
       Page template built for HeLM. Source on
       <a href="https://github.com/kimspacehuni/HeLM">GitHub</a>.
     </p>
+
+    <!-- Visitor map (mapmyvisitors.com). Two constraints worth knowing before editing:
+         1. map.js injects the widget where the tag sits, so it must stay here in the
+            body and must NOT get async/defer.
+         2. The widget renders on a white background (cl=ffffff), so it lives in a light
+            card. Do not duplicate the tag to theme-switch it — a hidden copy still
+            fires the request and double-counts every visitor. -->
+    <div class="visitor-map">
+      <script type="text/javascript" id="mapmyvisitors"
+              src="https://mapmyvisitors.com/map.js?d=zyACUZDSkuwMUGC7j7OLKvxJfzu4zt9VYG7eCGiAVt4&cl=ffffff&w=a"></script>
+    </div>
   </div>
 </footer>
 

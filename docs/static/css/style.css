@@ -441,6 +441,24 @@ footer {
   border-top: 1px solid var(--border);
 }
 
+/* ---------- Visitor map ---------- */
+
+/* The widget is rendered by mapmyvisitors on a white background, so the card stays
+   light in both themes rather than fighting it with a filter. */
+.visitor-map {
+  max-width: 320px;
+  margin: 26px auto 0;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.visitor-map img,
+.visitor-map canvas,
+.visitor-map iframe,
+.visitor-map > div { max-width: 100%; height: auto; }
+
 /* ---------- Theme toggle ---------- */
 
 #theme-toggle {

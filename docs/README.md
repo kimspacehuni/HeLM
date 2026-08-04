@@ -30,6 +30,7 @@ docs/
 │   ├── js/main.js             # task-card data + grid + theme toggle
 │   ├── figures/               # figures extracted from the paper PDF
 │   ├── images/demo_poster.jpg # poster frame for the overview video
+│   ├── images/og_card.jpg     # social-preview card (see below)
 │   └── videos/                # overview video + per-task rollouts
 └── .nojekyll
 ```
@@ -92,6 +93,39 @@ magick fig.png -resize 1800x\> -strip -quality 88 docs/static/figures/fig.webp
 Adjust the `-crop WxH+X+Y` box per figure; `-trim` removes the surrounding
 whitespace so the box only needs to be close, not exact. Photo-heavy figures go
 to WebP; flat-color charts are often smaller as PNG — check both.
+
+## Social preview card
+
+`og:image` points at `static/images/og_card.jpg` via an **absolute** URL — scrapers
+do not resolve relative paths. It is a JPEG, not the WebP source, because some
+scrapers (LinkedIn especially) still do not render WebP previews.
+
+It is generated from the teaser figure, which is already almost exactly the 1.91:1
+card ratio, so no cropping is needed:
+
+```bash
+python -c "
+from PIL import Image
+im = Image.open('static/figures/fig1_teaser.webp').convert('RGB')
+im = im.resize((1200, round(1200*im.size[1]/im.size[0])), Image.LANCZOS)
+im.save('static/images/og_card.jpg', 'JPEG', quality=86, optimize=True, progressive=True)
+"
+```
+
+If the page URL ever changes, the absolute URLs in the `og:` block must change with it.
+
+## Visitor map
+
+The footer embeds a [mapmyvisitors.com](https://mapmyvisitors.com/) widget. Stats are
+public at <https://mapmyvisitors.com/web/1c78b>.
+
+Two things to know before editing it:
+
+- `map.js` injects the widget where the tag sits, so it must stay in the body and must
+  **not** get `async` / `defer`.
+- The widget renders on a white background (`cl=ffffff`), so it sits in a light
+  `.visitor-map` card in both themes. **Do not** duplicate the tag to theme-switch it —
+  a `display:none` copy still fires the request and double-counts every visitor.
 
 ## Numbers on this page
 
