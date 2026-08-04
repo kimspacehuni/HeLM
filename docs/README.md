@@ -126,6 +126,19 @@ Two things to know before editing it:
 - The widget renders on a white background (`cl=ffffff`), so it sits in a light
   `.visitor-map` card in both themes. **Do not** duplicate the tag to theme-switch it —
   a `display:none` copy still fires the request and double-counts every visitor.
+- `pruneVisitorMap()` in `main.js` hides the card when the widget injects nothing, so
+  it does not show as an empty white bar. Content blockers block this tracker by
+  default, so that path is common, not an edge case.
+
+If the map never appears, check the endpoint directly — it should return an image:
+
+```bash
+curl -so /dev/null -w '%{http_code}\n' \
+  'https://mapmyvisitors.com/map.png?d=<HASH>&cl=ffffff'
+```
+
+A `500` there means the tracker is not being served for that hash, which is a
+mapmyvisitors-side issue and not something the page can fix.
 
 ## Numbers on this page
 

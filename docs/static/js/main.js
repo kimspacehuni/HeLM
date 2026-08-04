@@ -153,6 +153,27 @@ tabs.forEach((tab) => {
   });
 });
 
+/* ------------------------------------------------------- visitor map guard */
+
+/* The footer card is styled for the mapmyvisitors widget, so it renders as an empty
+ * white bar whenever the widget does not inject anything. That is not a rare edge
+ * case: content blockers block this tracker by default, so a good share of visitors
+ * would see the empty bar. Hide the card unless the widget actually rendered.
+ *
+ * map.js writes synchronously, but it fetches its data first, so re-check once
+ * before giving up. */
+function pruneVisitorMap() {
+  const box = document.querySelector('.visitor-map');
+  if (!box) return;
+  const rendered = () =>
+    Array.from(box.children).some((el) => el.tagName !== 'SCRIPT');
+
+  if (rendered()) return;
+  setTimeout(() => { if (!rendered()) box.style.display = 'none'; }, 3000);
+}
+
+window.addEventListener('load', pruneVisitorMap);
+
 /* ------------------------------------------------------------------- theme */
 
 const SUN =
