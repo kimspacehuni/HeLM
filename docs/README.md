@@ -3,7 +3,7 @@
 Static site served by GitHub Pages from `main` → `/docs`.
 No build step, no dependencies — plain HTML/CSS/JS.
 
-Live URL (after enabling Pages): <https://kimhuni.github.io/HeLM/>
+Live URL (after enabling Pages): <https://kimspacehuni.github.io/HeLM/>
 
 ## Enabling GitHub Pages
 
@@ -46,7 +46,9 @@ that nothing fake renders in the meantime:
    real `href` when the PDF / arXiv entry exists.
 3. `TODO(bibtex)` — the `author` field is omitted from the BibTeX entry.
 
-Also link the page from the personal site (`kimhuni.github.io`) once it is live.
+Also link the page from the personal site once it is live. Note the personal site
+still lives at `kimhuni.github.io` (the expiring school account) — it needs its own
+migration to `kimspacehuni` before that link is durable.
 
 ## Adding per-task rollout videos
 
