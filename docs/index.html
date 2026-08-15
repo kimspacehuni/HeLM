@@ -19,6 +19,10 @@
 <meta property="og:image:alt" content="A vanilla VLA presses the red button twice and fails, while HeLM tracks progress in language memory and completes the red-green-blue sequence.">
 <meta name="twitter:card" content="summary_large_image">
 
+<!-- Gates the scroll-reveal styles. Set before the stylesheet applies so content that
+     depends on JS to become visible is only ever hidden when JS is actually running. -->
+<script>document.documentElement.classList.add('js');</script>
+
 <link rel="stylesheet" href="static/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
 </head>
@@ -26,11 +30,24 @@
 
 <button id="theme-toggle" type="button" aria-label="Toggle color theme"></button>
 
+<!-- ============================= NAV ============================= -->
+<nav id="nav" aria-label="Section navigation">
+  <div class="nav-inner">
+    <span class="nav-brand">HeLM</span>
+    <span class="nav-links">
+      <a href="#memory">Memory</a>
+      <a href="#method">Method</a>
+      <a href="#tasks">Tasks</a>
+      <a href="#results">Results</a>
+      <a href="#video">Video</a>
+      <a href="#bibtex">BibTeX</a>
+    </span>
+  </div>
+</nav>
+
 <!-- ============================= HERO ============================= -->
 <header class="hero">
   <div class="wrap">
-    <div class="venue">Conference on Robot Learning (CoRL) 2026</div>
-
     <h1 class="title">HeLM: Hierarchical Explicit Language Memory</h1>
     <p class="subtitle">for Non-Markovian Manipulation</p>
 
@@ -71,7 +88,7 @@
 
 <!-- ============================= TEASER ============================= -->
 <section id="teaser">
-  <div class="wrap">
+  <div class="wrap reveal">
     <figure>
       <img src="static/figures/fig1_teaser.webp"
            alt="A vanilla VLA presses the red button twice and fails, while HeLM tracks progress in language memory and completes the red-green-blue sequence."
@@ -87,7 +104,7 @@
 
 <!-- ============================= ABSTRACT ============================= -->
 <section id="abstract">
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>Abstract</h2>
     <div class="abstract">
       <p>
@@ -132,39 +149,62 @@
   </div>
 </section>
 
-<!-- ============================= VIDEO ============================= -->
-<section id="video">
-  <div class="wrap">
-    <h2>Overview Video</h2>
-    <p class="section-sub">Framework walkthrough and real-world inference examples.</p>
-    <div class="video-frame">
-      <video controls preload="metadata" playsinline poster="static/images/demo_poster.jpg">
-        <source src="static/videos/helm_demo.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
+<!-- ============================= MEMORY INSPECTOR ============================= -->
+<section id="memory">
+  <div class="wrap reveal">
+    <h2>Read the memory</h2>
+    <p class="section-sub">
+      HeLM's memory is not a vector — it is text the policy writes and reads back. So rather than
+      describe it, here it is: every state below is replayed from the real task specifications, across
+      all 51 variants.
+    </p>
+
+    <div class="inspector" id="inspector" tabindex="0">
+      <div class="insp-tabs" id="insp-tabs"></div>
+
+      <div class="insp-head">
+        <select id="insp-variant" aria-label="Task variant"></select>
+        <div class="insp-instruction" id="insp-instruction" data-ep="Episode 1"></div>
+      </div>
+
+      <div class="insp-body">
+        <div class="insp-scene"><canvas id="insp-canvas"></canvas></div>
+        <div class="insp-mem" id="insp-mem"></div>
+      </div>
+
+      <div class="insp-timeline" id="insp-timeline"></div>
+      <div class="insp-controls">
+        <button id="insp-play" type="button" aria-pressed="true" title="Pause">❚❚</button>
+        <span class="insp-hint">Drag the timeline to scrub, or use ← →. Switch task with the tabs above.</span>
+      </div>
     </div>
+
+    <p class="diagram-note" style="min-height:0;max-width:720px">
+      The scene on the left is not a recording. It is drawn by parsing the memory string on the right —
+      nothing else is needed to reconstruct the world state, which is the property the paper is arguing
+      for. On the inter-episode tasks (E1–E5), watch working memory reset at the boundary while episodic
+      context is promoted and carries the answer forward.
+    </p>
   </div>
 </section>
 
 <!-- ============================= METHOD ============================= -->
 <section id="method">
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>Method</h2>
     <p class="section-sub">
       HeLM decouples semantic memory management from action generation through a two-level hierarchy.
     </p>
 
-    <figure>
-      <img src="static/figures/fig2_arch.webp"
-           alt="HeLM architecture: a high-level policy built on a pretrained VLM maintains working and episodic language memory and switches between detect and update modes, feeding action commands to a low-level VLA policy."
-           width="1800" height="722">
-      <figcaption>
-        <b>Overall architecture.</b> The High-Level Policy (HLP) integrates language memory with a
-        pretrained VLM, switching between a <em>detect mode</em> that monitors events and an
-        <em>update mode</em> that writes those events into memory. The Low-Level Policy (LLP), a
-        pretrained VLA, executes the action commands generated by the HLP.
-      </figcaption>
-    </figure>
+    <div class="diagram">
+      <canvas id="chart-arch"></canvas>
+    </div>
+    <p class="diagram-note" id="chart-arch-note"></p>
+    <figcaption style="margin-top:2px">
+      <b>Two modes, one VLM.</b> The high-level policy alternates between a <em>detect</em> mode that
+      watches for semantic events and an <em>update</em> mode that writes them into memory. Because the
+      update is event-triggered, most passes cost a single detect call and leave memory untouched.
+    </figcaption>
 
     <h3>Structured language memory</h3>
     <p>
@@ -213,7 +253,7 @@ Previous_Progress: blue, green, red</pre>
 
 <!-- ============================= TASK SUITE ============================= -->
 <section id="tasks">
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>Non-Markovian Task Suite</h2>
     <p class="section-sub">
       10 real-world tasks with 51 variants, isolating count-dependent, order-sensitive, and object-centric
@@ -243,24 +283,29 @@ Previous_Progress: blue, green, red</pre>
 
 <!-- ============================= RESULTS ============================= -->
 <section id="results">
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>Results</h2>
     <p class="section-sub">
-      Mean success rate per task over 15–30 trials (3–6 variants, 5 trials each), scored as the
-      proportion of correctly executed subtasks.
+      Mean success rate per task over 15–30 trials (3–6 variants, 5 trials each).
     </p>
 
-    <h3>Intra-episode tasks</h3>
-    <figure>
-      <img src="static/figures/fig5_intra.webp"
-           alt="Grouped bar chart of intra-episode success rates. HeLM averages 85.7 percent versus 72.9 for Keyframe-HLP, 39.5 for PCMB-pi0 and 16.7 for Naive-pi0."
-           width="1800" height="493">
-      <figcaption>
-        <b>Intra-episode real-world evaluation.</b> HeLM outperforms all baselines on average.
-        Keyframe-HLP fails to detect termination in A1 and A4 (★), while PCMB-<em>π</em><sub>0</sub> and
-        Naïve-<em>π</em><sub>0</sub> (★★) fail both sequencing and termination across all trials.
-      </figcaption>
-    </figure>
+    <h3 style="margin-top:0">Intra-episode tasks</h3>
+    <div class="diagram">
+      <canvas id="chart-success"></canvas>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Success metric">
+        <button type="button" data-metric="0" aria-pressed="true">Subtask-level</button>
+        <button type="button" data-metric="1" aria-pressed="false">Strict</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--c-ours)"></i>HeLM (Ours)</span>
+      <span><i style="background:var(--c-keyframe)"></i>Keyframe-HLP</span>
+      <span><i style="background:var(--c-pcmb)"></i>PCMB-π₀</span>
+      <span><i style="background:var(--c-naive)"></i>Naïve-π₀</span>
+    </div>
+    <p class="diagram-note" id="chart-success-note"></p>
 
     <h3>Inter-episode tasks</h3>
     <div class="table-scroll">
@@ -299,41 +344,19 @@ Previous_Progress: blue, green, red</pre>
     </div>
     <p class="footnote">★ Keyframe-HLP fails to detect termination in A1′, A4′, and A5′.</p>
 
-    <h3>Strict task success rate</h3>
-    <p>
-      A trial counts as successful only if all subtasks complete, in the correct order, with proper
-      termination. Baselines collapse to near-zero, revealing order and termination failures that the
-      subtask-level metric does not penalize.
-    </p>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr><th>Method</th><th>A1</th><th>A2</th><th>A3</th><th>A4</th><th>A5</th><th>Avg.</th></tr>
-        </thead>
-        <tbody>
-          <tr class="ours"><td>HeLM (Ours)</td><td>100.0</td><td>87.8</td><td>96.6</td><td>66.7</td><td>55.6</td><td class="avg">81.3</td></tr>
-          <tr><td>Keyframe-HLP</td><td>0.0</td><td>86.7</td><td>20.0</td><td>0.0</td><td>40.0</td><td class="avg">29.3</td></tr>
-          <tr><td>PCMB-<em>π</em><sub>0</sub></td><td>0.0</td><td>2.2</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="avg">0.4</td></tr>
-          <tr><td>Naïve-<em>π</em><sub>0</sub></td><td>0.0</td><td>2.2</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="avg">0.4</td></tr>
-        </tbody>
-      </table>
-    </div>
-
     <h3>Efficiency and scalability</h3>
     <p>
       HeLM is initially slower due to autoregressive text generation, but becomes 2.5&times; faster than
-      Keyframe-HLP at long horizons — a crossover driven by accumulating visual tokens. Keyframe-HLP
-      consumes about 28&nbsp;GB of VRAM for an 8-event episode, while HeLM stays under 6&nbsp;GB.
+      Keyframe-HLP at long horizons — a crossover driven by accumulating visual tokens.
     </p>
-    <figure>
-      <img src="static/figures/fig7_efficiency.png"
-           alt="Two line charts versus task length. HeLM latency and VRAM stay flat while Keyframe-HLP grows steeply to nearly 5 seconds and 28 gigabytes."
-           width="1542" height="651">
-      <figcaption>
-        <b>HLP inference efficiency.</b> HeLM's latency (left) and VRAM (right) remain stable as task
-        length grows, while Keyframe-HLP grows sharply.
-      </figcaption>
-    </figure>
+    <div class="diagram">
+      <canvas id="chart-eff"></canvas>
+    </div>
+    <div class="controls">
+      <label for="eff-len">Task length</label>
+      <input type="range" id="eff-len" min="1" max="8" step="1" value="8">
+    </div>
+    <p class="diagram-note" id="chart-eff-note"></p>
 
     <h3>Simulation: LIBERO-Mem</h3>
     <p>
@@ -365,15 +388,29 @@ Previous_Progress: blue, green, red</pre>
   </div>
 </section>
 
+<!-- ============================= VIDEO ============================= -->
+<section id="video">
+  <div class="wrap reveal">
+    <h2>Overview Video</h2>
+    <p class="section-sub">Framework walkthrough and real-world inference examples.</p>
+    <div class="video-frame">
+      <video controls preload="metadata" playsinline poster="static/images/demo_poster.jpg">
+        <source src="static/videos/helm_demo.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</section>
+
 <!-- ============================= BIBTEX ============================= -->
 <section id="bibtex">
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>BibTeX</h2>
-    <!-- TODO(bibtex): fill in the author list once the paper is public. -->
-    <pre class="bibtex">@inproceedings{helm2026,
-  title     = {HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation},
-  booktitle = {Conference on Robot Learning (CoRL)},
-  year      = {2026}
+    <!-- TODO(bibtex): fill in the author list, and swap to the venue entry once the
+         paper is accepted somewhere. Kept venue-neutral until then. -->
+    <pre class="bibtex">@misc{helm2026,
+  title = {HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation},
+  year  = {2026}
 }</pre>
   </div>
 </section>
@@ -398,6 +435,12 @@ Previous_Progress: blue, green, red</pre>
   </div>
 </footer>
 
+<script src="static/js/viz.js"></script>
+<script src="static/js/scene.js"></script>
+<script src="static/js/traces.js"></script>
+<script src="static/js/inspector.js"></script>
+<script src="static/js/charts.js"></script>
+<script src="static/js/arch.js"></script>
 <script src="static/js/main.js"></script>
 </body>
 </html>
