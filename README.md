@@ -143,14 +143,12 @@ HeLM/
 │
 ├── evaluate/
 │   ├── eval_helm/           # HLP validation (DETECT/UPDATE accuracy on held-out data)
-│   ├── eval_HLP_LLP/        # Real-time full-system evaluation: main script connects
-│   │                        # HLP (event detection + memory update) and LLP (action
-│   │                        # execution) in a closed loop on the physical robot.
-│   └── eval_LLP/            # LLP-only real-time evaluation
+│   └── eval_HLP_LLP/        # Real-time full-system evaluation: main script connects
+│                            # HLP (event detection + memory update) and LLP (action
+│                            # execution) in a closed loop on the physical robot.
 │
 ├── configs/                 # Dataclass-based configs (dataset, train, eval)
-├── scripts/                 # Automation scripts for pipeline steps
-└── legacy/                  # Archived older versions (datasets v1-v4, train, eval)
+└── scripts/                 # Automation scripts for pipeline steps
 ```
 
 ---
@@ -158,7 +156,7 @@ HeLM/
 ## Installation
 
 ```bash
-git clone <repo-url> && cd HeLM
+git clone https://github.com/kimhuni/HeLM.git && cd HeLM
 
 conda env create -f environment.yml
 conda activate HeLM
@@ -215,7 +213,6 @@ python -m helm_datasets.merge_helm_data \
 
 ```bash
 streamlit run helm_datasets/validate_helm_data.py -- --jsonl /data/helm_data/merged/all_val.jsonl
-python -m helm_datasets.validate_helm_simple --jsonl /data/helm_data/merged/all_val.jsonl
 ```
 
 ---
@@ -254,7 +251,15 @@ CUDA_VISIBLE_DEVICES=0 python train/train_helm_smolvlm/train_helm_smolvlm.py \
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python train/train_llp/train_pi0.py \
-  --config configs/default.py
+  --policy.path=/path/to/pi0_base \
+  --train_dataset.repo_id=<dataset_id> \
+  --train_dataset.root=/data/lerobot/<dataset_id> \
+  --test_dataset.repo_id=<dataset_id> \
+  --test_dataset.root=/data/lerobot/<dataset_id> \
+  --batch_size=8 \
+  --steps=30000 \
+  --save_freq=5000 \
+  --output_dir=/results/LLP_checkpoint
 ```
 
 ---
@@ -277,8 +282,10 @@ CUDA_VISIBLE_DEVICES=0 python evaluate/eval_helm/eval_helm_hlp.py \
 ```bash
 python evaluate/eval_HLP_LLP/eval_real_time_main.py \
   --llp_model_path /results/LLP_checkpoint \
-  --hlp_model_path /results/HeLM_HLP/checkpoint-3000 \
-  --task "press the blue button"
+  --hlp_base      /path/to/Qwen2.5-VL-7B-Instruct \
+  --hlp_adapter   /results/HeLM_HLP/checkpoint-3000 \
+  --taskspecs_dir helm_datasets/taskspecs \
+  --task_group    press_button_N_times_M_times_total
 ```
 
 ---

@@ -126,4 +126,3 @@ dependencies:
       - wandb==0.22.3
       - watchdog==6.0.0
       - lerobot
-prefix: /home/ghkim/miniconda3/envs/RefMe
