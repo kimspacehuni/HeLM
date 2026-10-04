@@ -24,6 +24,7 @@ from huggingface_hub.errors import HfHubHTTPError
 from common import envs
 from common.optim import OptimizerConfig
 from common.optim.schedulers import LRSchedulerConfig
+from common.policies.extensions import ExtendedConfig
 from common.utils.hub import HubMixin
 from configs import parser
 from configs.default import DatasetConfig, EvalConfig, WandBConfig
@@ -88,6 +89,18 @@ class TrainPipelineConfig(HubMixin):
     lora_moe_cfg: dict[str, Any] | None = None
 
     dataloader_type: str = "stream"
+
+    # Policy-wrap method (vanilla / train_linear_only / linear_probing).
+    # train_pi0.py reads this via cfg.method.core in factory.wrap_policy.
+    method: ExtendedConfig = field(default_factory=ExtendedConfig)
+
+    # Diagnostic frequency for lora_msp k-distribution plotting; 0 disables.
+    # The lora_msp branch itself is dead in current code, but the access
+    # `cfg.k_plot_freq > 0` runs every step so the field must exist.
+    k_plot_freq: int = 0
+
+    # Distributed mode: 'none' / 'ddp' / 'fsdp'. Read via getattr with default.
+    dist_mode: str = "none"
 
     def __post_init__(self):
         self.checkpoint_path = None

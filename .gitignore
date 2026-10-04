@@ -1,0 +1,46 @@
+# ====== Python ======
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ====== OS / IDE ======
+.DS_Store
+.idea/
+.vscode/
+.claude/
+*.swp
+*~
+
+# ====== Sub-repos (managed separately) ======
+libero-mem/
+
+# ====== Heavy outputs (not paper artifacts) ======
+outputs/
+benchmark_eval/
+logs/
+wandb/
+tmp/
+
+# ====== Backups / snapshots ======
+**/_backup_*/
+*.bak
+
+# ====== Local scratch / debug artifacts ======
+v1_frame0.jpg
+*.mp4
+*.h5
+*.hdf5
+
+# ====== Data directories (large; lives under ~/data) ======
+# (not in repo by default, but in case symlinks appear)
+data/
+helm_data/
+
+# ====== Slurm out/err files in repo root (just in case) ======
+slurm-*.out
+slurm-*.err

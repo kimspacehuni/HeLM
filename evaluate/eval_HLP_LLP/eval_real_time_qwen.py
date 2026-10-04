@@ -117,7 +117,7 @@ class HLPQwenV2:
     def __init__(
         self,
         base_model_path: str,
-        adapter_path: str,
+        adapter_path: Optional[str] = None,
         device: str = "cuda:0",
         attn_impl: str = "sdpa",
         load_in_4bit: bool = True,
@@ -152,10 +152,13 @@ class HLPQwenV2:
             attn_implementation=attn_impl,
             trust_remote_code=True,
         )
-        model = PeftModel.from_pretrained(base, adapter_path)
-        self.model = model.eval()
-        # self.model = model.merge_and_unload().eval()
-        print("[HLP] adapter merged", adapter_path)
+        if adapter_path:
+            model = PeftModel.from_pretrained(base, adapter_path)
+            self.model = model.eval()
+            print("[HLP] adapter loaded:", adapter_path)
+        else:
+            self.model = base.eval()
+            print("[HLP] no adapter — running base Qwen2.5-VL only (smoke-test mode)")
         print(f"[HLP] load done: {time.time()-t0:.2f}s")
 
     @torch.no_grad()

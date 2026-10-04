@@ -175,4 +175,37 @@ class PreTrainedConfig(draccus.ChoiceRegistry, HubMixin, HFPretrainedConfig, abc
         # HACK: this is very ugly, ideally we'd like to be able to do that natively with draccus
         # something like --policy.path (in addition to --policy.type)
         cli_overrides = policy_kwargs.pop("cli_overrides", [])
-        return draccus.parse(cls, config_file, args=cli_overrides)
+
+        # Resolve the actual subclass from the saved config's "type" field
+        # BEFORE draccus.parse — otherwise argparse builds its arg schema from
+        # the base class and rejects subclass-only fields (e.g.
+        # PI0Config.action_chunk_relative) as "unrecognized arguments".
+        # Then strip "type" from the config (not a dataclass field on the
+        # subclass) and parse with the resolved subclass.
+        import json as _json
+        import tempfile as _tempfile
+        actual_cls = cls
+        parse_file = config_file
+        _tmp_path = None
+        try:
+            with open(config_file) as _f:
+                _cfg_dict = _json.load(_f)
+            _type_name = _cfg_dict.pop("type", None)
+            if _type_name and hasattr(cls, "get_choice_class"):
+                actual_cls = cls.get_choice_class(_type_name)
+            if actual_cls is not cls:
+                _tmp = _tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".json", delete=False)
+                _json.dump(_cfg_dict, _tmp)
+                _tmp.close()
+                _tmp_path = _tmp.name
+                parse_file = _tmp_path
+        except Exception as _e:
+            print(f"[from_pretrained] could not resolve subclass from {config_file}: {_e}; "
+                  f"falling back to {cls.__name__}")
+
+        try:
+            return draccus.parse(actual_cls, parse_file, args=cli_overrides)
+        finally:
+            if _tmp_path is not None and os.path.exists(_tmp_path):
+                os.unlink(_tmp_path)

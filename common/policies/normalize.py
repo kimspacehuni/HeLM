@@ -168,14 +168,17 @@ class Normalize(nn.Module):
                 std = buffer["std"]
                 assert not torch.isinf(mean).any(), _no_stats_error_str("mean")
                 assert not torch.isinf(std).any(), _no_stats_error_str("std")
-                batch[key] = (batch[key] - mean) / (std + 1e-8)
+                # Clamp std at 1e-3 to keep dims with effectively-no-variance
+                # (e.g. LIBERO action rotation dims that are always ~0) from
+                # producing huge normalized values that destabilize loss.
+                batch[key] = (batch[key] - mean) / torch.clamp(std, min=1e-3)
             elif norm_mode is NormalizationMode.MIN_MAX:
                 min = buffer["min"]
                 max = buffer["max"]
                 assert not torch.isinf(min).any(), _no_stats_error_str("min")
                 assert not torch.isinf(max).any(), _no_stats_error_str("max")
-                # normalize to [0,1]
-                batch[key] = (batch[key] - min) / (max - min + 1e-8)
+                # normalize to [0,1] (clamp denominator for collapsed-range dims)
+                batch[key] = (batch[key] - min) / torch.clamp(max - min, min=1e-3)
                 # normalize to [-1, 1]
                 batch[key] = batch[key] * 2 - 1
             else:

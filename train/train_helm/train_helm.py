@@ -27,82 +27,16 @@ from train.train_helm.helm_dataset import (
     count_labels,
 )
 
-"""
-export PYTHONPATH=$(pwd)
-# DDP Train #
-CUDA_VISIBLE_DEVICES=6,7
-    torchrun --nproc_per_node=2 --master-port=29545 train/train_helm/train_helm.py \
-        --model_name_or_path /ckpt/Qwen2.5-VL-7B-Instruct \
-        --train_jsonl /data/ghkim/helm_data/helm_v4_task_10_extended/merged/all_train.jsonl \
-        --val_jsonl /data/ghkim/helm_data/helm_v4_task_10_extended/merged/all_val.jsonl \
-        --num_images 1 \
-        --output_dir /backups/ghkim/HeLM_v4/HLP_HeLM_v4_qwen_7b_all_DDP_0122 \
-        --batch_size 8 --n_detect_pos 2 --n_detect_neg 2 --n_update_intra 2 --n_update_transition 2 \
-        --num_train_epochs 3 \
-        --with_replacement True \
-        --attn_impl sdpa \
-        --eval_max_samples 40 \
-        --wandb_project RefMe \
-        --wandb_run_name HLP_HeLM_v4_qwen_7b_all_DDP_0122
-  
-# Qwen 3b model test #
-CUDA_VISIBLE_DEVICES=5 python train/train_helm/train_helm.py \
-  --model_name_or_path /ckpt/Qwen2.5-VL-3B-Instruct \
-  --train_jsonl /data/ghkim/helm_data/helm_v4_task_10/merged/all_train.jsonl \
-  --val_jsonl /data/ghkim/helm_data/helm_v4_task_10/merged/all_val.jsonl \
-  --num_images 1 \
-  --output_dir /backups/ghkim/HeLM_v4/HLP_HeLM_v4_qwen_3b_all_0126 \
-  --batch_size 10 --n_detect_pos 3 --n_detect_neg 3 --n_update_intra 2 --n_update_transition 2 \
-  --num_train_epochs 10 \
-  --with_replacement True \
-  --attn_impl sdpa \
-  --eval_max_samples 40 \
-  --wandb_project RefMe \
-  --wandb_run_name HLP_HeLM_v4_qwen_3b_all_0126
+"""Qwen2.5-VL HLP fine-tune (HeLM project).
 
-# Qwen 7b mode
-CUDA_VISIBLE_DEVICES=7 python train/train_helm/train_helm.py \
-  --model_name_or_path /ckpt/Qwen2.5-VL-7B-Instruct \
-  --train_jsonl /data/ghkim/helm_data/helm_ablation_task_5/merged/all_train.jsonl \
-  --val_jsonl /data/ghkim/helm_data/helm_ablation_task_5/merged/all_val.jsonl \
-  --num_images 1 \
-  --output_dir /backups/ghkim/HeLM_v4/HLP_HeLM_v4_qwen_7b_ablation_task_5 \
-  --batch_size 8 --n_detect_pos 0 --n_detect_neg 3 --n_update_intra 3 --n_update_transition 2 \
-  --num_train_epochs 3 \
-  --with_replacement True \
-  --attn_impl sdpa \
-  --eval_max_samples 40 \
-  --wandb_project RefMe \
-  --wandb_run_name HLP_HeLM_v4_qwen_7b_ablation_task_5
-  
-CUDA_VISIBLE_DEVICES=5 python train/train_helm/train_helm.py \
-  --model_name_or_path /ckpt/Qwen2.5-VL-7B-Instruct \
-  --train_jsonl /data/ghkim/helm_data/press_the_button_in_order/jsonl_v4/merged/all_train.jsonl \
-  --val_jsonl /data/ghkim/helm_data/press_the_button_in_order/jsonl_v4/merged/all_val.jsonl \
-  --num_images 1 \
-  --output_dir /result/ghkim/HeLM_v4/HLP_HeLM_v4_qwen_7b_press_button_in_order \
-  --batch_size 8 --n_detect_pos 2 --n_detect_neg 2 --n_update_intra 2 --n_update_transition 2 \
-  --num_train_epochs 10 \
-  --with_replacement True \
-  --attn_impl sdpa \
-  --eval_max_samples 40 \
-  --wandb_project RefMe \
-  --wandb_run_name HLP_HeLM_v4_qwen_7b_press_button_in_order
-  
-CUDA_VISIBLE_DEVICES=7 python train/train_helm_v3/train_helm.py \
-  --model_name_or_path /ckpt/Qwen2.5-VL-7B-Instruct \
-  --train_jsonl /data/ghkim/helm_data/press_button_N_times_M_times_total/jsonl_v3/merged/all_train.jsonl \
-  --val_jsonl /data/ghkim/helm_data/press_button_N_times_M_times_total/jsonl_v3/merged/all_val.jsonl \
-  --num_images 1 \
-  --output_dir /result/ghkim/HLP_HeLM_press_button_N_times_M_times_total_2240_0103 \
-  --batch_size 8 --n_detect_pos 2 --n_detect_neg 2 --n_update_intra 4 --n_update_transition 0 \
-  --num_train_epochs 10 \
-  --with_replacement True \
-  --attn_impl sdpa \
-  --eval_max_samples 40 \
-  --wandb_project RefMe \
-  --wandb_run_name HLP_HeLM_press_button_N_times_M_times_total_2240_0103 \
-  --save_steps 2000
+QLoRA + mixed-batch sampler that draws fixed counts from each label pool
+(detect_pos / detect_neg / update_intra / update_transition).
+Works in single-GPU and DDP modes (LOCAL_RANK auto-detected; sampler divides
+steps-per-epoch by world_size).
+
+Launchers:
+  scripts/hlp/run_qwen_full_debug.sh   — single-GPU debug
+  scripts/hlp/slurm_helm_qwen.sh       — multi-GPU DDP via torchrun
 """
 
 from collections import Counter
@@ -273,7 +207,13 @@ def build_model(model_name_or_path: str, use_qlora: bool, bf16: bool, attn_impl:
     )
 
     if use_qlora:
-        model = prepare_model_for_kbit_training(model)
+        # use_reentrant=False is required for DDP + LoRA + gradient_checkpointing —
+        # otherwise the reentrant checkpoint reruns the forward and DDP marks
+        # adapter params "ready twice" mid-backward.
+        model = prepare_model_for_kbit_training(
+            model,
+            gradient_checkpointing_kwargs={"use_reentrant": False},
+        )
 
         lora = LoraConfig(
             r=16,
@@ -325,6 +265,8 @@ def main():
     ap.add_argument("--warmup_ratio", type=float, default=0.03)
     ap.add_argument("--logging_steps", type=int, default=5)
     ap.add_argument("--save_steps", type=int, default=500)
+    ap.add_argument("--save_total_limit", type=int, default=3,
+                    help="Keep only the N most recent checkpoints to bound disk usage.")
     ap.add_argument("--eval_steps", type=int, default=50)
     ap.add_argument("--gradient_accumulation_steps", type=int, default=1)
     ap.add_argument("--dataloader_num_workers", type=int, default=4)
@@ -425,7 +367,9 @@ def main():
         weight_decay=args.weight_decay,
         warmup_ratio=args.warmup_ratio,
         logging_steps=args.logging_steps,
+        save_strategy="steps",
         save_steps=args.save_steps,
+        save_total_limit=args.save_total_limit,
         evaluation_strategy="steps",
         eval_steps=args.eval_steps,
         per_device_train_batch_size=1,  # 무시됨(우리는 batch_sampler 사용)
@@ -435,7 +379,11 @@ def main():
         bf16=bool(args.bf16),
         report_to=["wandb"],
         remove_unused_columns=False,
-        ddp_find_unused_parameters=True,
+        # LoRA: all adapter params used every step. False avoids DDP hook
+        # duplication with gradient_checkpointing(use_reentrant=False).
+        ddp_find_unused_parameters=False,
+        gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={"use_reentrant": False},
     )
 
     print_label_stats(args.train_jsonl)
