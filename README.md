@@ -290,20 +290,6 @@ python evaluate/eval_HLP_LLP/eval_real_time_main.py \
 
 ---
 
-## Citation
-
-If you find this work useful, please cite:
-
-```bibtex
-@inproceedings{helm2026rss,
-  title     = {HeLM: Hierarchical Explicit Language Memory for VLM-Guided Non-Markovian Manipulation},
-  booktitle = {Robotics: Science and Systems (RSS)},
-  year      = {2026},
-}
-```
-
----
-
 ## License
 
 This project is released under the [Apache 2.0 License](LICENSE).
