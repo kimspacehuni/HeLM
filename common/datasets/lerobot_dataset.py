@@ -655,6 +655,14 @@ class LeRobotDataset(torch.utils.data.Dataset):
             return get_hf_features_from_features(self.features)
 
     def _get_query_indices(self, idx: int, ep_idx: int) -> tuple[dict[str, list[int | bool]]]:
+        # When `self.episodes` filters to a subset, `episode_data_index["from"|"to"]`
+        # is a *dense* tensor sized to the filtered set (e.g. 19) but
+        # `ep_idx` here is the *original* episode index from the data
+        # (e.g. 190). Remap original → position-in-filter to avoid IndexError.
+        if self.episodes is not None:
+            if not hasattr(self, "_ep_idx_to_pos"):
+                self._ep_idx_to_pos = {ep: i for i, ep in enumerate(self.episodes)}
+            ep_idx = self._ep_idx_to_pos[ep_idx]
         ep_start = self.episode_data_index["from"][ep_idx]
         ep_end = self.episode_data_index["to"][ep_idx]
         query_indices = {

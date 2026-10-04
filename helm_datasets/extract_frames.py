@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2  # type: ignore
 import json
 from typing import Any, Dict, Optional
-from helm_datasets_v2.utils.io_utils import ensure_dir, frames_dir, list_chunks_from_videos, episode_json_path, read_json
+from helm_datasets.utils.io_utils import ensure_dir, frames_dir, list_chunks_from_videos, episode_json_path, read_json
 """
 python -m helm_datasets_v3.extract_frames \
   --lerobot_root "/data/ghkim/data_hub/find_open_the_drawer_ep120" \
@@ -132,6 +132,12 @@ def main():
     ap.add_argument("--out_root", type=str, required=True)
     ap.add_argument("--overwrite", type=int, default=0)
     ap.add_argument("--fps_frames", type=int, default=1)
+    ap.add_argument("--exterior_key", type=str, default="observation.images.table",
+                    help="LeRobot mp4 dir name for the exterior camera. "
+                         "LIBERO-Mem uses 'observation.images.base_0_rgb'.")
+    ap.add_argument("--wrist_key", type=str, default="observation.images.wrist",
+                    help="LeRobot mp4 dir name for the wrist camera. "
+                         "LIBERO-Mem uses 'observation.images.left_wrist_0_rgb'.")
     args = ap.parse_args()
 
     lerobot_root = Path(args.lerobot_root)
@@ -151,8 +157,8 @@ def main():
 
     total_eps = 0
     for chunk in chunks:
-        table_dir = videos_root / chunk / "observation.images.table"
-        wrist_dir = videos_root / chunk / "observation.images.wrist"
+        table_dir = videos_root / chunk / args.exterior_key
+        wrist_dir = videos_root / chunk / args.wrist_key
         if not table_dir.exists() or not wrist_dir.exists():
             print(f"[SKIP] Missing video dirs in {chunk}: {table_dir} / {wrist_dir}")
             continue

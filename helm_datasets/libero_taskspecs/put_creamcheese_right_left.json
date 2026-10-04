@@ -1,40 +1,40 @@
 {
-  "task_id": "put_creamcheese_left_left",
+  "task_id": "put_creamcheese_right_left",
   "inter": 0,
   "intra": [2],
   "task_text": [
-    "put the cream cheese in the nearest basket and place that basket in the center"
+    "put the cream cheese in the nearest basket and place the empty basket in the center"
   ],
   "episode_filters": [
     [
-      { "tasks": "pick and place the block into the left basket" },
-      { "tasks": "move the left basket forward" }
+      { "tasks": "['put_right_creamcheese']" },
+      { "tasks": "['place_left_basket']" }
     ]
   ],
-  "llp_commands": "bowl lift and placed\n",
-  "event_list": "bowl lift and placed\n",
+  "llp_commands": "put_right_creamcheese\nplace_left_basket\ndone",
+  "event_list": "put_right_creamcheese\nplace_left_basket\nnone\ndone",
   "event_grid": [
     [
-      "block place in left basket",
-      "left basket moved"
+      "put_right_creamcheese",
+      "place_left_basket"
     ]
   ],
   "memory_grid": [
     [
       {
-        "Action_Command": "pick and place the block into the left basket",
-        "Working_Memory": "Progress: None (Goal: left, left)",
+        "Action_Command": "put_right_creamcheese",
+        "Working_Memory": "Cheese: front of right basket (Goal: nearest basket then empty-basket to center)",
         "Episodic_Context": "None"
       },
       {
-        "Action_Command": "move the left basket forward",
-        "Working_Memory": "Count: left (Goal: left, left)",
+        "Action_Command": "place_left_basket",
+        "Working_Memory": "Cheese: in right basket; Target: empty=left basket -> center",
         "Episodic_Context": "None"
       },
       {
         "Action_Command": "done",
         "Working_Memory": "task done (None)",
-        "Episodic_Context": "Previous_Progress: left, left"
+        "Episodic_Context": "Cheese was in right basket; Moved left (empty) basket to center"
       }
     ]
   ]

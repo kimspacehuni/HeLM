@@ -1,0 +1,147 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; background: #111; color: #eee;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.topbar {
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 0.6rem 1rem; background: #1a1a1a; border-bottom: 1px solid #2a2a2a;
+}
+.brand { font-weight: 600; font-size: 1.05rem; }
+.topbar label { font-size: 0.8rem; color: #aaa; margin-right: 0.4rem; }
+.topbar select, .topbar input[type=text] {
+  background: #222; color: #eee; border: 1px solid #333; padding: 0.3rem 0.5rem;
+  border-radius: 4px; font: inherit;
+}
+.meta { margin-left: 0.5rem; color: #888; font-size: 0.85rem; }
+
+main { display: grid; grid-template-columns: 1fr 340px; height: calc(100vh - 52px); }
+
+.viewer { display: flex; flex-direction: column; padding: 1rem; gap: 0.75rem; min-width: 0; }
+.cams { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; flex: 1; min-height: 0; }
+.cam { margin: 0; display: flex; flex-direction: column; min-height: 0; }
+.cam img, .cam video {
+  width: 100%; height: 100%; object-fit: contain; background: #000;
+  border: 1px solid #2a2a2a; border-radius: 6px;
+}
+.cam[data-mode="video"] img { display: none; }
+.cam video[hidden] { display: none; }
+.cam figcaption { font-size: 0.75rem; color: #999; margin-top: 0.3rem; text-align: center; }
+
+.controls {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px;
+}
+.controls button {
+  background: #2a2a2a; color: #eee; border: 1px solid #3a3a3a;
+  padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer; font: inherit;
+}
+.controls button:hover { background: #333; }
+.controls #timeline { flex: 1; accent-color: #4a90e2; }
+.frame-indicator { display: flex; align-items: center; gap: 0.3rem; font-variant-numeric: tabular-nums; }
+.frame-indicator input {
+  width: 5.5rem; background: #222; color: #eee; border: 1px solid #333;
+  padding: 0.25rem 0.4rem; border-radius: 4px; font: inherit; text-align: right;
+}
+
+.subtask-bars {
+  position: relative; height: 22px; background: #1a1a1a;
+  border: 1px solid #2a2a2a; border-radius: 4px; overflow: hidden;
+}
+.subtask-bars .bar {
+  position: absolute; top: 0; bottom: 0; border-left: 1px solid rgba(0,0,0,0.35);
+  border-right: 1px solid rgba(0,0,0,0.35); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; min-width: 2px;
+  font-size: 0.7rem; color: rgba(0,0,0,0.75); font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding: 0 0.25rem; box-sizing: border-box;
+}
+.subtask-bars .bar:hover { filter: brightness(1.15); outline: 1px solid #eee; z-index: 2; }
+.subtask-bars .bar.active { outline: 2px solid #fff; z-index: 3; }
+.subtask-bars .playhead {
+  position: absolute; top: -2px; bottom: -2px; width: 2px;
+  background: #fff; box-shadow: 0 0 4px rgba(255,255,255,0.7); pointer-events: none; z-index: 4;
+}
+
+.segment-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.4rem 0.6rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px;
+  font-size: 0.85rem;
+}
+.hint kbd {
+  background: #2a2a2a; border: 1px solid #3a3a3a; padding: 0 0.35rem;
+  border-radius: 3px; font-family: inherit; font-size: 0.8rem;
+}
+.pending { color: #f5c76e; font-variant-numeric: tabular-nums; }
+
+.sidebar {
+  border-left: 1px solid #2a2a2a; background: #161616;
+  padding: 1rem; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.sidebar h2 { margin: 0; font-size: 1rem; color: #ccc; }
+.panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.mini { background: none; border: 1px solid #333; color: #aaa; padding: 0.15rem 0.5rem;
+  border-radius: 3px; font-size: 0.75rem; cursor: pointer; }
+.mini:hover { color: #eee; border-color: #555; }
+
+.label-buttons { display: flex; flex-direction: column; gap: 0.3rem; }
+.label-buttons .label-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: #1e1e1e; border: 1px solid #2a2a2a; color: #eee;
+  padding: 0.45rem 0.6rem; border-radius: 5px; cursor: pointer;
+  font: inherit; text-align: left;
+}
+.label-buttons .label-btn:hover { background: #252525; border-color: #3a3a3a; }
+.label-buttons .label-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.label-buttons .label-btn.armed { border-color: #f5c76e; background: #2a2414; }
+.label-buttons .label-btn .hotkey {
+  display: inline-block; min-width: 1.2rem; text-align: center;
+  background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 3px;
+  padding: 0 0.25rem; font-size: 0.75rem; color: #aaa;
+}
+.label-buttons .empty-hint { color: #777; font-style: italic; font-size: 0.85rem; padding: 0.3rem 0; }
+
+.label-editor { display: flex; flex-direction: column; gap: 0.5rem;
+  background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 5px; padding: 0.6rem; }
+.label-edit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.label-edit-list li {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.3rem 0.5rem; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 4px;
+}
+.label-edit-list .del {
+  background: none; border: none; color: #e26a6a; cursor: pointer; font: inherit; padding: 0;
+}
+.label-add { display: flex; gap: 0.4rem; }
+.label-add input {
+  flex: 1; background: #222; color: #eee; border: 1px solid #333;
+  padding: 0.3rem 0.5rem; border-radius: 4px; font: inherit;
+}
+.label-add button {
+  background: #2d5aa0; color: #eee; border: 1px solid #3a6cb8;
+  padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer; font: inherit;
+}
+.label-editor-actions { display: flex; justify-content: flex-end; }
+.label-editor-actions button {
+  background: #2a2a2a; color: #eee; border: 1px solid #3a3a3a;
+  padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer; font: inherit;
+}
+
+.subtask-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.subtask-list li {
+  padding: 0.5rem 0.6rem; background: #1e1e1e; border: 1px solid #2a2a2a;
+  border-radius: 5px; display: flex; flex-direction: column; gap: 0.25rem;
+}
+.subtask-list .row1 { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.subtask-list .label { font-weight: 600; color: #eee; word-break: break-word; }
+.subtask-list .range { color: #f5c76e; font-size: 0.8rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.subtask-list .meta-row { font-size: 0.75rem; color: #888; display: flex; justify-content: space-between; gap: 0.4rem; }
+.subtask-list button.seek { background: none; border: none; color: #4a90e2; cursor: pointer; padding: 0; font: inherit; }
+.subtask-list button.del { background: none; border: none; color: #e26a6a; cursor: pointer; padding: 0; font: inherit; }
+
+.toast {
+  position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
+  background: #2a2a2a; border: 1px solid #444; color: #eee;
+  padding: 0.5rem 0.9rem; border-radius: 6px; font-size: 0.85rem;
+  z-index: 100;
+}
+.toast.error { border-color: #e26a6a; color: #ffb3b3; }

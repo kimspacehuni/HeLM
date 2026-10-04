@@ -1,0 +1,69 @@
+{
+  "task_id": "liftput_bottle_3",
+  "inter": 0,
+  "intra": [6],
+  "task_text": [
+    "pick up the bottle and put it down the plate 3 times"
+  ],
+  "episode_filters": [
+    [
+      { "tasks": "['lift_bottle']" },
+      { "tasks": "['place_bottle']" },
+      { "tasks": "['lift_bottle']" },
+      { "tasks": "['place_bottle']" },
+      { "tasks": "['lift_bottle']" },
+      { "tasks": "['place_bottle']" }
+    ]
+  ],
+  "llp_commands": "lift_bottle\nplace_bottle\ndone",
+  "event_list": "lift_bottle\nplace_bottle\nnone\ndone",
+  "event_grid": [
+    [
+      "lift_bottle",
+      "place_bottle",
+      "lift_bottle",
+      "place_bottle",
+      "lift_bottle",
+      "place_bottle"
+    ]
+  ],
+  "memory_grid": [
+    [
+      {
+        "Action_Command": "lift_bottle",
+        "Working_Memory": "Count: 0 (Goal: 3)",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "place_bottle",
+        "Working_Memory": "Count: 0 (Goal: 3), holding bottle",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "lift_bottle",
+        "Working_Memory": "Count: 1 (Goal: 3)",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "place_bottle",
+        "Working_Memory": "Count: 1 (Goal: 3), holding bottle",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "lift_bottle",
+        "Working_Memory": "Count: 2 (Goal: 3)",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "place_bottle",
+        "Working_Memory": "Count: 2 (Goal: 3), holding bottle",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "done",
+        "Working_Memory": "task done (None)",
+        "Episodic_Context": "Previous_Count: 3"
+      }
+    ]
+  ]
+}

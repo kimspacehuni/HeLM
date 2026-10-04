@@ -1,12 +1,13 @@
 from __future__ import annotations
 import argparse
+import datetime as _dt
 import shutil
 from pathlib import Path
 from typing import List, Tuple, Optional
 
 import streamlit as st  # type: ignore
 from PIL import Image
-from helm_datasets_v3.utils.io_utils import (
+from helm_datasets.utils.io_utils import (
     list_chunks_from_frames,
     list_episodes_from_frames,
     frames_dir,
@@ -169,20 +170,44 @@ def main(out_root: Path, fps_out: int):
     events_key = f"event_frame_idxs::{episode_key}"
     event_key = f"event_frame_idx::{episode_key}"  # derived from events_key, not independently edited
     frame_key = f"frame_idx::{episode_key}"
+    saved_snapshot_key = f"last_saved_events::{episode_key}"
+    saved_time_key = f"last_saved_time::{episode_key}"
 
-    # Initialize event frame indexes in session state if missing (backward compatible)
-    if events_key not in st.session_state:
+    # Helper: read event_frame_idxs from on-disk episode JSON
+    def _load_events_from_disk() -> Tuple[List[int], Optional[str]]:
         ep_json = episode_json_path(out_root, fps_out, chunk, ep)
         ev = read_json(ep_json, default={})
-        event_frame_idxs = []
+        ids: List[int] = []
         if isinstance(ev, dict):
             if "event_frame_idxs" in ev and isinstance(ev["event_frame_idxs"], list):
-                event_frame_idxs = [int(x) for x in ev["event_frame_idxs"] if isinstance(x, int) or (isinstance(x, float) and x.is_integer())]
+                ids = [int(x) for x in ev["event_frame_idxs"]
+                       if isinstance(x, int) or (isinstance(x, float) and x.is_integer())]
             elif "event_frame_idx" in ev and (ev["event_frame_idx"] is not None):
                 val = ev["event_frame_idx"]
                 if isinstance(val, int) or (isinstance(val, float) and val.is_integer()):
-                    event_frame_idxs = [int(val)]
-        st.session_state[events_key] = sorted(set(event_frame_idxs))
+                    ids = [int(val)]
+        sorted_ids = sorted(set(ids))
+        if ep_json.exists():
+            mtime = _dt.datetime.fromtimestamp(ep_json.stat().st_mtime)
+            time_str = mtime.strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            time_str = None
+        return sorted_ids, time_str
+
+    # Initialize session_state from disk on first visit. The two keys are
+    # initialized together so a session created before the dirty/clean
+    # indicator was added still gets a baseline snapshot (otherwise everything
+    # would render as 'Unsaved').
+    disk_events = None
+    disk_time = None
+    if events_key not in st.session_state:
+        disk_events, disk_time = _load_events_from_disk()
+        st.session_state[events_key] = list(disk_events)
+    if saved_snapshot_key not in st.session_state:
+        if disk_events is None:
+            disk_events, disk_time = _load_events_from_disk()
+        st.session_state[saved_snapshot_key] = list(disk_events)
+        st.session_state[saved_time_key] = disk_time
     # Always keep event_key in sync with first event or None
     st.session_state[event_key] = st.session_state[events_key][0] if st.session_state[events_key] else None
 
@@ -215,6 +240,40 @@ def main(out_root: Path, fps_out: int):
 
     # ---- RIGHT: Event and Frame Delete Controls ----
     with col2:
+        # --- Save bar (top, for short mouse travel) + dirty/clean indicator ---
+        events_now = sorted(set(list(st.session_state.get(events_key, []))))
+        last_saved = st.session_state.get(saved_snapshot_key, None)
+        last_time = st.session_state.get(saved_time_key, None)
+        is_dirty = (last_saved is None) or (events_now != last_saved)
+
+        save_btn_col, status_col = st.columns([1, 2])
+        with save_btn_col:
+            save_clicked = st.button("💾 Save", type="primary", use_container_width=True)
+        with status_col:
+            if is_dirty:
+                if last_time:
+                    st.warning(f"⚠ Unsaved (last save {last_time})")
+                else:
+                    st.warning("⚠ Unsaved")
+            else:
+                st.success(f"✓ Saved {last_time}")
+
+        if save_clicked:
+            ep_json = episode_json_path(out_root, fps_out, chunk, ep)
+            existing_data = read_json(ep_json, default={})
+            if not isinstance(existing_data, dict):
+                existing_data = {}
+            existing_data["fps_frames"] = int(fps_out)
+            existing_data["n_frames"] = int(len(common_frame_ids))
+            existing_data["event_frame_idxs"] = events_now
+            existing_data["event_frame_idx"] = events_now[0] if events_now else None
+            atomic_write_json(ep_json, existing_data)
+            update_index_event(out_root, fps_out, chunk, ep, events_now)
+            st.session_state[saved_snapshot_key] = list(events_now)
+            st.session_state[saved_time_key] = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            st.rerun()
+
+        st.divider()
         st.subheader("Event / Delete")
 
         # --- Event Controls ---
@@ -364,22 +423,6 @@ def main(out_root: Path, fps_out: int):
             else:
                 st.session_state[frame_key] = min(st.session_state[frame_key], n_common - 1)
             st.rerun()
-
-        # --- Save Button ---
-        events = sorted(set(list(st.session_state[events_key])))
-        if st.button("Save", type="primary"):
-            ep_json = episode_json_path(out_root, fps_out, chunk, ep)
-            existing_data = read_json(ep_json, default={})
-            if not isinstance(existing_data, dict):
-                existing_data = {}
-            sorted_unique = sorted(set(events))
-            existing_data["fps_frames"] = int(fps_out)
-            existing_data["n_frames"] = int(len(common_frame_ids))
-            existing_data["event_frame_idxs"] = sorted_unique
-            existing_data["event_frame_idx"] = sorted_unique[0] if sorted_unique else None
-            atomic_write_json(ep_json, existing_data)
-            update_index_event(out_root, fps_out, chunk, ep, sorted_unique)
-            st.success(f"Saved: {ep_json}")
 
     # ---- LEFT: Frames Viewer ----
     with col1:

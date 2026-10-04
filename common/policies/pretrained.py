@@ -209,6 +209,16 @@ class PreTrainedPolicy(HubMixin, HFPreTrainedModel, abc.ABC):
         batch = self.normalize_inputs(batch)
         batch = self.normalize_targets(batch)
 
+        # Option B: train pi0 to predict chunk-cumulative trajectories instead
+        # of per-step deltas. Does cumsum AFTER normalization, so each per-step
+        # normalized delta has mean ~0 std ~1; their cumulative grows as a
+        # Brownian-like trajectory and gives the flow-matching head continuous
+        # targets, avoiding majority-delta collapse on OOD. Inverse (diff) is
+        # applied in PI0Policy.select_action before unnormalize. See
+        # PI0Config.action_chunk_relative for context.
+        if getattr(self.config, "action_chunk_relative", False):
+            batch[ACTION] = torch.cumsum(batch[ACTION], dim=1)
+
         images, img_masks = self.prepare_images(batch)
         state = self.prepare_state(batch)
         lang_tokens, lang_masks = self.prepare_language(batch)

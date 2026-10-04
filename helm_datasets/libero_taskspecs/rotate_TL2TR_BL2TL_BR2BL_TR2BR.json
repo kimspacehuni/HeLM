@@ -1,0 +1,65 @@
+{
+  "task_id": "rotate_TL2TR_BL2TL_BR2BL_TR2BR",
+  "inter": 0,
+  "intra": [
+    4
+  ],
+  "task_text": [
+    "rotate the 3 bowls on their plates from left to right using the empty plate"
+  ],
+  "episode_filters": [
+    [
+      {
+        "tasks": "['move_topleft_bowl_to_topright']"
+      },
+      {
+        "tasks": "['move_bottomleft_bowl_to_topleft']"
+      },
+      {
+        "tasks": "['move_bottomright_bowl_to_bottomleft']"
+      },
+      {
+        "tasks": "['move_topright_bowl_to_bottomright']"
+      }
+    ]
+  ],
+  "llp_commands": "move_topleft_bowl_to_topright\nmove_topleft_bowl_to_bottomleft\nmove_topleft_bowl_to_bottomright\nmove_topright_bowl_to_topleft\nmove_topright_bowl_to_bottomleft\nmove_topright_bowl_to_bottomright\nmove_bottomleft_bowl_to_topleft\nmove_bottomleft_bowl_to_topright\nmove_bottomleft_bowl_to_bottomright\nmove_bottomright_bowl_to_topleft\nmove_bottomright_bowl_to_topright\nmove_bottomright_bowl_to_bottomleft\ndone",
+  "event_list": "move_topleft_bowl_to_topright\nmove_topleft_bowl_to_bottomleft\nmove_topleft_bowl_to_bottomright\nmove_topright_bowl_to_topleft\nmove_topright_bowl_to_bottomleft\nmove_topright_bowl_to_bottomright\nmove_bottomleft_bowl_to_topleft\nmove_bottomleft_bowl_to_topright\nmove_bottomleft_bowl_to_bottomright\nmove_bottomright_bowl_to_topleft\nmove_bottomright_bowl_to_topright\nmove_bottomright_bowl_to_bottomleft\nnone\ndone",
+  "event_grid": [
+    [
+      "move_topleft_bowl_to_topright",
+      "move_bottomleft_bowl_to_topleft",
+      "move_bottomright_bowl_to_bottomleft",
+      "move_topright_bowl_to_bottomright"
+    ]
+  ],
+  "memory_grid": [
+    [
+      {
+        "Action_Command": "move_topleft_bowl_to_topright",
+        "Working_Memory": "Bowls: topleft, bottomleft, bottomright; Empty: topright; Done: 0/4; Goal: rotate",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "move_bottomleft_bowl_to_topleft",
+        "Working_Memory": "Bowls: bottomleft, bottomright, topright; Empty: topleft; Done: 1/4; Last_Placed: topright",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "move_bottomright_bowl_to_bottomleft",
+        "Working_Memory": "Bowls: bottomright, topleft, topright; Empty: bottomleft; Done: 2/4; Last_Placed: topleft",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "move_topright_bowl_to_bottomright",
+        "Working_Memory": "Bowls: bottomleft, topleft, topright; Empty: bottomright; Done: 3/4; Last_Placed: bottomleft",
+        "Episodic_Context": "None"
+      },
+      {
+        "Action_Command": "done",
+        "Working_Memory": "task done (None)",
+        "Episodic_Context": "Bowls were at topleft, bottomleft, bottomright; rotated via topright"
+      }
+    ]
+  ]
+}

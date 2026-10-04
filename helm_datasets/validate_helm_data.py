@@ -219,56 +219,57 @@ def main():
                 rerun()
 
     with right:
-        st.subheader("Key fields")
+        # === Mode-specific TOP fields (the data you actually need to verify) ===
+        # Long fields (system prompt, full row JSON) are pushed below so they
+        # don't bury the answer.
+        mode_str = str(mode).upper() if mode is not None else "UNKNOWN"
+        st.markdown(f"### Mode: `{mode_str}`")
 
-        # A compact schema summary to spot format drift quickly
+        if mode_str == "DETECT":
+            ed = r.get("event_detected")
+            ev = r.get("event")
+            badge = "✅ TRUE" if ed is True else ("❌ FALSE" if ed is False else f"`{ed}`")
+            st.markdown(f"**event_detected:** {badge}  &nbsp;&nbsp;|&nbsp;&nbsp; **event:** `{ev}`")
+            show_value("gt_text", r.get("gt_text"))
+        elif mode_str == "UPDATE":
+            st.markdown("**memory_in (previous):**")
+            show_value("memory_in", r.get("memory_in", {}))
+            st.markdown("**memory_out (updated):**")
+            show_value("memory_out", r.get("memory_out"))
+            show_value("gt_text", r.get("gt_text"))
+        else:
+            show_value("gt_text", r.get("gt_text"))
 
-        schema = {
-            "uid": type(r.get("uid")).__name__,
-            "task_id": type(r.get("task_id")).__name__,
-            "mode": type(r.get("mode")).__name__,
-            "label": type(r.get("label")).__name__,
-            "event_detected": type(r.get("event_detected")).__name__,
-            "event": type(r.get("event")).__name__,
-            "global_instruction": type(r.get("task")).__name__,
-            "memory_in": type(r.get("memory_in")).__name__,
-            "gt_text": type(r.get("gt_text")).__name__,
-            "gt_yaml": type(r.get("gt_yaml")).__name__,
-        }
+        # === Compact metadata strip ===
+        meta_cols = st.columns(4)
+        meta_cols[0].caption(f"uid: `{r.get('uid')}`")
+        meta_cols[1].caption(f"task_id: `{r.get('task_id')}`")
+        meta_cols[2].caption(f"label: `{r.get('label')}`")
+        meta_cols[3].caption(f"step: `{r.get('inter')}/{r.get('step')} f={r.get('frame_id')}`")
 
-        show_value("gt_text", r.get("gt_text"))
+        # === Context fields (long) — moved below ===
+        with st.expander("global_instruction (task)", expanded=False):
+            show_value("global_instruction", r.get("task", ""))
 
-        # Ground-truth representations
-        show_value("user_prompt", r.get("user_prompt"))
+        with st.expander("user_prompt (system prompt)", expanded=False):
+            show_value("user_prompt", r.get("user_prompt"))
 
-        # Event-related fields (DETECT rows)
-        show_value("event_detected", r.get("event_detected"))
-        show_value("event", r.get("event"))
+        with st.expander("gt_yaml", expanded=False):
+            show_value("gt_yaml", r.get("gt_yaml"))
 
-        show_value("uid", r.get("uid"))
-        show_value("task_id", r.get("task_id"))
-        show_value("mode", r.get("mode"))
-        show_value("label", r.get("label"))
+        # For DETECT also surface memory fields if present (some flows include them)
+        if mode_str == "DETECT" and (r.get("memory_in") or r.get("memory_out")):
+            with st.expander("memory_in / memory_out", expanded=False):
+                show_value("memory_in", r.get("memory_in", {}))
+                show_value("memory_out", r.get("memory_out"))
 
-
-
-        # Prompt + GT (if present)
-        show_value("global_instruction", r.get("task", ""))
-
-        # Memory in/out (depending on your pipeline)
-        show_value("memory_in", r.get("memory_in", {}))
-        show_value("memory_out", r.get("memory_out"))
-
-
-        show_value("gt_yaml", r.get("gt_yaml"))
-
-        st.subheader("Row JSON")
-        st.json(r)
+        with st.expander("Full row JSON", expanded=False):
+            st.json(r)
 
         pc = r.get("prompt_context", {})
         if isinstance(pc, dict) and pc:
-            st.markdown("**prompt_context**")
-            st.json(pc)
+            with st.expander("prompt_context", expanded=False):
+                st.json(pc)
 
 
 if __name__ == "__main__":
