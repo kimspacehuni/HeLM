@@ -466,7 +466,7 @@ footer { border-top: 1px solid var(--border); padding: 35px 0; }
 .task-scene { width: 100%; min-width: 0; }
 .scene-photo { position: relative; background: #e6e9e5; border-bottom: 1px solid var(--border); }
 
-.scene-photo-label { display: block; font: 500 8px/1.4 "SFMono-Regular", monospace; letter-spacing: .05em; padding: 5px 7px; color: #fff; background: #182a22e8; border-radius: 3px; }
+.scene-photo-label { display: block; font-size: 11px; line-height: 1.5; padding: 8px 12px; color: var(--fg-muted); background: var(--bg-soft); border-top: 1px solid var(--border); }
 .scene-state { padding: 20px; background: var(--bg-card); }
 .scene-state-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .scene-state-heading strong { font-size: 14px; font-weight: 600; letter-spacing: -.015em; }
@@ -523,3 +523,7 @@ footer { border-top: 1px solid var(--border); padding: 35px 0; }
 .sequence-demo { transform: none; max-width: 500px; width: 100%; }
 @media (max-width: 800px) { .hero { padding: 50px 0 40px; } .paper-title { font-size: 34px; } .example-layout { grid-template-columns: 1fr; gap: 25px; } .paper-title-line { display: inline; } .paper-title-line + .paper-title-line::before { content: ' '; } }
 @media (max-width: 560px) { .hero { padding: 36px 0 32px; } .paper-title { font-size: 28px; line-height: 1.28; } .paper-subtitle { font-size: 13px; margin-top: 16px; } .paper-links { gap: 9px; margin-top: 22px; } .paper-links .btn { font-size: 12px; padding: 10px 13px; } .paper-overview { padding-top: 34px; } .abstract-content p { font-size: 14px; } }
+
+/* Compact reference photos; cropping is baked into the assets, never CSS cover. */
+.task-media .task-photo { max-width: 260px; margin-inline: auto; }
+.scene-photo .task-photo { max-width: 320px; margin-inline: auto; }

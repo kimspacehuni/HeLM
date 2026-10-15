@@ -78,13 +78,18 @@ Regenerate from the repository root after editing a taskspec:
 python tools/build_page_traces.py
 ```
 
-The explorer pairs a fixed reference photograph of the real experiment setup
-with symbolic progress derived from the selected TaskSpec state (`scene.js`).
-The photos in `static/images/tasks/` are resized from the supplied 4000 × 3000
-originals to 1200 × 900 WebP, with orientation applied and no cropping. Native
-`<img>` elements use `width: 100%; height: auto` so each photograph remains fully
-visible in cards, the explorer and the introductory example. EXIF data is not
-included in the web assets. No generated robot imagery is used.
+The explorer selects reference photographs for the current action or its outcome
+when a verified example is available. Human demonstrations follow the observed
+colour, and robot button-press photos follow the command. Window photos match
+bottom / middle / top in the robot’s frame (confirmed against the source images). Repeated presses can
+reuse the same reference. The photos are examples, not synchronized rollout frames.
+When an exact drawer-position match is unavailable, the caption marks
+the image as a setup reference.
+
+The source photos in `static/images/tasks/` are cropped by 600 px (15%) on the
+left of the 4000 × 3000 originals, then reduced to 600 × 529 WebP. The top, bottom
+and right edges are retained. Native `<img>` elements keep `height: auto`; cards
+limit display width to 260 px and the explorer to 320 px. EXIF data is excluded.
 
 Completed steps, the next step and remembered context are displayed separately.
 Observation tasks reveal only events already in memory, not the future sequence.

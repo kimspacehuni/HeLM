@@ -1,5 +1,5 @@
 /* Original experiment photographs paired with symbolic TaskSpec progress.
- * Photos are fixed illustrations of the setup, never live or replayed observations.
+ * Photos illustrate matching actions or outcomes, never synchronized rollout observations.
  */
 window.HelmScene = (function () {
   'use strict';
@@ -26,7 +26,42 @@ window.HelmScene = (function () {
   };
   function photo(id, name) {
     if (!/^[AE][1-5]$/.test(id)) return '';
-    return '<img class="task-photo" src="static/images/tasks/' + id.toLowerCase() + '.webp" width="1200" height="900" alt="' + esc(name + ' — real-world experiment setup') + '" decoding="async" loading="lazy">';
+    return '<img class="task-photo" src="static/images/tasks/' + id.toLowerCase() + '.webp" width="600" height="529" alt="' + esc(name + ' — real-world experiment setup') + '" decoding="async" loading="lazy">';
+  }
+  function referenceFor(task, episode, index) {
+    const state = episode.steps[index];
+    const ended = state.cmd === 'done';
+    const action = ended ? episode.steps[Math.max(0, index - 1)].cmd : state.cmd;
+    const work = parseWork(state.work), previous = parseEpi(state.epi);
+    const prefix = ended ? 'Last action reference · ' : 'Action reference · ';
+    if (task.id === 'E2' && action === 'wait') {
+      const observed = ended && previous ? previous.items : work.got;
+      const color = observed && observed[observed.length - 1];
+      const files = { blue: 'observe-blue', green: 'e2', red: 'observe-red' };
+      return color && files[color]
+        ? { file: files[color], caption: 'Observed-action reference · human presses ' + color }
+        : { file: 'observation-ready', caption: 'Observation setup · no press observed yet' };
+    }
+    const press = action.match(/^press the (blue|green|red) button$/);
+    if (press) {
+      const files = { blue: task.id === 'E1' ? 'e1' : 'a1', green: 'press-green', red: 'a2' };
+      return { file: files[press[1]], caption: prefix + 'press ' + press[1] };
+    }
+    if (action === 'press the orange button') return { file: 'a5', caption: prefix + 'press orange' };
+    const destination = action.match(/place it on the (blue|red|white) plate/);
+    if (destination) {
+      const files = { blue: 'banana-blue', red: 'e5', white: 'a5' };
+      return { file: files[destination[1]], caption: destination[1] === 'red' ? 'Transfer reference · toward the red plate' : 'Result reference · banana on the ' + destination[1] + ' plate' };
+    }
+    const region = action.match(/^wipe the (bottom|middle|top) side of the window$/);
+    if (region) {
+      // Confirmed by the author: regions are named in the robot's frame.
+      const files = { bottom: 'e3', middle: 'a3', top: 'wipe-top' };
+      return { file: files[region[1]], caption: prefix + 'wipe ' + region[1] + ' (robot frame)' };
+    }
+    // Do not assign an unverified drawer location to an opening photograph.
+    if (task.id === 'A4' || task.id === 'E4') return { file: 'a4', caption: 'Setup reference · drawer-specific photo unavailable' };
+    return { file: task.id.toLowerCase(), caption: 'Experiment setup · reference photo' };
   }
   function step(label, state, detail, color) {
     return '<div class="state-step is-' + state + '"><span class="state-symbol' + (color ? ' color-' + color : '') + '" aria-hidden="true">' +
@@ -84,6 +119,14 @@ window.HelmScene = (function () {
       target.innerHTML = '<div class="scene-photo">' + photo(task.id, task.name) + '<span class="scene-photo-label">EXPERIMENT SETUP · REFERENCE PHOTO</span></div><div class="scene-state"></div>';
       target.dataset.task = task.id;
     }
+    const reference = referenceFor(task, episode, index);
+    const image = target.querySelector('.task-photo');
+    if (target.dataset.photo !== reference.file) {
+      image.setAttribute('src', 'static/images/tasks/' + reference.file + '.webp');
+      target.dataset.photo = reference.file;
+    }
+    image.setAttribute('alt', task.name + ' — ' + reference.caption);
+    target.querySelector('.scene-photo-label').textContent = reference.caption;
     target.querySelector('.scene-state').innerHTML = '<div class="scene-state-heading"><strong>' + esc(title) + '</strong><span>' + esc(summary) + '</span></div>' +
       '<div class="state-steps' + ((task.id === 'A4' || task.id === 'E4') && !observed ? ' is-drawers' : '') + '">' + content + '</div>' +
       (context && !compact ? '<div class="scene-context"><span>EPISODIC CONTEXT</span>' + esc(context) + '</div>' : '');

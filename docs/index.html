@@ -62,7 +62,7 @@
     <figure class="paper-figure"><img src="static/figures/fig1_teaser.webp" alt="A vanilla policy repeats the red-button press, while HeLM remembers completed presses and follows the red, green, blue order." width="1800" height="939" loading="lazy"><figcaption><span class="figure-tag">THE MOTIVATING EXAMPLE</span> A sequence needs a record of progress. This is the non-Markovian part: the correct action depends on history.</figcaption></figure>
     <details class="research-detail sequence-example">
       <summary>Interactive example: button-order memory <span aria-hidden="true">+</span></summary>
-      <div class="detail-content example-layout"><div class="example-explanation"><h3>Progress determines the next action</h3><p>The instruction stays the same: press red, green, then blue. Select a step to see how the memory records completed presses and changes the next command.</p><p class="small-note">The photograph is a fixed setup reference. Progress and commands follow the task specification.</p></div>
+      <div class="detail-content example-layout"><div class="example-explanation"><h3>Progress determines the next action</h3><p>The instruction stays the same: press red, green, then blue. Select a step to see how the memory records completed presses and changes the next command.</p><p class="small-note">Photographs illustrate the selected button action. Progress and commands follow the task specification; photos are not synchronized rollout frames.</p></div>
     <div class="sequence-demo" role="region" aria-label="Button sequence example">
       <div class="demo-topline"><span><span class="live-dot"></span> TASK-SPECIFICATION EXAMPLE</span><span class="mono">A2 / RGB</span></div>
       <div class="demo-instruction">“Press <span class="word-red">red</span>, <span class="word-green">green</span>, then <span class="word-blue">blue</span>.”</div>
@@ -102,7 +102,7 @@
 
 <section id="memory" class="section">
   <div class="wrap">
-    <div class="section-heading heading-split"><div><p class="eyebrow">03 / LOOK INSIDE THE MEMORY</p><h2>Language memory explorer</h2></div><p>Choose a task, then step through the sequence. The setup photo identifies the task; the progress display and memory panel follow its task specification.</p></div>
+    <div class="section-heading heading-split"><div><p class="eyebrow">03 / LOOK INSIDE THE MEMORY</p><h2>Language memory explorer</h2></div><p>Choose a task, then step through the sequence. Action reference photos change with the selected subtask when available. The progress display and memory panel follow its task specification.</p></div>
     <div class="explorer-guide"><span><b>A1–A5</b> Remember within one instruction</span><span><b>E1–E5</b> Carry context to the next episode</span></div>
     <div class="inspector" id="inspector" tabindex="0" role="region" aria-label="Interactive task memory explorer">
       <div class="insp-tabs" id="insp-tabs"></div>
@@ -123,7 +123,7 @@
         <span class="insp-hint">Choose a task and variant. Play the sequence or select a step; use ← → when focused.</span>
       </div>
     </div>
-    <p class="small-note explorer-note">Reference photographs show the real experiment setups and remain fixed. Progress and memory replay the task specifications; they are not recorded robot inference. Playback timing is illustrative. For cross-episode memory, try E1 and follow the new-instruction marker.</p>
+    <p class="small-note explorer-note">Reference photographs switch to matching actions or outcomes when available; they are not synchronized rollout frames. Window regions use the robot’s frame. Missing drawer-specific photographs are marked as setup references. Progress and memory follow the task specifications. Playback timing is illustrative. For cross-episode memory, try E1 and follow the new-instruction marker.</p>
     <noscript><p>The interactive explorer needs JavaScript. The method figures, video and result tables remain available below.</p></noscript>
   </div>
 </section>
