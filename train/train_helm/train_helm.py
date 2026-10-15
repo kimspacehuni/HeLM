@@ -2,14 +2,16 @@
 from __future__ import annotations
 
 import argparse
+
 import os
 import random
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import torch
-import torch.distributed as dist
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import Subset
+from common.datasets.mixed_batch_sampler import MixedBatchSampler, EpochDataLoader
+from common.utils.argparse_utils import str_to_bool
+
 from transformers import (
     Qwen2_5_VLForConditionalGeneration,
     TrainingArguments,
@@ -23,8 +25,6 @@ from train.train_helm.helm_dataset import (
     HelmJsonlDatasetV4,
     V4DatasetConfig,
     DataCollatorForQwenVL,
-    read_jsonl,
-    count_labels,
 )
 
 """Qwen2.5-VL HLP fine-tune (HeLM project).
@@ -56,81 +56,6 @@ def print_label_stats(jsonl_path):
     print(f"  {'TOTAL':>18}: {total:6d}\n")
 
 # ---------------------------
-# Mixed Batch Sampler
-# ---------------------------
-class MixedBatchSampler:
-    """
-    Yield list[int] indices each step:
-      per_batch = {"detect_pos":2, "detect_neg":2, "update_intra":4, "update_transition":0}
-    """
-    def __init__(
-        self,
-        pools: Dict[str, List[int]],
-        per_batch: Dict[str, int],
-        steps_per_epoch: int,
-        seed: int = 0,
-        with_replacement: bool = True,
-        shuffle_within_batch: bool = True,
-    ):
-        self.pools = {k: list(v) for k, v in pools.items()}
-        self.per_batch = dict(per_batch)
-        self.steps_per_epoch = int(steps_per_epoch)
-        self.seed = int(seed)
-        self.with_replacement = bool(with_replacement)
-        self.shuffle_within_batch = bool(shuffle_within_batch)
-
-        # validate
-        for k, n in self.per_batch.items():
-            if n < 0:
-                raise ValueError(f"per_batch[{k}] must be >=0")
-            if n > 0 and len(self.pools.get(k, [])) == 0:
-                raise ValueError(f"pool '{k}' is empty but per_batch[{k}]={n}")
-
-    def __len__(self):
-        # DDP일 때 rank당 steps 수로 줄여서 Trainer epoch 길이가 맞게 함
-        world = dist.get_world_size() if dist.is_available() and dist.is_initialized() else 1
-        return (self.steps_per_epoch + world - 1) // world
-
-    def __iter__(self):
-        rng = random.Random(self.seed)
-
-        rank = dist.get_rank() if dist.is_available() and dist.is_initialized() else 0
-        world = dist.get_world_size() if dist.is_available() and dist.is_initialized() else 1
-
-        if self.with_replacement:
-            for step in range(self.steps_per_epoch):
-                batch: List[int] = []
-                for k, n in self.per_batch.items():
-                    if n == 0:
-                        continue
-                    batch.extend(rng.choices(self.pools[k], k=n))
-                if self.shuffle_within_batch:
-                    rng.shuffle(batch)
-
-                if (step % world) == rank:
-                    yield batch
-        else:
-            working = {k: list(v) for k, v in self.pools.items()}
-            for k in working:
-                rng.shuffle(working[k])
-
-            for step in range(self.steps_per_epoch):
-                batch: List[int] = []
-                for k, n in self.per_batch.items():
-                    if n == 0:
-                        continue
-                    if len(working[k]) < n:
-                        return
-                    batch.extend(working[k][:n])
-                    del working[k][:n]
-                if self.shuffle_within_batch:
-                    rng.shuffle(batch)
-
-                if (step % world) == rank:
-                    yield batch
-
-
-# ---------------------------
 # Trainer override
 # ---------------------------
 class MixedBatchTrainer(Trainer):
@@ -142,7 +67,7 @@ class MixedBatchTrainer(Trainer):
         if self._train_batch_sampler is None:
             return super().get_train_dataloader()
 
-        return DataLoader(
+        return EpochDataLoader(
             self.train_dataset,
             batch_sampler=self._train_batch_sampler,
             collate_fn=self.data_collator,
@@ -246,7 +171,7 @@ def main():
     ap.add_argument("--n_update_intra", type=int, default=4)
     ap.add_argument("--n_update_transition", type=int, default=0)
 
-    ap.add_argument("--with_replacement", type=bool, default=True)
+    ap.add_argument("--with_replacement", type=str_to_bool, default=True)
     ap.add_argument("--sampler_seed", type=int, default=0)
 
     # epoch sizing
@@ -271,8 +196,8 @@ def main():
     ap.add_argument("--gradient_accumulation_steps", type=int, default=1)
     ap.add_argument("--dataloader_num_workers", type=int, default=4)
 
-    ap.add_argument("--bf16", type=bool, default=True)
-    ap.add_argument("--use_qlora", type=bool, default=True)
+    ap.add_argument("--bf16", type=str_to_bool, default=True)
+    ap.add_argument("--use_qlora", type=str_to_bool, default=True)
 
     ap.add_argument("--attn_impl", type=str, default="sdpa", choices=["sdpa", "eager", "flash_attention_2"])
 

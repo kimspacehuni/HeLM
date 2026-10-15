@@ -9,12 +9,7 @@
 
 # Round 2: multi-task pi0 full fine-tuning on the *canonical* LIBERO-Mem dataset.
 #
-# Difference from Round 1:
-#   - Trains on v2 (= canonical world view; floor-bottom + L/R-correct).
-#     v1 was upside-down + L/R-mirrored due to converter's spurious 180° rotation.
-#     v2 was made by re-rotating v1 (cancels the original 180°) and verified via
-#     replay (LEFT=mujoco_raw vs RIGHT=v2 differ only in V).
-#   - Eval at end uses ORIENT=vflip on env.obs (mujoco_raw → vflip → v2 canonical).
+# Eval uses ORIENT=vflip to match canonical dataset orientation.
 #
 # Launches torchrun with 2 ranks (one per H100) → DDP across both GPUs.
 
@@ -34,7 +29,6 @@ cd /rlwrld2/home/gyeonghun_kim/codes/HeLM
 export PYTHONPATH=$(pwd):${PYTHONPATH}
 mkdir -p logs
 
-# Same batch / steps / schedule as Round 1 — only the dataset orientation changed.
 BATCH_PER_GPU=24
 
 ${PYBIN} -m torch.distributed.run \
@@ -57,7 +51,6 @@ ${PYBIN} -m torch.distributed.run \
     --job_name=${RUN_NAME} \
     --wandb.enable=true \
     --wandb.project=RefMe \
-    --wandb.entity=kgh011016-seoul-national-university \
     --method.core=vanilla \
     --dist_mode=ddp \
     --use_ddp=true \

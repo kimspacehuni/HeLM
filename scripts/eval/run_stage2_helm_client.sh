@@ -3,7 +3,7 @@
 # server spun up by run_stage2_helm_server.sh.
 #
 # Single task / single episode (smoke test). For multi-episode benchmark,
-# we'll need a HeLM version of mem_8 (TODO).
+# use scripts/eval/run_helm_benchmark.sh.
 #
 # Usage:
 #   bash scripts/eval/run_stage2_helm_client.sh [TASK_ID] [MAX_STEPS] [SEED]

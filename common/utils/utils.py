@@ -28,8 +28,6 @@ import torch
 
 from PIL import Image
 
-from common.robot_devices.robot_utils import init_robot
-from common.robot_devices.cam_utils import RealSenseCamera
 from common.constants import TASK_LIST
 
 def none_or_int(value):
@@ -315,6 +313,8 @@ def log_time():
     return time.perf_counter()
 
 def init_devices(cfg, is_recording=False):
+    from common.robot_devices.robot_utils import init_robot
+    from common.robot_devices.cam_utils import RealSenseCamera
     fps = cfg.fps
     cam_list = cfg.cam_list
     cam = {

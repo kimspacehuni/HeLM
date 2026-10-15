@@ -214,14 +214,14 @@ def dist_policy(
 
         policy = DDP(
             policy,
-            device_ids=[local_rank],
-            output_device=device,
+            device_ids=[local_rank] if torch.device(device).type == "cuda" else None,
+            output_device=device if torch.device(device).type == "cuda" else None,
             gradient_as_bucket_view=True,
             find_unused_parameters=True,
         )
         res = f"Wrapped DDP module for local rank {local_rank}"
 
-        return policy.module, res
+        return policy, res
 
     else:
         raise NotImplementedError(f"{dist_mode} not implemented")

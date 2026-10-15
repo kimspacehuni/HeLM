@@ -15,51 +15,12 @@ from helm_datasets.core.io_utils import frame_path
 from helm_datasets.core.templates import dump_yaml, make_detect_prompt, make_update_prompt
 
 """
-export PYTHONPATH=$(pwd)
-python -m helm_datasets.build_helm \
-  --data_root "/data/ghkim/helm_data/find_object_in_drawer" \
-  --out_root "/data/ghkim/helm_data/helm_v4_task_10_extended_re" \
-  --taskspecs_dir "/home/ghkim/codes/RefMe-VLA/helm_datasets/taskspecs/find_object_in_drawer" \
-  --fps_out 5 \
-  --n_images 1 \
-  --val_ratio 0.1 \
-  --shard_size 5000
-  
-python -m helm_datasets.build_helm \
-  --data_root "/data/ghkim/helm_data/pick_place_press" \
-  --out_root="/data/ghkim/helm_data/helm_v4_task_10_extended_re" \
-  --taskspecs_dir "/home/ghkim/codes/RefMe-VLA/helm_datasets/taskspecs/pick_place_press" \
-  --fps_out 5 \
-  --n_images 1 \
-  --val_ratio 0.1 \
-  --shard_size 5000
-
-python -m helm_datasets_v3.build_helm \
-  --out_root "/data/ghkim/helm_data/press_button_N_times_M_times_total" \
-  --taskspecs_dir "/home/ghkim/codes/RefMe-VLA/helm_datasets_v3/taskspecs/press_button_N_times_M_times_total" \
-  --tasks "press_blue_button_1+1" "press_blue_button_1+2" "press_blue_button_1+3" "press_blue_button_2+1" "press_blue_button_2+2" "press_blue_button_2+3" "press_blue_button_3+1" "press_blue_button_3+2" "press_blue_button_3+3" \
-  --fps_out 5 \
-  --n_images 1 \
-  --val_ratio 0.1 \
-  --shard_size 5000
-
-python -m helm_datasets_v3.build_helm \
-  --out_root "/data/ghkim/helm_test/press_the_button_nolight" \
-  --taskspecs_dir "/home/ghkim/codes/RefMe-VLA/helm_datasets_v3/taskspecs/press_button_N_times" \
-  --tasks "press_blue_button_1" "press_blue_button_2" "press_blue_button_3" \
-  --fps_out 5 \
-  --n_images 1 \
-  --val_ratio 0.1 \
-  --shard_size 5000
-
-python -m helm_datasets_v3.build_helm \
-  --out_root "/data/ghkim/helm_data/press_the_button_nolight" \
-  --taskspecs_dir "/home/ghkim/codes/RefMe-VLA/helm_datasets_v3/taskspecs/press_button_in_order" \
-  --tasks "press_RGB" "press_RBG" "press_GBR" "press_GRB" "press_BRG" "press_BGR" \
-  --fps_out 5 \
-  --n_images 1 \
-  --val_ratio 0.1 \
-  --shard_size 5000
+Example (run from the repository root):
+    python -m helm_datasets.build_helm \
+      --data_root /path/to/annotated_data \
+      --out_root /path/to/output \
+      --taskspecs_dir helm_datasets/taskspecs/find_object_in_drawer \
+      --fps_out 5 --n_images 1 --val_ratio 0.1 --shard_size 5000
 """
 
 
@@ -74,8 +35,6 @@ def episode_matches_filter(ep_meta: Dict[str, Any], flt: Dict[str, Any]) -> bool
     for k, v in flt.items():
         if ep_meta.get(k) != v:
             return False
-        if v == "press the orange button":
-            print("finding: ", ep_meta.get(k))
     return True
 
 
@@ -130,7 +89,7 @@ def build_detect_rows_for_episode_step(
     task_text = spec.task_text[inter_idx]
     mem = spec.memory_grid[inter_idx][step_idx]  # 핵심: step별 memory만 사용
 
-    # event_list / event_grid는 TaskSpec에 추가될 예정 (없으면 안전하게 None 처리)
+    # Use the optional task event vocabulary.
     event_list = getattr(spec, "event_list", None)
     prompt = make_detect_prompt(task_text, mem, n_images=n_images, event_list=event_list)
 
@@ -392,16 +351,7 @@ def build_for_task(
                 flt = spec.episode_filters[inter_idx][step_idx]
                 for ep in eps:
                     if not episode_matches_filter(ep.meta, flt):
-                        # print("[NOT MATCH] no matching episode for: ", flt, "[Episode] ", ep)
-                        # for k in flt.items():
-                        #     print(k)
-                        #     if k == "press the orange button":
-                        #         print("!!! [NOT MATCH] no matching episode for: ", flt, "[Episode] ", ep)
                         continue
-                    #print(flt)
-                    # for k in flt.items():
-                    #     if k == "press the orange button":
-                    #         print("!!! [MATCH] matching episode for: ", flt, "[Episode] ", ep)
                     out_rows.extend(build_detect_rows_for_episode_step(
                         spec=spec,
                         ep=ep,
@@ -437,7 +387,7 @@ def build_for_task(
                     out_rows.extend(build_update_rows_for_episode_step(
                         spec, ep, out_root, data_root, fps_out, n_images, split_name,
                         inter_idx=inter_idx, step_idx=step_idx,
-                        make_transition_in_step0=True,   # 고정(나중에 argparse 옵션화)
+                        make_transition_in_step0=True,   # Include the initial episode transition.
                     ))
         return out_rows
 

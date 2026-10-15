@@ -82,5 +82,4 @@ ${LAUNCHER} ${TRAIN_ENTRY} \
     --num_workers="${NUM_WORKERS}" \
     --wandb.enable=true \
     --wandb.project=RefMe \
-    --wandb.entity=kgh011016-seoul-national-university \
     --seed=42

@@ -6,7 +6,6 @@ from contextlib import nullcontext
 from pathlib import Path
 from pprint import pformat
 from typing import Any, List, Optional
-import gc
 
 # LoRA / Prefix / LoRA-MoE injection utilities
 
@@ -14,12 +13,12 @@ import torch
 from termcolor import colored
 from torch.amp import GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.distributed.fsdp import FullyShardedDataParallel as FSDP, MixedPrecision, StateDictType
 
 from torch.optim import Optimizer
 import torch.distributed as dist
 
 from common.datasets.make_dataloader import make_dataloader
+from common.datasets.mixed_batch_sampler import cycle_dataloader
 from common.policies.extensions import ExtendedConfig
 from common.utils.train_utils import batch_to_device
 from common.utils.logging_utils import log_wandb_tracker, AverageMeter, MetricsTracker, log_wandb_k_dist, log_csv_k_dist
@@ -47,7 +46,6 @@ from common.policies.factory import make_policy, wrap_policy, dist_policy
 from common.policies.pretrained import PreTrainedPolicy
 from common.policies.utils import get_device_from_parameters
 from common.datasets.factory import make_dataset
-from common.datasets.utils import cycle
 from common.optim.factory import make_optimizer_and_scheduler
 
 
@@ -68,9 +66,10 @@ def update_policy(
     device = get_device_from_parameters(policy)
     policy.train()
     with torch.autocast(device_type=device.type) if use_amp else nullcontext():
-        loss, output_dict = policy.forward(batch)
+        loss, output_dict = policy(batch)
     grad_scaler.scale(loss).backward()
-    policy.clear_cache()
+    raw_policy = policy.module if isinstance(policy, DDP) else policy
+    raw_policy.clear_cache()
 
     # Unscale the gradient of the optimizer's assigned params in-place **prior to gradient clipping**.
     grad_scaler.unscale_(optimizer)
@@ -113,9 +112,9 @@ def update_policy(
     if lr_scheduler is not None:
         lr_scheduler.step()
 
-    if has_method(policy, "update"):
+    if has_method(raw_policy, "update"):
         # To possibly update an internal buffer (for instance an Exponential Moving Average like in TDMPC).
-        policy.update()
+        raw_policy.update()
 
     train_metrics.loss = loss.item()
     train_metrics.grad_norm = grad_norm.item()
@@ -143,7 +142,7 @@ def test_policy(
     policy.eval()
     with torch.no_grad():
         with torch.autocast(device_type=device.type) if use_amp else nullcontext():
-            loss, output_dict = policy.forward(batch)
+            loss, output_dict = policy(batch)
             # TODO(rcadene): policy.unnormalize_outputs(out_dict)
 
     test_metrics.loss = loss.item()
@@ -158,43 +157,52 @@ def train(cfg: TrainPipelineConfig):
     # distributed mode flags
     # ---------------------------------------------------------
     dist_mode = getattr(cfg, "dist_mode", "none")  # 'ddp', 'fsdp', 'none'
+    if dist_mode == "fsdp":
+        raise NotImplementedError(
+            "LLP FSDP training/checkpointing is not supported. Use dist_mode=ddp "
+            "with dataloader_type=default, or dist_mode=none."
+        )
+    if dist_mode not in ("none", "ddp"):
+        raise ValueError(f"Unsupported dist_mode: {dist_mode}")
     use_ddp = dist_mode == "ddp"
-    use_fsdp = dist_mode == "fsdp"
-    is_distributed = use_ddp or use_fsdp
+    is_distributed = use_ddp
+    if use_ddp and getattr(cfg, "dataloader_type", "stream") in ("stream", "episode_stream"):
+        raise ValueError("LLP DDP requires dataloader_type=default; stream rank partitioning is not implemented")
+    if use_ddp and "LOCAL_RANK" not in os.environ:
+        raise ValueError("DDP must be launched with torchrun (LOCAL_RANK is missing)")
 
     device = get_safe_torch_device(cfg.policy.device, log=True)
     torch.backends.cuda.matmul.allow_tf32 = True
 
     if is_distributed:
-        if os.environ.get("LOCAL_RANK", -1) == -1:  # not called by torchrun, do not initialize dist.
-            device, local_rank = torch.device("cuda"), 0  # single GPU
-
+        local_rank = int(os.environ["LOCAL_RANK"])
+        device = torch.device("cuda", local_rank)
+        torch.cuda.set_device(device)
         if not dist.is_initialized():
             dist.init_process_group(backend="nccl", timeout=datetime.timedelta(minutes=5))
-        local_rank = dist.get_rank()
-        device = torch.device("cuda", local_rank)
-        torch.cuda.set_device(device)  # needed!
         logging.info(f"Local Rank ({local_rank}) Initialized for {dist_mode.upper()}")
 
     else:
         local_rank = 0
 
+    global_rank = dist.get_rank() if is_distributed else 0
     cfg.policy.device = str(device)
 
-    if is_ddp_master(is_distributed, local_rank):
+    if is_ddp_master(is_distributed, global_rank):
         logging.info(pformat(cfg.to_dict()))
 
     if cfg.seed is not None:
         set_seed(cfg.seed)
 
+    wandb_logger = None
     if cfg.wandb.enable and cfg.wandb.project:
-        if is_ddp_master(is_distributed, local_rank):
+        if is_ddp_master(is_distributed, global_rank):
             wandb_logger = WandBLogger(cfg)
     else:
         wandb_logger = None
         logging.info(colored("Logs will be saved locally.", "yellow", attrs=["bold"]))
 
-    if is_ddp_master(is_distributed, local_rank):
+    if is_ddp_master(is_distributed, global_rank):
         logging.info("Creating dataset")
 
     train_dataset = make_dataset(cfg, split="train")
@@ -202,12 +210,12 @@ def train(cfg: TrainPipelineConfig):
 
     # create dataloader for offline training
     train_dataloader = make_dataloader(cfg, train_dataset, device)
-    train_dl_iter = cycle(train_dataloader)
+    train_dl_iter = cycle_dataloader(train_dataloader)
 
     test_dataloader = make_dataloader(cfg, test_dataset, device)
-    test_dl_iter = cycle(test_dataloader)
+    test_dl_iter = cycle_dataloader(test_dataloader)
 
-    if is_ddp_master(is_distributed, local_rank):
+    if is_ddp_master(is_distributed, global_rank):
         logging.info("Creating policy")
         
     policy = make_policy(
@@ -218,11 +226,15 @@ def train(cfg: TrainPipelineConfig):
     policy, res = wrap_policy(
         policy = policy,
         cfg = cfg.method,
-        is_master = is_ddp_master(is_distributed, local_rank),
+        is_master = is_ddp_master(is_distributed, global_rank),
         device = device,
     )
-    if is_ddp_master(is_distributed, local_rank):
+    if is_ddp_master(is_distributed, global_rank):
         logging.info(res)
+
+    if cfg.gradient_checkpointing:
+        policy.supports_gradient_checkpointing = True
+        policy.gradient_checkpointing_enable()
 
     policy_m, res = dist_policy(
         policy = policy,
@@ -231,12 +243,13 @@ def train(cfg: TrainPipelineConfig):
         local_rank = local_rank,
         device = device,
     )
-    if is_ddp_master(is_distributed, local_rank):
+    if is_ddp_master(is_distributed, global_rank):
         logging.info(res)
 
-    if is_ddp_master(is_distributed, local_rank):
+    if is_ddp_master(is_distributed, global_rank):
         logging.info("Creating optimizer and scheduler")
-    optimizer, lr_scheduler = make_optimizer_and_scheduler(cfg, policy_m)
+    # DDP keeps the same parameters; policy-specific presets live on the raw model.
+    optimizer, lr_scheduler = make_optimizer_and_scheduler(cfg, policy)
     grad_scaler = GradScaler(device.type, enabled=cfg.policy.use_amp)
 
     step = 0  # number of policy updates (forward + backward + optim)
@@ -249,7 +262,7 @@ def train(cfg: TrainPipelineConfig):
     num_total_params = sum(p.numel() for p in policy.parameters())
     learnable_params_proportion = 100.0 * (num_learnable_params / num_total_params) if num_total_params > 0 else 0.0
 
-    if is_ddp_master(is_distributed, local_rank):
+    if is_ddp_master(is_distributed, global_rank):
         logging.info(colored("Output dir:", "yellow", attrs=["bold"]) + f" {cfg.output_dir}")
         logging.info(f"{cfg.steps=} ({format_big_number(cfg.steps)})")
         logging.info(f"{train_dataset.num_frames=} ({format_big_number(train_dataset.num_frames)})")
@@ -306,13 +319,8 @@ def train(cfg: TrainPipelineConfig):
         initial_step=step,
     )
 
-    if is_ddp_master(is_distributed, local_rank):
+    if is_ddp_master(is_distributed, global_rank):
         logging.info("Start offline training on a fixed dataset")
-
-    if cfg.gradient_checkpointing:
-        # assert not (cfg.use_lora_moe or cfg.use_qlora_moe)
-        policy_m.supports_gradient_checkpointing = True
-        policy_m.gradient_checkpointing_enable()
 
     for _ in range(step, cfg.steps):
         if is_distributed:
@@ -329,7 +337,7 @@ def train(cfg: TrainPipelineConfig):
 
         train_tracker, output_dict = update_policy(
             train_tracker,
-            policy,
+            policy_m,
             batch,
             optimizer,
             cfg.optimizer.grad_clip_norm,
@@ -370,29 +378,13 @@ def train(cfg: TrainPipelineConfig):
                 log_csv_k_dist(log_csv_path, k_dist, step) if is_log_step else None
 
         if cfg.save_checkpoint and is_saving_step:
-            if isinstance(policy, FSDP):
-                with FSDP.state_dict_type(policy, StateDictType.FULL_STATE_DICT):
-                    full_state_dict = {k: v.cpu() for k, v in policy.state_dict().items()}
-
-            if is_ddp_master(is_distributed, local_rank):
+            if is_ddp_master(is_distributed, global_rank):
                 logging.info(f"Checkpoint policy after step {step}")
                 checkpoint_dir = get_step_checkpoint_dir(cfg.output_dir, cfg.steps, step)
-
-                if not isinstance(policy, FSDP):
-                    # Full model checkpoint
-                    save_checkpoint(checkpoint_dir, step, cfg, policy_m, optimizer, lr_scheduler)
-                else:
-                    assert isinstance(policy, FSDP)
-                    save_checkpoint(checkpoint_dir, step, cfg, policy_m, optimizer, lr_scheduler, is_sharded=True, state_dict=full_state_dict)
-
-                    del full_state_dict
-                    gc.collect()
-                    torch.cuda.empty_cache()
-
+                save_checkpoint(checkpoint_dir, step, cfg, policy, optimizer, lr_scheduler)
                 update_last_checkpoint(checkpoint_dir)
                 if wandb_logger:
                     wandb_logger.log_policy(checkpoint_dir)
-
             if is_distributed:
                 dist.barrier()
 
@@ -402,13 +394,13 @@ def train(cfg: TrainPipelineConfig):
 
             test_tracker, output_dict = test_policy(
                 test_tracker,
-                policy,
+                policy_m,
                 test_batch,
                 use_amp=cfg.policy.use_amp,
                 method=cfg.method,
             )
 
-            if is_ddp_master(is_distributed, local_rank):
+            if is_ddp_master(is_distributed, global_rank):
                 logging.info(test_tracker)
                 log_wandb_tracker(wandb_logger, test_tracker, output_dict, step, mode='eval')
 

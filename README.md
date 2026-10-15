@@ -11,8 +11,8 @@ HeLM decouples memory management from action generation through a two-level hier
 **Key results on 10 real-world non-Markovian tasks:**
 - **+13%** average success rate over baselines
 - **78%** zero-shot success rate on unseen task variants
-- **4.5x** more computationally efficient than image-based alternatives
-- **2.5x** lower inference latency than keyframe-based methods
+- **~4.5x** lower VRAM usage than Keyframe-HLP at 8 events
+- **~2.3x** faster inference than Keyframe-HLP at 8 events (estimated from Fig. 7)
 
 ---
 
@@ -122,8 +122,11 @@ PCMB-π0 and Naïve-π0 are excluded from inter-episode comparison as they reset
 
 | Metric | HeLM | Keyframe-HLP |
 |---|---|---|
-| VRAM (8 events) | ~6 GB | ~28 GB |
+| VRAM (8 events) | ~6.2 GB | ~28 GB |
+| Inference latency (8 events) | ~2.06 s | ~4.81 s |
 | Latency scaling | Stable | Grows sharply with task length |
+
+Efficiency values are approximate estimates digitised from Fig. 7, not raw benchmark measurements.
 
 ---
 
@@ -168,9 +171,10 @@ git clone https://github.com/kimspacehuni/HeLM.git && cd HeLM
 
 conda env create -f environment.yml
 conda activate HeLM
+export PYTHONPATH="$(pwd)${PYTHONPATH:+:$PYTHONPATH}"
 ```
 
-> `flash-attn` is included in `environment.yml` but requires a matching CUDA version to build. If installation fails, install it separately following the [flash-attention installation guide](https://github.com/Dao-AILab/flash-attention).
+> `flash-attn` is optional and is not included in `environment.yml`. Install it separately if you select `--attn_impl flash_attention_2`, following the [flash-attention installation guide](https://github.com/Dao-AILab/flash-attention).
 
 > For real-robot evaluation: AgileX PiPER arm with Intel RealSense D455 (workspace) and L515 (wrist) cameras. See `common/robot_devices/` for device setup.
 
@@ -185,7 +189,8 @@ The `helm_datasets/` package builds the HeLM training dataset from raw robot dem
 ```bash
 python -m helm_datasets.extract_frames \
   --lerobot_root /data/your_dataset/lerobot_5hz \
-  --out_root     /data/helm_data/your_task
+  --out_root     /data/helm_data/your_task \
+  --fps_frames  5
 ```
 
 ### Step 2 — Annotate event frames
@@ -193,16 +198,19 @@ python -m helm_datasets.extract_frames \
 ```bash
 export PYTHONPATH=$(pwd)
 streamlit run helm_datasets/annotate_app.py -- \
-  --out_root /data/helm_data/your_task
+  --out_root /data/helm_data/your_task \
+  --fps_frames 5
 ```
 
 ### Step 3 — Build DETECT/UPDATE JSONL
 
 ```bash
 python -m helm_datasets.build_helm \
-  --out_root /data/helm_data/your_task \
-  --task_id  press_button_1 \
-  --split    train,val \
+  --data_root /data/helm_data/your_task \
+  --out_root /data/helm_data/built \
+  --taskspecs_dir helm_datasets/taskspecs/press_button_N_times \
+  --fps_out 5 --n_images 1 \
+  --val_ratio 0.1 \
   --seed     1234
 ```
 
@@ -212,16 +220,18 @@ Generates DETECT rows (every frame) and UPDATE rows (event frames only) as Share
 
 ```bash
 python -m helm_datasets.merge_helm_data \
-  --src_root /data/helm_data \
-  --out_root /data/helm_data/merged \
-  --tasks    press_button_1,press_button_2,wipe_top
+  --jsonl_root /data/helm_data/built/jsonl_v4 \
+  --out_dir /data/helm_data/merged \
+  --tasks press_blue_button_1,press_blue_button_2,press_blue_button_3
 ```
 
 ### Validation
 
 ```bash
-streamlit run helm_datasets/validate_helm_data.py -- --jsonl /data/helm_data/merged/all_val.jsonl
+streamlit run helm_datasets/validate_helm_data.py
 ```
+
+Enter `/data/helm_data/merged/all_val.jsonl` in the viewer's sidebar and click **Load**.
 
 ---
 
@@ -250,12 +260,18 @@ torchrun --nproc_per_node=2 --master-port=29545 train/train_helm/train_helm.py \
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python train/train_helm_smolvlm/train_helm_smolvlm.py \
+  --model_name_or_path /ckpt/SmolVLM-500M-Instruct \
   --train_jsonl /data/helm_data/merged/all_train.jsonl \
   --val_jsonl   /data/helm_data/merged/all_val.jsonl \
   --output_dir  /results/HeLM_HLP_SmolVLM
 ```
 
 ### LLP — π0 (per-task fine-tuning, 150–200 demos)
+
+LLP training defaults to single-process stream sampling with `--stream_stride=10`
+(one frame out of every ten). Set `--stream_stride=1` to use every frame. DDP must
+be launched with `torchrun` and `--dist_mode=ddp --dataloader_type=default`;
+distributed stream sampling and LLP FSDP training/checkpointing are not supported.
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python train/train_llp/train_pi0.py \
@@ -290,11 +306,64 @@ CUDA_VISIBLE_DEVICES=0 python evaluate/eval_helm/eval_helm_hlp.py \
 ```bash
 python evaluate/eval_HLP_LLP/eval_real_time_main.py \
   --llp_model_path /results/LLP_checkpoint \
+  --dataset_repo_id your_dataset_id \
+  --dataset_root /data/lerobot/your_dataset_id \
   --hlp_base      /path/to/Qwen2.5-VL-7B-Instruct \
   --hlp_adapter   /results/HeLM_HLP/checkpoint-3000 \
   --taskspecs_dir helm_datasets/taskspecs \
   --task_group    press_button_N_times_M_times_total
 ```
+
+Debug images are disabled by default; enable brief non-blocking previews with
+`--debug_images`. These optional previews require Matplotlib (`pip install matplotlib`).
+
+---
+
+## Regression checks
+
+Run from the repository root in the project environment:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+These checks use synthetic CPU data, including a two-process Gloo test for
+gradient averaging and small Trainer runs for sampler epoch changes. They do not
+load model checkpoints or control robot hardware. GPU/NCCL training and real-robot
+evaluation still require testing on the target machine.
+
+For local dataset checks, first create a separate smoke fixture. The source is
+read-only; the fixture fixes subset counts, task IDs and frame/global indices and
+recomputes numeric statistics. Source image statistics are retained, so this copy
+is for loader validation, not training:
+
+```bash
+python -m tools.prepare_smoke_dataset \
+  --source /path/to/lerobot_sample \
+  --destination /tmp/helm-smoke-data
+
+python -m helm_datasets.extract_frames \
+  --lerobot_root /tmp/helm-smoke-data \
+  --out_root /tmp/helm-smoke-frames --fps_frames 5
+```
+
+Optional integration checks use local processor/tokenizer directories; model
+weights are not needed. Set the following paths to enable them:
+
+```bash
+HELM_FULL_IMPORT_CHECK=1 \
+HELM_SMOKE_DATASET=/tmp/helm-smoke-data \
+HELM_SMOKE_FRAMES=/tmp/helm-smoke-frames \
+HELM_QWEN_PROCESSOR=/path/to/Qwen2.5-VL-processor \
+HELM_SMOL_PROCESSOR=/path/to/SmolVLM-processor \
+python -m unittest discover -s tests -v
+```
+
+The sample integration checks expect the five-episode, 330-frame fixture used for
+release validation. The HLP build/merge check uses synthetic event annotations in
+a temporary directory to verify schema and split isolation. Those annotations
+are not ground truth. Other datasets need matching test expectations and real
+event annotations for HLP training.
 
 ---
 

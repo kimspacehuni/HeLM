@@ -25,7 +25,7 @@
 #   N_EPISODES=10 DEMO_START=0 TASKS="0" bash scripts/eval/run_helm_benchmark.sh
 #   TASKS="0 2 4 5" bash scripts/eval/run_helm_benchmark.sh   # bowl 1/3/5/7
 #
-# LIBERO suite id ↔ dataset task_index ↔ taskspec mapping (see project notes):
+# LIBERO suite id ↔ dataset task_index ↔ taskspec mapping:
 #   suite[0]  '1  pick up the bowl ...'           → liftput_bowl_1
 #   suite[1]  '2  lift the bottle ...'            → liftput_bottle_1
 #   suite[2]  '3  lift the bowl ... 3 times'      → liftput_bowl_3

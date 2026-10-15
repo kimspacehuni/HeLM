@@ -33,7 +33,6 @@ def convert_30hz_to_5hz(source_base_path, dest_base_path, index, task_index):
     chunk_dir_name = f"chunk-{index // 50:03d}"
     episode_name = f"episode_{index:06d}"
 
-    # 참고: 원본 코드의 파일 경로에 'train'이 있어 폴더 생성 시에도 추가했습니다.
     os.makedirs(f"{dest_base_path}/data/{chunk_dir_name}", exist_ok=True)
     os.makedirs(f"{dest_base_path}/videos/{chunk_dir_name}/observation.images.exo", exist_ok=True)
     os.makedirs(f"{dest_base_path}/videos/{chunk_dir_name}/observation.images.wrist", exist_ok=True)
@@ -83,33 +82,6 @@ def convert_30hz_to_5hz(source_base_path, dest_base_path, index, task_index):
 
 
 if __name__ == "__main__":
-    # for i in tqdm(range(0,20)):
-    #     convert_30hz_to_5hz("/data/ghkim/wipe_the_window/lerobot", "/data/ghkim/wipe_the_window/lerobot_5hz", i)
-    # for i in tqdm(range(0, 20)):
-    #     convert_30hz_to_5hz("/data/ghkim/pick_place_press/banana_blue_to_red/lerobot",
-    #                         "/data/ghkim/pick_place_press/banana_blue_to_red/lerobot_5hz",
-    #                         i,10)
-    #
-    # for i in tqdm(range(0, 20)):
-    #     convert_30hz_to_5hz("/data/ghkim/pick_place_press/banana_blue_to_white/lerobot",
-    #                         "/data/ghkim/pick_place_press/banana_blue_to_white/lerobot_5hz",
-    #                         i,11)
-    #
-    # for i in tqdm(range(0, 20)):
-    #     convert_30hz_to_5hz("/data/ghkim/pick_place_press/banana_red_to_blue/lerobot",
-    #                         "/data/ghkim/pick_place_press/banana_red_to_blue/lerobot_5hz",
-    #                         i,12)
-    #
-    # for i in tqdm(range(0, 20)):
-    #     convert_30hz_to_5hz("/data/ghkim/pick_place_press/banna_red_to_white/lerobot",
-    #                         "/data/ghkim/pick_place_press/banana_red_to_white/lerobot_5hz",
-    #                         i,13)
-    #
-    # for i in tqdm(range(0, 20)):
-    #     convert_30hz_to_5hz("/data/ghkim/pick_place_press/banana_white_to_blue/lerobot",
-    #                         "/data/ghkim/pick_place_press/banana_white_to_blue/lerobot_5hz",
-    #                         i,14)
-
     for i in tqdm(range(0, 10)):
         convert_30hz_to_5hz("/data/ghkim/data_hub/open_empty_drawer_ep40/open_leftdown_drawer_empty/lerobot",
                             "/data/ghkim/data_hub/open_empty_drawer_ep40/open_leftdown_drawer_empty/lerobot_5hz",

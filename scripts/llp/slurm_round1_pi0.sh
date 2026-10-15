@@ -50,7 +50,6 @@ ${PYBIN} -m torch.distributed.run \
     --job_name=${RUN_NAME} \
     --wandb.enable=true \
     --wandb.project=RefMe \
-    --wandb.entity=kgh011016-seoul-national-university \
     --method.core=vanilla \
     --dist_mode=ddp \
     --use_ddp=true \

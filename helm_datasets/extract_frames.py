@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 import cv2  # type: ignore
 import json
+import math
 from typing import Any, Dict, Optional
 from helm_datasets.utils.io_utils import ensure_dir, frames_dir, list_chunks_from_videos, episode_json_path, read_json
 """
@@ -89,6 +90,8 @@ def extract_frames_at_fps(mp4_path: Path, out_dir: Path, overwrite: bool, fps_ou
     Extract frames from mp4 at fps_out frames per second and save.
     - Saved filename: frame_{index:06d}.jpg (index=0,1,2,...)
     """
+    if not math.isfinite(fps_out) or fps_out <= 0:
+        raise ValueError("fps_out must be finite and greater than zero")
     ensure_dir(out_dir)
 
     if not mp4_path.exists():
@@ -106,23 +109,23 @@ def extract_frames_at_fps(mp4_path: Path, out_dir: Path, overwrite: bool, fps_ou
     if fps <= 0:
         fps = 5.0  # 너 데이터는 5Hz이므로 fallback
 
-    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    duration_sec = int(frame_count / fps) if frame_count > 0 else 0
-
-    step_sec = 1.0 / fps_out
-    num_steps = int(duration_sec * fps_out)
-
     saved = 0
-    for i in range(num_steps + 1):
-        cap.set(cv2.CAP_PROP_POS_MSEC, i * step_sec * 1000.0)
-        ok, frame = cap.read()
-        if not ok:
-            continue
-        out_path = out_dir / f"frame_{i:06d}.jpg"
-        cv2.imwrite(str(out_path), frame)
-        saved += 1
-
-    cap.release()
+    try:
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        # Preserve fractional seconds: 57 frames at 5 Hz lasts 11.4 s.
+        # Sample timestamps strictly before the end of the video.
+        num_steps = math.ceil(frame_count * fps_out / fps) if frame_count > 0 else 1
+        for i in range(num_steps):
+            cap.set(cv2.CAP_PROP_POS_MSEC, i * 1000.0 / fps_out)
+            ok, frame = cap.read()
+            if not ok:
+                continue
+            out_path = out_dir / f"frame_{i:06d}.jpg"
+            if not cv2.imwrite(str(out_path), frame):
+                raise RuntimeError(f"Failed to save frame: {out_path}")
+            saved += 1
+    finally:
+        cap.release()
     return saved
 
 

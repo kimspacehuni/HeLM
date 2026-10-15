@@ -74,7 +74,7 @@ def _safe_yaml_dict(text: str) -> Dict[str, Any]:
     return out
 
 
-def parse_detect_yaml(text: str) -> bool:
+def parse_detect_yaml(text: str) -> tuple[bool, str]:
     d = _safe_yaml_dict(text)
     v = d.get("Event_Detected", False)
     if isinstance(v, bool):
@@ -100,10 +100,10 @@ def parse_update_yaml(text: str) -> Dict[str, str]:
         "Action_Command": "",
     }
     for k in out.keys():
-        v = d.get(k, "")
-        if v is None:
-            v = ""
-        out[k] = str(v).strip()
+        v = d.get(k)
+        if not isinstance(v, str) or not v.strip():
+            raise ValueError(f"Invalid UPDATE output: {k} must be a nonempty string")
+        out[k] = v.strip()
     return out
 
 

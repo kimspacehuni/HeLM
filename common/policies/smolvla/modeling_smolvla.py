@@ -184,7 +184,7 @@ class SmolVLAPolicy(PreTrainedPolicy):
         model_file: str,
         map_location: str,
         strict: bool,
-        model_is_safetensor: bool | None = None,  # ✅ 추가
+        model_is_safetensor: bool | None = None,
         **kwargs,
     ):
         safetensors.torch.load_model(model, model_file, strict=strict, device=map_location)
@@ -260,7 +260,7 @@ class SmolVLAPolicy(PreTrainedPolicy):
         self.eval()
 
         batch = self._prepare_batch(batch)
-        self._queues = populate_queues(self._queues, batch, exclude_keys=[ACTION])
+        self._queues = populate_queues(self._queues, {k: v for k, v in batch.items() if k != ACTION})
 
         actions = self._get_action_chunk(batch, noise)
         return actions
@@ -269,61 +269,22 @@ class SmolVLAPolicy(PreTrainedPolicy):
     def select_action(self, batch: dict[str, Tensor], noise: Tensor | None = None) -> Tensor:
         """Select a single action given environment observations.
 
-        This method wraps `select_actions` in order to return one action at a time for execution in the
-        environment. It works by managing the actions in a queue and only calling `select_actions` when the
+        This method wraps action-chunk prediction in order to return one action at a time for execution in the
+        environment. It works by managing the actions in a queue and only predicting a new chunk when the
         queue is empty.
         """
         self.eval()
 
-        #check state
-        if len(self._queues[ACTION]) == 0:
-            stt = batch['observation.state']
-            print(f'state : {stt}')
-
         batch = self._prepare_batch(batch)
-        # self._queues = populate_queues(self._queues, batch, exclude_keys=["action"])
-        self._queues = populate_queues(self._queues, batch)
-        print(len(self._queues[ACTION]))
+        self._queues = populate_queues(self._queues, {k: v for k, v in batch.items() if k != ACTION})
         # Action queue logic for n_action_steps > 1. When the action_queue is depleted, populate it by
         # querying the policy.
         if len(self._queues[ACTION]) == 0:
-            stt = batch['observation.state']
-            print(f'state : {stt}')
             actions = self._get_action_chunk(batch, noise)
 
             # `self.predict_action_chunk` returns a (batch_size, n_action_steps, action_dim) tensor, but the queue
             # effectively has shape (n_action_steps, batch_size, *), hence the transpose.
             self._queues[ACTION].extend(actions.transpose(0, 1)[: self.config.n_action_steps])
-            #debug
-            import matplotlib.pyplot as plt
-            steps_list = list(self._queues[ACTION])
-            max_steps = 50
-            actions_tbD = torch.stack(steps_list, dim=0)  # (T, B, D)
-            T, B, D = actions_tbD.shape
-            if max_steps is not None:
-                T = min(T, max_steps)
-                actions_tbD = actions_tbD[:T]
-
-            actions_tD = actions_tbD[:, 0, :]  # (T, D)
-            if D < 3:
-                raise ValueError(f"action_dim={D}, need at least 3 dims for xyz")
-
-            x = actions_tD[:, 0].cpu().numpy()
-            y = actions_tD[:, 1].cpu().numpy()
-            z = actions_tD[:, 2].cpu().numpy()
-            t = range(len(x))
-
-            plt.figure()
-            plt.plot(t, x, label="x", linewidth=2)  # 라인
-            plt.plot(t, y, label="y", linewidth=2)
-            plt.plot(t, z, label="z", linewidth=2)
-            plt.xlabel("timestep")
-            plt.ylabel("value")
-            plt.title("XYZ over timesteps")
-            plt.legend()
-            plt.grid(True, alpha=0.3)
-            plt.tight_layout()
-            plt.show()
 
         return self._queues[ACTION].popleft()
 

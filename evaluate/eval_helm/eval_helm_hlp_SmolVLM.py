@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from common.utils.argparse_utils import str_to_bool
 import json
 import logging
 import random
@@ -16,7 +17,7 @@ from PIL import Image
 import yaml
 from tqdm import tqdm  # 진행 상황 확인을 위해 tqdm 추가 권장
 
-# [수정 1] 최신 Transformers 클래스 및 Peft 사용
+# 최신 Transformers 클래스 및 Peft 사용
 from transformers import AutoModelForImageTextToText, AutoProcessor
 # from peft import PeftModel
 """
@@ -35,7 +36,7 @@ logger = logging.getLogger("eval_helm")
 
 
 # -------------------------
-# JSONL IO (기존과 동일)
+# JSONL IO
 # -------------------------
 def read_jsonl(path_or_dir: Union[str, Path]) -> List[Dict[str, Any]]:
     p = Path(path_or_dir)
@@ -68,7 +69,7 @@ def write_jsonl(path: Union[str, Path], rows: List[Dict[str, Any]]) -> None:
 
 
 # -------------------------
-# YAML parsing helpers (기존과 동일)
+# YAML parsing helpers
 # -------------------------
 def parse_yaml_loose(text: str) -> Dict[str, Any]:
     if text is None: return {}
@@ -78,7 +79,7 @@ def parse_yaml_loose(text: str) -> Dict[str, Any]:
     if "\nassistant\n" in s:
         s = s.split("\nassistant\n", 1)[-1].strip()
 
-    # [수정 2] SmolVLM은 "Assistant: "를 붙이는 경우가 많음 -> 후처리 강화
+    # SmolVLM은 "Assistant: "를 붙이는 경우가 많음 -> 후처리 강화
     if "Assistant:" in s:
         s = s.split("Assistant:")[-1].strip()
 
@@ -161,7 +162,7 @@ class HelmEvalDatasetSmolVLM(Dataset):
 
         imgs = _load_images(row, self.cfg.num_images)
 
-        # [수정 3] SmolVLM Chat Template 적용
+        # SmolVLM Chat Template 적용
         # 이미지 토큰과 텍스트를 메시지로 구성
         messages = [
             {
@@ -173,7 +174,7 @@ class HelmEvalDatasetSmolVLM(Dataset):
         # 템플릿 적용 (토큰화 X, 텍스트 반환)
         prompt = self.processor.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
 
-        # [수정 4] processor 호출 시 image_grid_thw 관련 옵션 제거
+        # processor 호출 시 image_grid_thw 관련 옵션 제거
         model_inputs = self.processor(text=prompt, images=imgs, return_tensors="pt")
 
         input_ids = model_inputs["input_ids"].squeeze(0)
@@ -200,7 +201,7 @@ class HelmEvalDatasetSmolVLM(Dataset):
             "input_ids": input_ids,
             "attention_mask": attention_mask,
             "pixel_values": pixel_values,
-            "pixel_attention_mask": pixel_attention_mask,  # 추가
+            "pixel_attention_mask": pixel_attention_mask,
         }
 
 
@@ -228,7 +229,7 @@ class EvalCollatorSmolVLM:
         batch["attention_mask"] = self._left_pad_1d([f["attention_mask"] for f in features], 0)
 
         # Pixel values stack (B, N, C, H, W) -> SmolVLM usually handles batch dim in forward
-        # [수정] cat 대신 stack을 사용하여 (B, num_images, C, H, W) 5차원 유지
+        # cat 대신 stack을 사용하여 (B, num_images, C, H, W) 5차원 유지
         batch["pixel_values"] = torch.stack([f["pixel_values"] for f in features], dim=0)
 
         if features[0].get("pixel_attention_mask") is not None:
@@ -252,7 +253,7 @@ def load_model_and_processor(
         bf16: bool,
         attn_impl: str,
 ):
-    # [수정 5] AutoModelForImageTextToText 및 dtype 사용
+    # AutoModelForImageTextToText 및 dtype 사용
     print(f"Loading base model: {base_model}")
     model = AutoModelForImageTextToText.from_pretrained(
         base_model,
@@ -273,7 +274,7 @@ def load_model_and_processor(
 
 
 # -------------------------
-# Metrics (기존과 동일)
+# Metrics
 # -------------------------
 def eval_detect(gt_yaml, pred_yaml):
     gt = norm_bool(gt_yaml.get("Event_Detected", None))
@@ -318,7 +319,7 @@ def run_eval(
     cfg = EvalConfig(jsonl_path="", model_name_or_path="", num_images=num_images)
     ds = HelmEvalDatasetSmolVLM(cfg, rows, processor)
 
-    # [수정 6] Collator 교체
+    # Collator 교체
     dl = DataLoader(ds, batch_size=batch_size, shuffle=False, num_workers=4,
                     collate_fn=EvalCollatorSmolVLM(processor))
 
@@ -357,10 +358,10 @@ def run_eval(
             gen_kwargs["temperature"] = temperature
             gen_kwargs["top_p"] = top_p
 
-        # [수정 7] Generate 호출 (image_grid_thw 제거됨)
+        # Generate 호출 (image_grid_thw 제거됨)
         gen = model.generate(**gen_kwargs)
 
-        # [수정 8] 결과 디코딩 로직 개선
+        # 결과 디코딩 로직 개선
         # Prompt 길이를 이용하여 뒷부분만 잘라냄
         # input_ids가 left padding 되어 있으므로, 실제 프롬프트 길이는 배치 내에서 다를 수 있음.
         # 하지만 generate 출력은 input_ids를 포함해서 나옴.
@@ -376,7 +377,7 @@ def run_eval(
         for txt in decoded:
             texts.append(txt.strip())
 
-        # Metric Calculation (기존 로직 유지)
+        # Metric Calculation
         for i in range(len(batch["uid"])):
             uid = batch["uid"][i]
             label = batch["label"][i]
@@ -436,8 +437,8 @@ def main():
     ap.add_argument("--num_images", type=int, default=1)
     ap.add_argument("--batch_size", type=int, default=4)
     ap.add_argument("--max_new_tokens", type=int, default=128)
-    ap.add_argument("--do_sample", type=bool, default=False)  # python bool parsing 주의
-    ap.add_argument("--bf16", type=bool, default=True)
+    ap.add_argument("--do_sample", type=str_to_bool, default=False)  # python bool parsing 주의
+    ap.add_argument("--bf16", type=str_to_bool, default=True)
     ap.add_argument("--attn_impl", type=str, default="flash_attention_2")
     ap.add_argument("--max_samples", type=int, default=0)
     ap.add_argument("--out_jsonl", type=str, required=True)

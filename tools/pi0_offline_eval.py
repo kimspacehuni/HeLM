@@ -1,19 +1,14 @@
 """
-Offline pi0 evaluation: feed in-distribution (training/val) frames to pi0
-and compare predicted actions to ground truth.
+Offline pi0 evaluation: compare predicted actions against recorded actions on
+training or validation frames. MSE diagnoses action prediction error on those
+samples; it does not establish the cause of deployment failures.
 
-If MSE is low → model learned the data, deployment/OOD/conditioning is the
-issue. If MSE is high even on training data → training failed (silent
-bug in data, dataloader, or normalization).
-
-Usage:
-PYTHONPATH=/rlwrld2/home/gyeonghun_kim/codes/HeLM \\
-/rlwrld2/home/gyeonghun_kim/miniconda3/envs/HeLM/bin/python \\
-    tools/pi0_offline_eval.py \\
-    --ckpt /rlwrld2/home/gyeonghun_kim/result/stage2_helm_pi0_task01_sub_ep100_relative_0506/checkpoints/030000/pretrained_model \\
-    --data-root /rlwrld2/home/gyeonghun_kim/data/LIBERO-Mem/LIBERO-Mem-LeRobot-v2-30ep/task_01_sub \\
-    --repo-id task_01_sub \\
-    --n-samples 30 --device cuda:0
+Usage (from the repository root):
+    PYTHONPATH=. python tools/pi0_offline_eval.py \\
+        --ckpt /path/to/checkpoint/pretrained_model \\
+        --data-root /path/to/lerobot_dataset \\
+        --repo-id your_dataset \\
+        --n-samples 30 --device cuda:0
 """
 from __future__ import annotations
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from common.utils.argparse_utils import str_to_bool
 import json
 import logging
 import random
@@ -552,12 +553,12 @@ def main():
     ap.add_argument("--batch_size", type=int, default=2)
     ap.add_argument("--max_new_tokens", type=int, default=128)
 
-    ap.add_argument("--do_sample", type=bool, default=False)
+    ap.add_argument("--do_sample", type=str_to_bool, default=False)
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--top_p", type=float, default=1.0)
 
-    ap.add_argument("--use_qlora", type=bool, default=True)
-    ap.add_argument("--bf16", type=bool, default=True)
+    ap.add_argument("--use_qlora", type=str_to_bool, default=True)
+    ap.add_argument("--bf16", type=str_to_bool, default=True)
     ap.add_argument("--attn_impl", type=str, default="sdpa", choices=["sdpa", "eager", "flash_attention_2"])
 
     ap.add_argument("--max_samples", type=int, default=0, help="0=all, else random sample")

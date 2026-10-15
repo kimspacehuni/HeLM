@@ -9,17 +9,8 @@
 
 # Qwen2.5-VL HLP fine-tune on slurm with DDP (torchrun, multi-GPU).
 #
-# Stage-agnostic. Set STAGE to the dataset stage (matches helm_dataset_<N> built
-# by scripts/data/06_make_stage.sh):
-#   STAGE=2  → bowl_1 only (~1k rows)
-#   STAGE=3  → +bowl 3/5/7 (~18k)
-#   STAGE=4  → +bottle 1/3 (~30k)
-#   STAGE=7  → bowl/bottle + cream cheese (~50k)
-#   STAGE=8  → swap + rotate only (~70k)
-#   STAGE=9  → all 10 tasks (~94k)        ← current default
-#
-# Prereq:
-#   STAGE=<N> bash scripts/data/06_make_stage.sh
+# Set STAGE to the dataset folder suffix helm_dataset_<N>.
+# Prerequisite: all_train.jsonl and all_val.jsonl must exist under STAGE_ROOT.
 #
 # Usage:
 #   sbatch scripts/hlp/slurm_helm_qwen.sh
@@ -29,8 +20,7 @@
 #   STAGE            dataset stage id (default 9)
 #   N_EPOCHS         training epochs (default 2)
 #   BATCH            per-rank mixed-batch size, must be divisible by 4 (default 16)
-#   LR               learning rate (default 3e-5; auto-scale from default 2e-5
-#                    accounts for effective batch = BATCH × num_gpus)
+#   LR               learning rate (default 3e-5)
 #   SAVE_STEPS       checkpoint save cadence (default 500)
 #   SAVE_TOTAL_LIMIT max ckpts to keep (default 8)
 #   RUN_NAME         output run name (default stage<N>_qwen_<date>)
@@ -68,7 +58,7 @@ OUTPUT_DIR=${HOME}/result/stage${STAGE}/qwen/${RUN_NAME}
 
 if [ ! -f "${TRAIN_JSONL}" ]; then
     echo "ERROR: ${TRAIN_JSONL} not found." >&2
-    echo "Run: STAGE=${STAGE} bash scripts/data/06_make_stage.sh" >&2
+    echo "Prepare all_train.jsonl and all_val.jsonl under ${STAGE_ROOT}." >&2
     exit 1
 fi
 if [ ! -d "${MODEL_PATH}" ]; then

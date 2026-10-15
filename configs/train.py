@@ -89,6 +89,8 @@ class TrainPipelineConfig(HubMixin):
     lora_moe_cfg: dict[str, Any] | None = None
 
     dataloader_type: str = "stream"
+    # Preserve the experiment's existing sampling rate; use 1 for every frame.
+    stream_stride: int = 10
 
     # Policy-wrap method (vanilla / train_linear_only / linear_probing).
     # train_pi0.py reads this via cfg.method.core in factory.wrap_policy.
@@ -99,13 +101,15 @@ class TrainPipelineConfig(HubMixin):
     # `cfg.k_plot_freq > 0` runs every step so the field must exist.
     k_plot_freq: int = 0
 
-    # Distributed mode: 'none' / 'ddp' / 'fsdp'. Read via getattr with default.
+    # LLP supports 'none' / 'ddp'; FSDP is rejected before model creation.
     dist_mode: str = "none"
 
     def __post_init__(self):
         self.checkpoint_path = None
 
     def validate(self):
+        if self.stream_stride <= 0:
+            raise ValueError("stream_stride must be > 0")
         # HACK: We parse again the cli args here to get the pretrained paths if there was some.
         policy_path = parser.get_path_arg("policy")
         if policy_path:

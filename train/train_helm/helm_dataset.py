@@ -11,6 +11,7 @@ import torch
 from torch.utils.data import Dataset
 from PIL import Image
 from transformers import AutoProcessor
+from common.datasets.hlp_utils import load_hlp_images as _load_images, mask_assistant_tokens, require_hlp_batch
 
 
 def read_jsonl(path_or_dir: Union[str, Path]) -> List[Dict[str, Any]]:
@@ -42,48 +43,6 @@ def count_labels(rows: List[Dict[str, Any]]) -> Dict[str, int]:
         k = str(r.get("label", "UNKNOWN"))
         out[k] = out.get(k, 0) + 1
     return out
-
-
-# 기존 코드 대신 아래 코드로 교체
-def _load_images(item: Dict[str, Any], num_images: int) -> Optional[List[Image.Image]]:
-    imgs: List[Image.Image] = []
-    images = item.get("images", {})
-    if not isinstance(images, dict):
-        # 에러 대신 None 반환 (로그 출력 권장)
-        print(f"[Warning] row['images'] must be a dict. Skipping uid: {item.get('uid', 'unknown')}")
-        return None
-
-    table = images.get("table", None)
-    if table is None:
-        print(f"[Warning] row['images']['table'] is missing. Skipping uid: {item.get('uid', 'unknown')}")
-        return None
-
-    try:
-        imgs.append(Image.open(table).convert("RGB"))
-
-        if num_images == 2:
-            wrist = images.get("wrist", None)
-            if wrist is None:
-                print(f"[Warning] num_images=2 but wrist missing. Skipping uid: {item.get('uid', 'unknown')}")
-                return None
-            imgs.append(Image.open(wrist).convert("RGB"))
-
-    except (FileNotFoundError, OSError) as e:
-        # 파일이 없거나 깨진 경우 경고 메시지를 출력하고 None 반환
-        print(f"[Skip] Image load failed: {e}")
-        return None
-
-    return imgs
-
-
-def _find_subsequence(haystack: List[int], needle: List[int]) -> int:
-    """Return start index of needle in haystack scanning from end; -1 if not found."""
-    if len(needle) == 0 or len(needle) > len(haystack):
-        return -1
-    for i in range(len(haystack) - len(needle), -1, -1):
-        if haystack[i : i + len(needle)] == needle:
-            return i
-    return -1
 
 
 @dataclass
@@ -137,11 +96,10 @@ class HelmJsonlDatasetV4(Dataset):
 
         user_prompt = str(item.get("user_prompt", ""))
         target_text = str(item.get("gt_text", ""))
+        if not target_text.strip():
+            raise ValueError(f"[{item.get('uid', 'unknown')}] gt_text is empty")
 
-        # 수정된 부분: 이미지가 없으면 None 반환
         imgs = _load_images(item, self.cfg.num_images)
-        if imgs is None:
-            return None
 
         # Qwen2.5-VL chat messages (images are separate tokens, not embedded in text)
         # user_prompt에 "Images: <image_table>" 같은 줄이 있어도 상관은 없지만,
@@ -172,19 +130,16 @@ class HelmJsonlDatasetV4(Dataset):
         input_ids = model_inputs["input_ids"].squeeze(0)
         attention_mask = model_inputs["attention_mask"].squeeze(0)
 
-        labels = input_ids.clone()
-
-        # mask: only supervise the target_text part
-        target_ids = self.processor.tokenizer(
-            target_text, add_special_tokens=False
-        ).input_ids
-
-        start_idx = _find_subsequence(input_ids.tolist(), target_ids)
-        if start_idx >= 0:
-            labels[:start_idx] = -100
-        else:
-            # fail-safe: ignore this sample
-            labels[:] = -100
+        prompt_only = self.processor.tokenizer.apply_chat_template(
+            [{"role": "user", "content": user_content}],
+            tokenize=False, add_generation_prompt=True,
+        )
+        prompt_inputs = self.processor(
+            text=prompt_only, images=imgs, return_tensors="pt", padding=False,
+        )
+        labels = mask_assistant_tokens(
+            input_ids, prompt_inputs["input_ids"].squeeze(0), item.get("uid", "unknown"),
+        )
 
         # pixel_values: (1, N, C, H, W) -> squeeze(0) => (N, C, H, W)
         pixel_values = model_inputs["pixel_values"].squeeze(0)
@@ -238,9 +193,7 @@ class DataCollatorForQwenVL:
         return out
 
     def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, torch.Tensor]:
-        features = [f for f in features if f is not None]
-        if not features:
-            return {}
+        require_hlp_batch(features)
 
         pad_id = self.tokenizer.pad_token_id
 

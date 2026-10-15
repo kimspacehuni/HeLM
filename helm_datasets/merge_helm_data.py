@@ -183,7 +183,7 @@ def main():
                     help="split_mode=rebuild_from_all에서만 사용")
 
     ap.add_argument("--dedup_uid", type=int, default=1,
-                    help="1이면 uid 기준 중복 제거")
+                    help="1이면 weighting 전에 입력 uid 기준 중복 제거")
     ap.add_argument("--shuffle", type=int, default=1)
     ap.add_argument("--shard_size", type=int, default=0,
                     help="0이면 단일 파일로 저장, >0이면 shard로 나눔")
@@ -202,6 +202,7 @@ def main():
 
     def load_split(split: str) -> List[dict]:
         rows_all: List[dict] = []
+        seen_uids: Set[str] = set()
         for td in task_dirs:
             task_id = td.name
             files = iter_jsonl_files(td, split)
@@ -213,6 +214,16 @@ def main():
                 # print(f"[warn] no {split} jsonl under: {td}")
                 continue
             rows = list(iter_rows(files))
+            if args.dedup_uid:
+                unique_rows = []
+                for row in rows:
+                    uid = str(row.get("uid", ""))
+                    if uid and uid in seen_uids:
+                        continue
+                    if uid:
+                        seen_uids.add(uid)
+                    unique_rows.append(row)
+                rows = unique_rows
             w = weights.get(task_id, 1.0)
             rows = maybe_sample_rows(rows, w, rng)
             rows_all.extend(rows)
@@ -243,9 +254,8 @@ def main():
             key = (str(r.get("chunk", "")), str(r.get("episode", "")))
             (val_rows if key in val_set else train_rows).append(r)
 
-    if args.dedup_uid:
-        train_rows = dedup_by_uid(train_rows)
-        val_rows = dedup_by_uid(val_rows)
+    # Source duplicates were removed before weighting. Deduplicating here would
+    # erase the intentional repetitions produced by weights greater than one.
 
     if args.shuffle:
         rng.shuffle(train_rows)

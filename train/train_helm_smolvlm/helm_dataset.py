@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from PIL import Image
 from transformers import AutoProcessor
+from common.datasets.hlp_utils import load_hlp_images as _load_images, mask_assistant_tokens, require_hlp_batch
 from torch.utils.data import Dataset
 
 
@@ -31,31 +32,6 @@ def read_jsonl(path_or_dir: Union[str, Path]) -> List[Dict[str, Any]]:
                 except Exception as e:
                     raise RuntimeError(f"JSON parse error: {fp} line {ln}: {e}")
     return rows
-
-
-def _load_images(item: Dict[str, Any], num_images: int) -> Optional[List[Image.Image]]:
-    imgs: List[Image.Image] = []
-    images = item.get("images", {})
-    if not isinstance(images, dict): return None
-    table = images.get("table", None)
-    if table is None: return None
-    try:
-        imgs.append(Image.open(table).convert("RGB"))
-        if num_images == 2:
-            wrist = images.get("wrist", None)
-            if wrist is not None:
-                imgs.append(Image.open(wrist).convert("RGB"))
-    except (FileNotFoundError, OSError):
-        return None
-    return imgs
-
-
-def _find_subsequence(haystack: List[int], needle: List[int]) -> int:
-    if len(needle) == 0 or len(needle) > len(haystack): return -1
-    for i in range(len(haystack) - len(needle), -1, -1):
-        if haystack[i: i + len(needle)] == needle:
-            return i
-    return -1
 
 
 @dataclass
@@ -96,9 +72,10 @@ class HelmJsonlDatasetSmolVLM(Dataset):
         item = self.rows[idx]
         user_prompt = str(item.get("user_prompt", ""))
         target_text = str(item.get("gt_text", ""))
+        if not target_text.strip():
+            raise ValueError(f"[{item.get('uid', 'unknown')}] gt_text is empty")
 
         imgs = _load_images(item, self.cfg.num_images)
-        if imgs is None: return None
 
         # 1. 전체 메시지 구성
         user_content = [{"type": "image"}] * self.cfg.num_images
@@ -129,16 +106,9 @@ class HelmJsonlDatasetSmolVLM(Dataset):
         input_ids = model_inputs["input_ids"].squeeze(0)
         attention_mask = model_inputs["attention_mask"].squeeze(0)
 
-        # 질문(Prompt)의 토큰 길이 계산
-        prompt_len = prompt_inputs["input_ids"].size(1)
-
-        # 5. 레이블 생성
-        labels = input_ids.clone()
-        # 질문 부분(Prompt)과 패딩은 -100으로 마스킹하여 학습에서 제외
-        labels[:prompt_len] = -100
-
-        # (선택 사항) 마지막에 <end_of_utterance> 같은 특수 토큰이 있다면 포함해서 학습되도록 유지
-        # labels[prompt_len:] 범위가 실제 target_text + Assistant: 접두어 영역임
+        labels = mask_assistant_tokens(
+            input_ids, prompt_inputs["input_ids"].squeeze(0), item.get("uid", "unknown"),
+        )
 
         pixel_values = model_inputs["pixel_values"].squeeze(0)
         pixel_attention_mask = model_inputs.get("pixel_attention_mask")
@@ -169,8 +139,7 @@ class DataCollatorForSmolVLM:
         return out
 
     def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, torch.Tensor]:
-        features = [f for f in features if f is not None]
-        if not features: return {}
+        require_hlp_batch(features)
 
         pad_id = self.tokenizer.pad_token_id
         input_ids = self._left_pad_1d([f["input_ids"] for f in features], pad_id)

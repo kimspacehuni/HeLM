@@ -1,9 +1,8 @@
 # utils_keyboard.py
 from __future__ import annotations
 from typing import Dict, Any, Optional
-from pynput import keyboard
 
-# ====== 네가 원하는 방식: task group별 키맵 ======
+# Task-group keyboard mappings.
 TASK_KEYMAP: Dict[str, Dict[str, str]] = {
     "press_button_N_times": {
         "1": "press_blue_button_1",
@@ -84,6 +83,7 @@ TASK_KEYMAP: Dict[str, Dict[str, str]] = {
 # - q: quit
 # - n: next inter (task_text[0] -> task_text[1])
 def init_keyboard_listener(task_group: str):
+    from pynput import keyboard
     if task_group not in TASK_KEYMAP:
         raise ValueError(f"Unknown task_group='{task_group}'. Available: {list(TASK_KEYMAP.keys())}")
 

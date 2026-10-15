@@ -1,12 +1,15 @@
 # train_helm_smolvlm.py
 from __future__ import annotations
 import argparse
+
 import os
 import random
 from typing import Dict, List, Optional, Any
 import torch
-import torch.distributed as dist
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import Subset
+from common.datasets.mixed_batch_sampler import MixedBatchSampler, EpochDataLoader
+from common.utils.argparse_utils import str_to_bool
+
 from transformers import (
     AutoModelForVision2Seq,
     TrainingArguments,
@@ -17,7 +20,7 @@ from collections import Counter
 import json
 
 # helm_dataset.py 파일에 정의된 클래스들을 가져옵니다.
-from helm_dataset import (
+from train.train_helm_smolvlm.helm_dataset import (
     HelmJsonlDatasetSmolVLM,
     SmolVLMDatasetConfig,
     DataCollatorForSmolVLM,
@@ -64,60 +67,8 @@ def print_label_stats(jsonl_path):
 
 
 # ---------------------------
-# Mixed Batch Sampler
+# Trainer override
 # ---------------------------
-class MixedBatchSampler:
-    def __init__(
-            self,
-            pools: Dict[str, List[int]],
-            per_batch: Dict[str, int],
-            steps_per_epoch: int,
-            seed: int = 0,
-            with_replacement: bool = True,
-            shuffle_within_batch: bool = True,
-    ):
-        self.pools = {k: list(v) for k, v in pools.items()}
-        self.per_batch = dict(per_batch)
-        self.steps_per_epoch = int(steps_per_epoch)
-        self.seed = int(seed)
-        self.with_replacement = bool(with_replacement)
-        self.shuffle_within_batch = bool(shuffle_within_batch)
-
-        for k, n in self.per_batch.items():
-            if n < 0: raise ValueError(f"per_batch[{k}] must be >=0")
-            if n > 0 and len(self.pools.get(k, [])) == 0:
-                raise ValueError(f"pool '{k}' is empty but per_batch[{k}]={n}")
-
-    def __len__(self):
-        world = dist.get_world_size() if dist.is_available() and dist.is_initialized() else 1
-        return (self.steps_per_epoch + world - 1) // world
-
-    def __iter__(self):
-        rng = random.Random(self.seed)
-        rank = dist.get_rank() if dist.is_available() and dist.is_initialized() else 0
-        world = dist.get_world_size() if dist.is_available() and dist.is_initialized() else 1
-
-        if self.with_replacement:
-            for step in range(self.steps_per_epoch):
-                batch: List[int] = []
-                for k, n in self.per_batch.items():
-                    if n > 0: batch.extend(rng.choices(self.pools[k], k=n))
-                if self.shuffle_within_batch: rng.shuffle(batch)
-                if (step % world) == rank: yield batch
-        else:
-            working = {k: list(v) for k, v in self.pools.items()}
-            for k in working: rng.shuffle(working[k])
-            for step in range(self.steps_per_epoch):
-                batch: List[int] = []
-                for k, n in self.per_batch.items():
-                    if n == 0: continue
-                    if len(working[k]) < n: return
-                    batch.extend(working[k][:n])
-                    del working[k][:n]
-                if self.shuffle_within_batch: rng.shuffle(batch)
-                if (step % world) == rank: yield batch
-
-
 class MixedBatchTrainer(Trainer):
     def __init__(self, *args, train_batch_sampler=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -125,7 +76,7 @@ class MixedBatchTrainer(Trainer):
 
     def get_train_dataloader(self):
         if self._train_batch_sampler is None: return super().get_train_dataloader()
-        return DataLoader(
+        return EpochDataLoader(
             self.train_dataset,
             batch_sampler=self._train_batch_sampler,
             collate_fn=self.data_collator,
@@ -184,7 +135,7 @@ def main():
     ap.add_argument("--n_detect_neg", type=int, default=2)
     ap.add_argument("--n_update_intra", type=int, default=4)
     ap.add_argument("--n_update_transition", type=int, default=0)
-    ap.add_argument("--with_replacement", type=lambda x: (str(x).lower() == 'true'), default=True)
+    ap.add_argument("--with_replacement", type=str_to_bool, default=True)
     ap.add_argument("--sampler_seed", type=int, default=0)
 
     # Epoch sizing
@@ -204,7 +155,7 @@ def main():
     ap.add_argument("--eval_steps", type=int, default=50)
     ap.add_argument("--gradient_accumulation_steps", type=int, default=1)
     ap.add_argument("--dataloader_num_workers", type=int, default=4)
-    ap.add_argument("--bf16", type=lambda x: (str(x).lower() == 'true'), default=True)
+    ap.add_argument("--bf16", type=str_to_bool, default=True)
     ap.add_argument("--attn_impl", type=str, default="flash_attention_2")
 
     # WandB

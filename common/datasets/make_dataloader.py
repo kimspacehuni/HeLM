@@ -7,7 +7,7 @@ from common.datasets.sampler import EpisodeAwareSampler, EpisodeAwareBatchSample
 
 def make_dataloader(cfg, dataset, device):
     """
-    Stream-style(옵션 A)용:
+    Episode-stream loading:
     - cfg.dataloader_type == "stream" 이면 EpisodeAwareBatchSampler 사용
     - frame-level shuffle은 금지 (episode-level shuffle만 허용)
     """
@@ -15,17 +15,16 @@ def make_dataloader(cfg, dataset, device):
     dataloader_type = getattr(cfg, "dataloader_type", "default")
     use_stream = dataloader_type in ("stream", "episode_stream")
 
-    # drop_n_last_frames가 있으면 원래 코드가 EpisodeAwareSampler를 썼는데,
-    # PCMB 목적이면 frame-level shuffle 금지 + batch_sampler로 교체.
+    # Stream batches preserve frame order within each episode.
     drop_n_last_frames = int(getattr(getattr(cfg, "policy", object()), "drop_n_last_frames", 0))
 
-    # (선택) episode 앞쪽도 드랍하고 싶으면 cfg에 추가해서 사용
+    # Optional trimming at the start of each episode.
     drop_n_first_frames = int(getattr(getattr(cfg, "policy", object()), "drop_n_first_frames", 0))
 
     # 기본값: episode-level shuffle만
     shuffle_episodes = bool(getattr(cfg, "shuffle_episodes", True))
 
-    # DDP/FSDP는 너가 안 쓴다고 했지만, 안전하게 기존 로직은 남겨둠
+    # Distributed episode-stream partitioning is not implemented.
     dist_mode = getattr(cfg, "dist_mode", None)
     if dist_mode in ("ddp", "fsdp") and use_stream:
         raise ValueError(
@@ -40,8 +39,9 @@ def make_dataloader(cfg, dataset, device):
             drop_n_first_frames=drop_n_first_frames,
             drop_n_last_frames=drop_n_last_frames,
             shuffle_episodes=shuffle_episodes,
-            seed=int(getattr(cfg, "seed", 0)),
-            allow_cross_episode_fill=False,  # 논문 stream은 true/ 일단 지금은 false로
+            seed=int(getattr(cfg, "seed", 0) or 0),
+            stride=int(getattr(cfg, "stream_stride", 10)),
+            allow_cross_episode_fill=False,  # Keep batches within one episode.
             drop_last=False,
         )
 
@@ -54,7 +54,7 @@ def make_dataloader(cfg, dataset, device):
         )
         return dataloader
 
-    # ---- 기존 default 경로 (PCMB 없이 일반 학습) ----
+    # Standard frame sampling.
     if hasattr(cfg.policy, "drop_n_last_frames"):
         shuffle = False
         sampler = EpisodeAwareSampler(

@@ -78,7 +78,7 @@ class PI0Config(PreTrainedConfig):
 
     # Gain applied to the per-step abs-xyz diff at inference to match LIBERO's
     # OSC_POSE controller scale. OSC interprets `action ∈ [-1, +1]` where 1 maps
-    # to a 0.05 m position offset target, and the PD loop achieves ~25% of that
+    # to a 0.05 m position offset target, and the PD loop achieves ~25 percent of that
     # per 20 Hz step → measured per-step state diff in demos is ~0.005 m while
     # the commanded action saturated at ±0.4 (= ±0.02 m offset). Empirical
     # ratio commanded / achieved ≈ 80, so multiply by 80 then clip to ±1 to

@@ -38,6 +38,9 @@ def load_data_episode(
     table_dir = out_root / f"frames_{fps_out}hz" / chunk / episode / "table"
     wrist_dir = (out_root / f"frames_{fps_out}hz" / chunk / episode / "wrist") if use_wrist else None
     frame_ids = list_common_frame_ids(table_dir, wrist_dir)
+    missing_events = set(event_ids) - set(frame_ids)
+    if missing_events:
+        raise ValueError(f"[{chunk}/{episode}] event frames are missing from available images: {sorted(missing_events)}")
 
     return DataEpisodeV4(
         chunk=chunk,

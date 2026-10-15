@@ -12,9 +12,6 @@ from common.utils.utils import init_devices, get_safe_torch_device
 from configs.default import DatasetConfig, EvalConfig
 from configs.policies import PreTrainedConfig
 from common.utils.random_utils import set_seed
-from common.robot_devices.robot_utils import (
-    read_end_pose_msg, ctrl_end_pose, read_joint_msg, set_zero_configuration
-)
 from common.policies.factory import make_policy
 
 GRIPPER_EFFORT = 500  # 프로젝트 값 유지
@@ -81,6 +78,7 @@ def create_llp_batch(
     (기존 호환용) LLP 내부에서 직접 센서/카메라 읽어서 batch 생성.
     """
     if use_devices:
+        from common.robot_devices.robot_utils import read_end_pose_msg, read_joint_msg
         state = read_end_pose_msg(piper) if use_end_pose else read_joint_msg(piper)
         return {
             "observation.state": state,
@@ -123,6 +121,7 @@ def capture_shared_observation(
     if not use_devices:
         return None, None, None
 
+    from common.robot_devices.robot_utils import read_end_pose_msg, read_joint_msg
     state = read_end_pose_msg(piper) if use_end_pose else read_joint_msg(piper)
     table_img = table_rs_cam.image_for_inference()
     wrist_img = wrist_rs_cam.image_for_inference()
@@ -243,6 +242,7 @@ def llp_step(
         gripper_data = [action_pred[6].cpu().to(dtype=int), GRIPPER_EFFORT]
 
         if ctx.piper is not None:
+            from common.robot_devices.robot_utils import ctrl_end_pose
             ctrl_end_pose(ctx.piper, end_pose_data, gripper_data)
 
 
@@ -262,6 +262,7 @@ def llp_step(
 
 def llp_send_zero(ctx: LLPRuntimeContext):
     if ctx.cfg.use_devices and ctx.piper is not None:
+        from common.robot_devices.robot_utils import set_zero_configuration
         logging.info("[0100LLP] Sending zero configuration.")
         set_zero_configuration(ctx.piper)
         time.sleep(3)

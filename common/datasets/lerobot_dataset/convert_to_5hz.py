@@ -44,7 +44,6 @@ def convert_to_5hz(source_base_path, dest_base_path, index, task_index=None, tar
     chunk_dir_name = f"chunk-{index // 1000:03d}"
     episode_name = f"episode_{index:06d}"
 
-    # 참고: 원본 코드의 파일 경로에 'train'이 있어 폴더 생성 시에도 추가했습니다.
     os.makedirs(f"{dest_base_path}/data/{chunk_dir_name}", exist_ok=True)
     # os.makedirs(f"{dest_base_path}/videos/{chunk_dir_name}/observation.images.exo", exist_ok=True)
     os.makedirs(f"{dest_base_path}/videos/{chunk_dir_name}/observation.images.wrist", exist_ok=True)

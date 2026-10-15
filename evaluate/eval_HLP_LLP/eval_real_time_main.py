@@ -10,11 +10,10 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import torch
 from PIL import Image
-import matplotlib.pyplot as plt
 from pathlib import Path
 
-from eval_real_time_qwen import HLPQwenV2, UPDATE_SYSTEM, DETECT_SYSTEM
-from eval_real_time_pi0 import (
+from evaluate.eval_HLP_LLP.eval_real_time_qwen import HLPQwenV2, UPDATE_SYSTEM, DETECT_SYSTEM
+from evaluate.eval_HLP_LLP.eval_real_time_pi0 import (
     LLPConfig,
     LLPRuntimeContext,
     init_llp_runtime,
@@ -24,13 +23,14 @@ from eval_real_time_pi0 import (
     create_llp_batch_from_obs,
 )
 
-from utils_keyboard import init_keyboard_listener
-from utils_batches import (
+from evaluate.eval_HLP_LLP.utils_keyboard import init_keyboard_listener
+from evaluate.eval_HLP_LLP.utils_batches import (
     create_hlp_detect_batch,
     create_hlp_update_batch,
 )
 
 from helm_datasets.core.templates import make_detect_prompt, make_update_prompt
+from helm_datasets.core.registry import load_all_taskspecs
 
 logger = logging.getLogger(__name__)
 
@@ -69,48 +69,17 @@ def _load_taskspecs_from_group(taskspecs_dir: str, task_group: str) -> Dict[str,
     if not root.exists():
         raise FileNotFoundError(f"Task group dir not found: {root}")
 
-    out: Dict[str, TaskSpecRuntime] = {}
-    for p in sorted(root.rglob("*.json")):
-        try:
-            raw = json.loads(p.read_text(encoding="utf-8"))
-        except Exception as e:
-            logger.warning(f"[TASKSPEC] failed to read {p}: {e}")
-            continue
-
-        tid = str(raw.get("task_id", "")).strip()
-        if not tid:
-            logger.warning(f"[TASKSPEC] missing task_id in {p}")
-            continue
-
-        tt = raw.get("task_text", [])
-        if isinstance(tt, str):
-            tt = [tt]
-        if not isinstance(tt, list) or not tt:
-            logger.warning(f"[TASKSPEC] invalid task_text in {p} (task_id={tid})")
-            continue
-        task_text = [str(x).strip() for x in tt if str(x).strip()]
-
-        mem_grid = raw.get("memory_grid", None)
-        init_mem = mem_grid[0][0]
-        if not isinstance(init_mem, dict):
-            logger.warning(f"[TASKSPEC] init_memory must be dict in {p} (task_id={tid})")
-            mem_grid = {}
-
-        # allowed actions: llp_command_list 우선, 없으면 allowed_actions
-        allowed_actions = raw.get("llp_commands", None)
-        event_list = raw.get("event_list", "none\ndone")
-
-        # 필수: init_memory에 Action_Command 포함 (너가 확정한 (i))
-        if "Action_Command" not in init_mem:
-            logger.warning(f"[TASKSPEC] init_memory missing Action_Command in {p} (task_id={tid})")
-
-        out[tid] = TaskSpecRuntime(
-            task_id=tid,
-            task_text=task_text,
-            init_memory=init_mem,
-            allowed_actions=allowed_actions,
-            event_list=event_list,
+    validated = load_all_taskspecs(root)
+    out = {
+        task_id: TaskSpecRuntime(
+            task_id=task_id,
+            task_text=list(spec.task_text),
+            init_memory=dict(spec.memory_grid[0][0]),
+            allowed_actions=spec.llp_commands,
+            event_list=spec.event_list,
         )
+        for task_id, spec in validated.items()
+    }
 
     logger.info(f"[TASKSPEC] loaded {len(out)} specs from group='{task_group}' at {root}")
     return out
@@ -245,18 +214,33 @@ def run_hlp_update(
 
     print("[UPDATE] update time: ", dt)
 
-    next_memory = {
-        "Working_Memory": upd.get("Working_Memory", ""),
-        "Episodic_Context": upd.get("Episodic_Context", ""),
-        "Action_Command": upd.get("Action_Command", ""),
-    }
+    commands = {command.strip() for command in allowed_actions.splitlines() if command.strip()}
+    if upd["Action_Command"] not in commands:
+        raise ValueError(f"HLP returned an unsupported Action_Command: {upd['Action_Command']}")
+    next_memory = dict(upd)
     return next_memory, dt
+
+def _show_debug_image(obs_pil, step: int, enabled: bool = False) -> None:
+    if not enabled:
+        return
+    import matplotlib.pyplot as plt
+    figure, axis = plt.subplots()
+    try:
+        axis.imshow(obs_pil)
+        axis.set_title(f"[UPDATE] image for debug | table step={step}")
+        axis.axis("off")
+        plt.show(block=False)
+        plt.pause(0.001)
+    finally:
+        plt.close(figure)
+
 
 def eval_real_time_main_v4(
     hlp: HLPQwenV2,
     llp_cfg: LLPConfig,
     specs: Dict[str, TaskSpecRuntime],
     task_group: str = "1",
+    debug_images: bool = False,
 ):
     llp_ctx: LLPRuntimeContext = init_llp_runtime(llp_cfg)
     listener, kstate = init_keyboard_listener(task_group)
@@ -380,11 +364,7 @@ def eval_real_time_main_v4(
             # 1장 고정: table 관측만 사용
             obs_pil = _to_pil_from_tensor(obs_img_t)
 
-            plt.figure()
-            plt.imshow(obs_pil)
-            plt.title(f"[UPDATE] image for debug | table step={step}")
-            plt.axis("off")
-            plt.show()
+            _show_debug_image(obs_pil, step, enabled=debug_images)
 
             # UPDATE에서 재사용할 수 있게 캐시
             last_obs_pil = obs_pil
@@ -467,7 +447,7 @@ if __name__ == "__main__":
     p.add_argument("--hlp_device", type=str, default="cuda:0")
     p.add_argument("--hlp_attn", type=str, default="sdpa")
 
-    # LLP args는 네 프로젝트 config에 맞게 유지
+    # LLP runtime arguments.
     p.add_argument("--llp_model_path", type=str, required=True)
     p.add_argument("--dataset_repo_id", type=str, default=None)
     p.add_argument("--dataset_root", type=str, default=None)
@@ -476,6 +456,8 @@ if __name__ == "__main__":
     p.set_defaults(use_devices=True)
     p.add_argument("--llp_device", type=str, default="cuda:0")
     p.add_argument("--max_steps", type=int, default=1000000)
+    p.add_argument("--debug_images", action="store_true",
+                   help="Show brief, non-blocking debug images during evaluation")
     args = p.parse_args()
 
     specs = _load_taskspecs_from_group(args.taskspecs_dir, args.task_group)
@@ -489,7 +471,7 @@ if __name__ == "__main__":
         load_in_4bit=True,
     )
 
-    # LLP cfg (네 프로젝트의 DatasetConfig 경로에 맞춰 수정 필요)
+    # Build LLP runtime configuration.
     from configs.default import DatasetConfig
     llp_cfg = LLPConfig(
         train_dataset=DatasetConfig(repo_id=args.dataset_repo_id, root=args.dataset_root),
@@ -504,4 +486,5 @@ if __name__ == "__main__":
         llp_cfg=llp_cfg,
         specs=specs,
         task_group=args.task_group,
+        debug_images=args.debug_images,
     )

@@ -14,19 +14,14 @@
 # pi0 trains as vanilla on the new dataset; at inference, select_action
 # converts predicted abs xyz back to per-step delta using current obs anchor.
 #
-# Why: LIBERO bang-bang ±0.4 delta is multimodal & ill-suited for flow matching.
-# Absolute xyz at 20Hz is a smooth continuous trajectory, friendlier target.
-#
 # Pre-req: run `tools/transform_dataset_abs_xyz.py` once on task_01_sub to
 # produce task_01_sub_abs_xyz before submitting this.
 #
-# Eval: ORIENT=vflip same as Round 2.
+# Eval: ORIENT=vflip for canonical dataset orientation.
 
 set -e
 
-# Always start from pi0_base (user convention) — Round 2 warmstart was tried
-# but action head weights baked for delta-action stats may conflict with the
-# new abs-xyz stats. Override with PI0_CKPT=... if needed.
+# Override the default base checkpoint with PI0_CKPT.
 PI0_BASE=/rlwrld2/home/gyeonghun_kim/ckpt/pi0_base
 PI0_CKPT=${PI0_CKPT:-${PI0_BASE}}
 
@@ -63,8 +58,6 @@ VAL_EPS="[$(seq -s, ${N_TRAIN} $((N_TOTAL - 1)))]"
 echo "[split] dataset n=${N_TOTAL}  train=${N_TRAIN}  val=${N_VAL}"
 echo "[ckpt]  warm-start from ${PI0_CKPT}"
 
-# Warm-start from Round 2 → fewer steps needed (action head only needs to
-# re-fit dim 0-2 to abs xyz scale; rest is already adapted to LIBERO).
 ${PYBIN} -m torch.distributed.run \
     --nproc_per_node=2 \
     --master_port=29304 \
@@ -88,7 +81,6 @@ ${PYBIN} -m torch.distributed.run \
     --job_name=${RUN_NAME} \
     --wandb.enable=true \
     --wandb.project=RefMe \
-    --wandb.entity=kgh011016-seoul-national-university \
     --method.core=vanilla \
     --dist_mode=ddp \
     --use_ddp=true \

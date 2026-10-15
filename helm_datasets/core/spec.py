@@ -11,11 +11,13 @@ class TaskSpecV4:
     task_text: List[str]                # per-inter instruction text
     episode_filters: List[List[Dict[str, Any]]]  # [inter][step] -> parquet/meta filter
     memory_grid: List[List[Dict[str, str]]]      # [inter][state] (len = intra[inter] + 1)
-    event_grid: List[List[Dict[str, str]]]      # [inter][state] (len = intra[inter] + 1)
+    event_grid: Optional[List[List[str]]]      # [inter][step] (len = intra[inter])
     llp_commands: str = ""
     event_list: str = ""
 
     def validate(self) -> None:
+        if not self.task_id or self.inter < 0 or any(count < 0 for count in self.intra):
+            raise ValueError("task_id must be nonempty and inter/intra must be nonnegative")
         if len(self.task_text) != (self.inter + 1):
             raise ValueError(f"[{self.task_id}] task_text length mismatch: "
                              f"{len(self.task_text)} vs inter+1={self.inter+1}")
@@ -28,6 +30,9 @@ class TaskSpecV4:
             raise ValueError(f"[{self.task_id}] memory_grid length mismatch.")
         if not isinstance(self.llp_commands, str):
             raise ValueError(f"[{self.task_id}] llp_commands must be a string.")
+        commands = {command.strip() for command in self.llp_commands.splitlines() if command.strip()}
+        if not commands:
+            raise ValueError(f"[{self.task_id}] llp_commands must not be empty")
         if self.event_grid is not None:
             if len(self.event_grid) != (self.inter + 1):
                 raise ValueError(f"[{self.task_id}] event_grid length mismatch.")
@@ -47,6 +52,12 @@ class TaskSpecV4:
             if len(self.memory_grid[i]) != exp_states:
                 raise ValueError(f"[{self.task_id}] memory_grid[{i}] length mismatch: "
                                  f"{len(self.memory_grid[i])} vs {exp_states}")
+            for memory in self.memory_grid[i]:
+                keys = ("Working_Memory", "Episodic_Context", "Action_Command")
+                if not isinstance(memory, dict) or any(not isinstance(memory.get(key), str) for key in keys):
+                    raise ValueError(f"[{self.task_id}] memory states must contain all three string fields")
+                if memory["Action_Command"] not in commands:
+                    raise ValueError(f"[{self.task_id}] invalid Action_Command: {memory['Action_Command']}")
             exp_steps = self.intra[i]
             if len(self.episode_filters[i]) != exp_steps:
                 raise ValueError(f"[{self.task_id}] episode_filters[{i}] steps mismatch: "

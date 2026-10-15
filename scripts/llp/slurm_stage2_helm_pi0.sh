@@ -9,13 +9,8 @@
 
 # Stage 2 (HeLM-base): pi0 LLP fine-tune on subtask-split LIBERO-Mem data.
 #
-# Differs from Round 2 (round2_pi0_libero_mem_v2_0503):
-#   - Trains on the SUBTASK-SPLIT dataset (each lift / place is its own
-#     episode) so the model learns to follow short subtask commands like
-#     "lift_bowl" / "place_bowl" issued by the HLP.
-#   - Smaller corpus (≈58 subtask episodes from 30 originals) → fewer steps.
-#
-# Eval still uses ORIENT=vflip (canonical orientation, same as Round 2).
+# Each lift/place subtask is a separate episode with its own HLP command.
+# Eval uses ORIENT=vflip for canonical dataset orientation.
 
 set -e
 
@@ -37,12 +32,11 @@ cd /rlwrld2/home/gyeonghun_kim/codes/HeLM
 export PYTHONPATH=$(pwd):${PYTHONPATH}
 mkdir -p logs
 
-# Smaller dataset (~58 ep), so fewer steps. ~96 steps/epoch at batch=48 → 10k
-# steps ≈ 100 epochs.
 BATCH_PER_GPU=24
 
 # 90/10 train/val split. Sub-episodes are sorted (source_ep, start_frame), so
-# contiguous index ranges keep each source episode in a single split (no leak).
+# Check source-episode boundaries when choosing the split; a contiguous
+# sub-episode range can split one source episode across train and validation.
 N_TOTAL=$(wc -l < "${DATA_ROOT}/meta/episodes.jsonl")
 N_VAL=$(( N_TOTAL / 10 ))
 N_TRAIN=$(( N_TOTAL - N_VAL ))
@@ -73,7 +67,6 @@ ${PYBIN} -m torch.distributed.run \
     --job_name=${RUN_NAME} \
     --wandb.enable=true \
     --wandb.project=RefMe \
-    --wandb.entity=kgh011016-seoul-national-university \
     --method.core=vanilla \
     --dist_mode=ddp \
     --use_ddp=true \
