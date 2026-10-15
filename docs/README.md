@@ -29,7 +29,7 @@ docs/
 │   ├── css/style.css          # single light-mode stylesheet
 │   ├── js/
 │   │   ├── viz.js             # shared canvas helpers + palette
-│   │   ├── scene.js           # draws a task scene by parsing a memory string
+│   │   ├── scene.js           # setup photos and symbolic task progress
 │   │   ├── traces.js          # GENERATED — real memory states, all 51 variants
 │   │   ├── hero.js            # manual introduction using the A2 task spec
 │   │   ├── inspector.js       # the memory inspector
@@ -78,9 +78,12 @@ Regenerate from the repository root after editing a taskspec:
 python tools/build_page_traces.py
 ```
 
-The scene beside the memory panel is drawn purely by parsing the memory string
-(`scene.js`). These are schematic views of task-specification states, not recorded
-robot trajectories. Task renderers are defined in that file.
+The explorer pairs a fixed setup photograph from paper Figure 4 with symbolic
+progress derived from the selected TaskSpec state (`scene.js`). SVG view boxes
+select each task photo from the existing figure; no extra photo downloads or
+generated robot imagery are needed. Completed steps, the next step and remembered
+context are displayed separately. Observation tasks reveal only events already
+in memory, not the future event sequence.
 
 Examples of memory strings:
 
@@ -90,8 +93,8 @@ Progress: blue, green (Goal: blue, green, red)
 task done (None)
 ```
 
-`?task=E2#memory` deep-links to a task in the explorer. Scenes and playback are
-schematic task-specification replays, not recorded robot inference.
+`?task=E2#memory` deep-links to a task in the explorer. Setup photos stay fixed while the symbolic progress and memory follow the selected
+task-specification state. Playback is not recorded robot inference.
 
 ## Numbers on this page
 

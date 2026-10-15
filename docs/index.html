@@ -52,7 +52,7 @@
     <div class="hero-demo" role="region" aria-label="Button sequence example">
       <div class="demo-topline"><span><span class="live-dot"></span> A SMALL TASK. A MEMORY PROBLEM.</span><span class="mono">A2 / RGB</span></div>
       <div class="demo-instruction">“Press <span class="word-red">red</span>, <span class="word-green">green</span>, then <span class="word-blue">blue</span>.”</div>
-      <div class="hero-scene"><canvas id="hero-canvas" role="img" aria-label="Schematic of the button sequence and completed steps"></canvas><span class="scene-label">TASK-SPECIFICATION REPLAY</span></div>
+      <div class="hero-scene"><div id="hero-scene"></div></div>
       <div class="hero-memory" aria-live="polite" aria-atomic="true">
         <div class="memory-label"><span class="status-dot"></span> WHAT HeLM REMEMBERS</div>
         <p id="hero-progress">Progress: red</p>
@@ -95,7 +95,7 @@
 
 <section id="memory" class="section">
   <div class="wrap">
-    <div class="section-heading heading-split"><div><p class="eyebrow">03 / LOOK INSIDE THE MEMORY</p><h2>Follow the task.<br>Read every update.</h2></div><p>Choose a task, then step through the sequence. The scene and memory panel replay states from the repository’s task specifications.</p></div>
+    <div class="section-heading heading-split"><div><p class="eyebrow">03 / LOOK INSIDE THE MEMORY</p><h2>Follow the task.<br>Read every update.</h2></div><p>Choose a task, then step through the sequence. The setup photo identifies the task; the progress display and memory panel follow its task specification.</p></div>
     <div class="explorer-guide"><span><b>A1–A5</b> Remember within one instruction</span><span><b>E1–E5</b> Carry context to the next episode</span></div>
     <div class="inspector" id="inspector" tabindex="0" role="region" aria-label="Interactive task memory explorer">
       <div class="insp-tabs" id="insp-tabs"></div>
@@ -106,7 +106,7 @@
       </div>
 
       <div class="insp-body">
-        <div class="insp-scene"><canvas id="insp-canvas"></canvas></div>
+        <div class="insp-scene"><div id="insp-scene"></div></div>
         <div class="insp-mem" id="insp-mem"></div>
       </div>
 
@@ -116,7 +116,7 @@
         <span class="insp-hint">Choose a task and variant. Play the sequence or select a step; use ← → when focused.</span>
       </div>
     </div>
-    <p class="small-note explorer-note">A schematic task-specification replay, not recorded robot inference. Animation timing is illustrative. For cross-episode memory, try E1 and follow the new-instruction marker.</p>
+    <p class="small-note explorer-note">Setup photos are from paper Figure 4 and remain fixed. Progress and memory replay the task specifications; they are not recorded robot inference. Playback timing is illustrative. For cross-episode memory, try E1 and follow the new-instruction marker.</p>
     <noscript><p>The interactive explorer needs JavaScript. The method figures, video and result tables remain available below.</p></noscript>
   </div>
 </section>

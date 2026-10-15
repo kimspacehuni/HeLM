@@ -10,11 +10,10 @@
   const tabsBox = el('insp-tabs');
   const variantSel = el('insp-variant');
   const instrBox = el('insp-instruction');
-  const canvas = el('insp-canvas');
+  const scene = el('insp-scene');
   const memBox = el('insp-mem');
   const lineBox = el('insp-timeline');
   const playBtn = el('insp-play');
-  const ctx = canvas.getContext('2d');
 
   const DWELL = 0.78;          /* fraction of a step spent in DETECT */
   const STEP_MS = 1750;
@@ -44,21 +43,10 @@
           ep: ei, si: si, step: st,
           epStart: si === 0 && ei > 0,
           instruction: ep.instruction,
-          lastGoal: lastGoalOf(ep),
         });
       });
     });
     return out;
-  }
-
-  /* The terminal state reads "task done (None)", which drops the goal. Carry the
-     previous step's goal forward so the scene can still draw a finished episode. */
-  function lastGoalOf(ep) {
-    for (let i = ep.steps.length - 1; i >= 0; i--) {
-      const w = S.parseWork(ep.steps[i].work);
-      if (!w.done) return w.kind === 'count' ? w.goal : w.goal.length;
-    }
-    return 0;
   }
 
   /* ------------------------------------------------------------------ chrome */
@@ -174,8 +162,7 @@
 
   function drawScene() {
     const m = moments[idx];
-    const size = V.fit(canvas, Math.max(205, Math.min(265, canvas.clientWidth * 0.55)));
-    S.draw(ctx, size.w, size.h, task.id, m.step.work, m.step.epi, m.lastGoal);
+    S.render(scene, task, variant.episodes[m.ep], m.si, false);
   }
 
   /* ---------------------------------------------------------------- playback */
@@ -245,7 +232,6 @@
   moments = flatten(variant);
   buildVariants(); buildTimeline(); render(); syncPlay();
 
-  window.addEventListener('resize', drawScene);
 
   if (V.reduceMotion()) { playing = false; syncPlay(); }
 

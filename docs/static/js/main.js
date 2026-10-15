@@ -18,14 +18,9 @@
   const grid = document.getElementById('task-grid');
   const cards = [];
   const filters = document.querySelectorAll('[data-filter]');
-  function paint(card) {
-    if (card.el.hidden) return;
-    const size = V.fit(card.canvas, Math.min(210, Math.round(card.canvas.clientWidth * .62)));
-    S.draw(card.canvas.getContext('2d'), size.w, size.h, card.task.id, card.state.work, card.state.epi, 0);
-  }
   function filter(group) {
     filters.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === group)));
-    cards.forEach((c) => { c.el.hidden = group !== 'all' && c.task.group !== group; paint(c); });
+    cards.forEach((c) => { c.el.hidden = group !== 'all' && c.task.group !== group; });
   }
   function explore(task) {
     window.dispatchEvent(new CustomEvent('helm:select-task', { detail: { id: task.id } }));
@@ -37,26 +32,23 @@
   }
   if (grid && V && S) {
     traces.forEach((task) => {
-      const state = task.variants[0].episodes[0].steps[0];
       const article = document.createElement('article');
       article.className = 'task-card';
       const media = document.createElement('div'); media.className = 'task-media';
       const badge = document.createElement('span'); badge.className = 'task-id'; badge.textContent = task.id;
-      const canvas = document.createElement('canvas'); canvas.className = 'task-canvas'; canvas.setAttribute('aria-hidden', 'true');
-      media.append(badge, canvas);
+      media.innerHTML = S.photo(task.id, task.name);
+      media.append(badge);
       const body = document.createElement('div'); body.className = 'task-body';
       const title = document.createElement('h3'); title.className = 'task-name'; title.textContent = task.name;
       const description = document.createElement('p'); description.className = 'task-desc'; description.textContent = DESC[task.id];
-      const memory = document.createElement('code'); memory.className = 'task-mem'; memory.textContent = state.work;
       const button = document.createElement('button'); button.type = 'button'; button.className = 'task-explore';
       button.textContent = 'Explore the memory ↗'; button.setAttribute('aria-label', 'Explore memory for ' + task.name);
       button.addEventListener('click', () => explore(task));
-      body.append(title, description, memory, button); article.append(media, body); grid.append(article);
-      cards.push({ task, state, canvas, el: article });
+      body.append(title, description, button); article.append(media, body); grid.append(article);
+      cards.push({ task, el: article });
     });
     filter('intra');
     filters.forEach((button) => button.addEventListener('click', () => filter(button.dataset.filter)));
-    window.addEventListener('resize', () => cards.forEach(paint));
   }
   const navLinks = Array.from(document.querySelectorAll('.nav-links a'));
   const sections = navLinks.map((a) => document.querySelector(a.getAttribute('href')));
