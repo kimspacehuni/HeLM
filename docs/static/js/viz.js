@@ -1,9 +1,9 @@
-/* Shared canvas sizing, theme palette and viewport-aware animation helpers. */
+/* Shared canvas sizing, palette and viewport-aware animation helpers. */
 window.HelmViz = (function () {
   'use strict';
 
   /* Read a CSS custom property off :root. Diagrams call this every frame, so the
-     stylesheet stays the single source of truth for colour in both themes. */
+     stylesheet stays the single source of truth for diagram colours. */
   function css(name, fallback) {
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
@@ -70,16 +70,6 @@ window.HelmViz = (function () {
     return 'rgb(' + a.map((v, i) => Math.round(lerp(v, b[i], t))).join(',') + ')';
   }
 
-  /* Repaint on a theme flip. Covers both paths: the explicit toggle stamps
-     data-theme on <html>, and the untouched default follows the OS setting. */
-  function onTheme(fn) {
-    new MutationObserver(fn).observe(document.documentElement, {
-      attributes: true, attributeFilter: ['data-theme'],
-    });
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    mq.addEventListener ? mq.addEventListener('change', fn) : mq.addListener(fn);
-  }
-
   /* Run an rAF loop only while the element is on screen — several of these diagrams
      animate continuously and there is no reason to burn frames off-screen. */
   function animate(el, step) {
@@ -113,5 +103,5 @@ window.HelmViz = (function () {
   const reduceMotion = () =>
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  return { css, palette, fit, rr, ease, clamp, lerp, mix, onTheme, animate, reduceMotion };
+  return { css, palette, fit, rr, ease, clamp, lerp, mix, animate, reduceMotion };
 })();

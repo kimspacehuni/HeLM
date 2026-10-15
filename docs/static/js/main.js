@@ -1,4 +1,4 @@
-/* Navigation, task discovery and theme preferences. */
+/* Navigation and task discovery. */
 (function () {
   'use strict';
   const V = window.HelmViz, S = window.HelmScene;
@@ -57,25 +57,7 @@
     filter('intra');
     filters.forEach((button) => button.addEventListener('click', () => filter(button.dataset.filter)));
     window.addEventListener('resize', () => cards.forEach(paint));
-    V.onTheme(() => cards.forEach(paint));
   }
-  const root = document.documentElement;
-  const toggle = document.getElementById('theme-toggle');
-  const sun = '<svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>';
-  const moon = '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13.2A9 9 0 0 1 10.8 3a9 9 0 1 0 10.2 10.2z"/></svg>';
-  function dark() { return root.dataset.theme ? root.dataset.theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches; }
-  function paintToggle() {
-    if (!toggle) return;
-    toggle.innerHTML = dark() ? sun : moon;
-    toggle.setAttribute('aria-label', 'Switch to ' + (dark() ? 'light' : 'dark') + ' theme');
-  }
-  if (toggle) toggle.addEventListener('click', () => {
-    root.dataset.theme = dark() ? 'light' : 'dark';
-    try { localStorage.setItem('helm-theme', root.dataset.theme); } catch (_) {}
-    paintToggle();
-  });
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintToggle);
-  paintToggle();
   const navLinks = Array.from(document.querySelectorAll('.nav-links a'));
   const sections = navLinks.map((a) => document.querySelector(a.getAttribute('href')));
   function spy() {

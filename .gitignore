@@ -46,3 +46,7 @@ helm_data/
 # ====== Slurm out/err files in repo root (just in case) ======
 slurm-*.out
 slurm-*.err
+
+# Original mascot sources; publish optimized assets from docs/static/images/.
+/2B8E191C-FA35-4F6A-A0DE-3CD3C5BED34E.png
+/Gemini_Generated_Image_vomqkdvomqkdvomq.png

@@ -26,37 +26,35 @@ cd docs && python3 -m http.server 8899
 docs/
 ├── index.html                 # all page copy lives here
 ├── static/
-│   ├── css/style.css          # single stylesheet, light + dark
+│   ├── css/style.css          # single light-mode stylesheet
 │   ├── js/
-│   │   ├── viz.js             # shared canvas helpers + theme-aware palette
+│   │   ├── viz.js             # shared canvas helpers + palette
 │   │   ├── scene.js           # draws a task scene by parsing a memory string
 │   │   ├── traces.js          # GENERATED — real memory states, all 51 variants
 │   │   ├── hero.js            # manual introduction using the A2 task spec
 │   │   ├── inspector.js       # the memory inspector
 │   │   ├── charts.js          # success-rate chart + efficiency chart
-│   │   ├── arch.js            # animated architecture diagram
-│   │   └── main.js            # task discovery, nav and theme
+│   │   └── main.js            # task discovery and nav
 │   ├── figures/               # figures extracted from the paper PDF
 │   ├── images/                # video poster + social card
 │   └── videos/                # overview video
 └── .nojekyll
 ```
 
-## Theme-aware diagrams
+## Figures and presentation
 
-Interactive diagrams use runtime `<canvas>` rendering to support both light and
-dark themes. Paper figures are stored as static images.
+The page uses a fixed light palette, independent of the OS preference and any
+previously saved theme setting. Diagram colours come from the CSS custom
+properties in `style.css` through `viz.js`.
 
-Two rules follow from that, and breaking either one is the likely cause of a diagram
-that looks wrong in one theme:
+The main method illustration is paper Figure 2 (`static/figures/fig2_arch.webp`).
+It spans the content width. On smaller screens it scrolls horizontally to keep
+its labels readable; a full-size link is available below the figure.
 
-1. **Colour lives in `style.css` only.** `viz.js` reads the CSS custom properties at
-   draw time. A colour hard-coded in a `.js` file will not follow a theme flip.
-2. **Register for repaints.** A diagram must call `HelmViz.onTheme(draw)` and
-   `window.addEventListener('resize', draw)`, or it will go stale.
-
-`HelmViz.animate(el, step)` runs an rAF loop only while `el` is on screen, and paints
-one frame immediately so nothing below the fold shows an empty canvas.
+The paper mascots appear as small brand marks near the title and in the footer.
+`mascot-mark.webp` preserves transparency and `mascot-signature.webp` preserves
+the second image's white background. Both are 192 px wide; a separate 48 px PNG
+serves as the favicon. Original large PNGs are kept local and ignored by Git.
 
 ## Reading order and interaction
 
@@ -135,7 +133,7 @@ Two things to know before editing it:
 - `map.js` injects the widget where the tag sits, so it must stay in the body and must
   **not** get `async` / `defer`.
 - The widget renders on a white background (`cl=ffffff`), so it sits in a light
-  `.visitor-map` card in both themes. **Do not** duplicate the tag to theme-switch it —
+  `.visitor-map` card. **Do not** duplicate the tag —
   a `display:none` copy still fires the request and double-counts every visitor.
 - `pruneVisitorMap()` in `main.js` hides the card when the widget injects nothing, so
   it does not show as an empty white bar. Content blockers block this tracker by

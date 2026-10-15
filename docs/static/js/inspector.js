@@ -245,7 +245,6 @@
   moments = flatten(variant);
   buildVariants(); buildTimeline(); render(); syncPlay();
 
-  V.onTheme(drawScene);
   window.addEventListener('resize', drawScene);
 
   if (V.reduceMotion()) { playing = false; syncPlay(); }

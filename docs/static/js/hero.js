@@ -29,6 +29,5 @@
   }
   buttons.forEach((b) => b.addEventListener('click', () => select(+b.dataset.heroStep)));
   window.addEventListener('resize', draw);
-  V.onTheme(draw);
   select(index);
 })();

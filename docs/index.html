@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation</title>
 <meta name="description" content="HeLM establishes explicit natural language as a memory representation for VLA-based robot manipulation, with a working-episodic structure and event-triggered updates.">
 
@@ -19,23 +20,19 @@
 <meta property="og:image:alt" content="A vanilla VLA presses the red button twice and fails, while HeLM tracks progress in language memory and completes the red-green-blue sequence.">
 <meta name="twitter:card" content="summary_large_image">
 
-<script>
-try { const theme = localStorage.getItem('helm-theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; } catch (_) {}
-</script>
 
 <link rel="stylesheet" href="static/css/style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%23165e48'/%3E%3Cpath d='M14 12v24m20-24v24M14 24h20' stroke='white' stroke-width='5'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="static/images/favicon.png">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <nav id="nav" aria-label="Main navigation">
   <div class="nav-inner">
-    <a class="nav-brand" href="#top" aria-label="HeLM home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>HeLM<span class="brand-caption">ROBOT LEARNING</span></a>
+    <a class="nav-brand" href="#top" aria-label="HeLM home"><img class="brand-mascot" src="static/images/mascot-mark.webp" width="32" height="32" alt="">HeLM<span class="brand-caption">ROBOT LEARNING</span></a>
     <div class="nav-links">
       <a href="#problem">The idea</a><a href="#method">How it works</a><a href="#memory">Explore</a><a href="#results">Results</a>
     </div>
     <a class="nav-code" href="https://github.com/kimspacehuni/HeLM">GitHub <span aria-hidden="true">↗</span></a>
-    <button id="theme-toggle" type="button" aria-label="Toggle color theme"></button>
   </div>
 </nav>
 <main id="main" tabindex="-1">
@@ -50,7 +47,7 @@ try { const theme = localStorage.getItem('helm-theme'); if (theme === 'light' ||
         <a class="btn primary" href="#video"><span class="play-icon" aria-hidden="true">▶</span> Watch the overview</a>
         <a class="text-link" href="#method">Understand the method <span aria-hidden="true">↓</span></a>
       </div>
-      <p class="research-title">HeLM: Hierarchical Explicit Language Memory<br>for Non-Markovian Manipulation</p>
+      <div class="research-identity"><img src="static/images/mascot-mark.webp" width="56" height="56" alt="" decoding="async"><p class="research-title">HeLM: Hierarchical Explicit Language Memory<br>for Non-Markovian Manipulation</p></div>
     </div>
     <div class="hero-demo" role="region" aria-label="Button sequence example">
       <div class="demo-topline"><span><span class="live-dot"></span> A SMALL TASK. A MEMORY PROBLEM.</span><span class="mono">A2 / RGB</span></div>
@@ -85,7 +82,13 @@ try { const theme = localStorage.getItem('helm-theme'); if (theme === 'light' ||
   <div class="wrap">
     <div class="section-heading"><p class="eyebrow">02 / THE METHOD</p><h2>Remember in language.<br>Act through a robot policy.</h2><p>HeLM separates deciding what comes next from executing the movement. The high-level vision-language model (HLP) manages memory; the low-level action policy (LLP) controls the robot.</p></div>
     <ol class="method-steps"><li><span class="step-number">01</span><h3>Notice an event</h3><p>Detect a meaningful change, such as a button press. If nothing happens, keep the memory.</p><span class="step-tag">DETECT</span></li><li><span class="step-number">02</span><h3>Update the memory</h3><p>Record the new progress and decide which action command should come next.</p><span class="step-tag">UPDATE</span></li><li><span class="step-number">03</span><h3>Execute the action</h3><p>The low-level policy turns the command and current observations into robot actions.</p><span class="step-tag">ACT</span></li></ol>
-    <div class="method-layout"><div class="method-explanation"><h3>Two kinds of remembering.</h3><div class="memory-definition"><span class="definition-index">a.</span><div><h4>Working memory</h4><p>Progress inside the current instruction.</p><code>Count: 2 (Goal: 3)</code></div></div><div class="memory-definition"><span class="definition-index">b.</span><div><h4>Episodic context</h4><p>Information carried to the next episode.</p><code>Previous_Count: 3</code></div></div><p class="small-note">Both are explicit text. You can inspect the state used to choose the next command.</p></div><div class="architecture-panel"><div class="panel-heading"><span>THE CONTROL LOOP</span><span class="mono">HLP → LLP</span></div><canvas id="chart-arch" role="img" aria-label="Event-triggered high-level memory updates guide a low-level action policy"></canvas><p class="diagram-note" id="chart-arch-note"></p><p class="small-note">Schematic timing. Detect and update share the same VLM parameters.</p></div></div>
+    <figure class="method-figure">
+      <div class="figure-scroll" tabindex="0" role="region" aria-label="Paper Figure 2: HeLM architecture. Scroll horizontally on smaller screens.">
+        <img src="static/figures/fig2_arch.webp" alt="HeLM architecture from the paper: the high-level policy reads the instruction, current observation and language memory, then sends action commands to the low-level VLA policy. Working memory tracks events; episodic context carries information across episodes. The shared VLM uses detect mode to watch for events and update mode to revise memory and the next command." width="1800" height="733" loading="lazy">
+      </div>
+      <figcaption><div><span class="figure-tag">FIGURE 2 / THE HeLM ARCHITECTURE</span><p>The high-level policy maintains language memory and chooses an action command. The low-level policy turns that command into robot actions. Detect and update are two modes of the same VLM.</p><p class="figure-scroll-hint">Scroll horizontally to read the full figure.</p></div><a class="text-link" href="static/figures/fig2_arch.webp" target="_blank" rel="noopener">Open full-size figure <span aria-hidden="true">↗</span></a></figcaption>
+    </figure>
+    <div class="memory-definitions"><div class="memory-definition"><span class="definition-index">a.</span><div><h3>Working memory</h3><p>Progress inside the current instruction, updated when a task event occurs.</p><code>Count: 2 (Goal: 3)</code></div></div><div class="memory-definition"><span class="definition-index">b.</span><div><h3>Episodic context</h3><p>Information retained across episodes, available when a new instruction arrives.</p><code>Previous_Count: 3</code></div></div></div>
     <details class="research-detail"><summary>Go deeper: event-triggered updates <span aria-hidden="true">+</span></summary><div class="detail-content"><p>Detect mode emits a task-relevant event or <code>none</code>. Update mode runs when an event is detected or the global instruction changes. Working memory tracks the current task; episodic context carries information across task boundaries.</p><figure class="paper-figure"><img src="static/figures/fig3_loop.webp" alt="Detect and update calls across episodes, with working memory and episodic context updated at task events." width="1800" height="644" loading="lazy"><figcaption>The evaluation loop across intra-episode and inter-episode tasks.</figcaption></figure></div></details>
   </div>
 </section>
@@ -215,7 +218,7 @@ try { const theme = localStorage.getItem('helm-theme'); if (theme === 'light' ||
   </div>
 </section>
 </main>
-<footer><div class="wrap"><div class="footer-line"><a class="footer-brand" href="#top">HeLM<span>Hierarchical Explicit Language Memory</span></a><div><a href="https://github.com/kimspacehuni/HeLM">GitHub ↗</a><a href="#bibtex">BibTeX</a><a href="#top">Back to top ↑</a></div></div>
+<footer><div class="wrap"><div class="footer-line"><a class="footer-brand" href="#top"><img src="static/images/mascot-signature.webp" width="56" height="56" alt="" loading="lazy" decoding="async"><span class="footer-wordmark">HeLM<span>Hierarchical Explicit Language Memory</span></span></a><div><a href="https://github.com/kimspacehuni/HeLM">GitHub ↗</a><a href="#bibtex">BibTeX</a><a href="#top">Back to top ↑</a></div></div>
     <div class="visitor-map">
       <script type="text/javascript" id="mapmyvisitors"
               src="https://mapmyvisitors.com/map.js?d=zyACUZDSkuwMUGC7j7OLKvxJfzu4zt9VYG7eCGiAVt4&cl=ffffff&w=a"></script>
@@ -227,7 +230,6 @@ try { const theme = localStorage.getItem('helm-theme'); if (theme === 'light' ||
 <script src="static/js/hero.js"></script>
 <script src="static/js/inspector.js"></script>
 <script src="static/js/charts.js"></script>
-<script src="static/js/arch.js"></script>
 <script src="static/js/main.js"></script>
 </body>
 </html>

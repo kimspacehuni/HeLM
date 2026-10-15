@@ -114,7 +114,6 @@
 
     btns.forEach((b) => b.addEventListener('click', () => setMetric(+b.dataset.metric)));
     setMetric(0);
-    V.onTheme(draw);
     window.addEventListener('resize', draw);
     V.animate(cv, (dt) => {
       const d = target - t;
@@ -214,7 +213,6 @@
 
     if (slider) { slider.addEventListener('input', (e) => setN(e.target.value)); setN(slider.value); }
     else setN(8);
-    V.onTheme(draw);
     window.addEventListener('resize', draw);
   }
 
