@@ -25,28 +25,27 @@ cd docs && python3 -m http.server 8899
 ```
 docs/
 ├── index.html                 # all page copy lives here
-├── tools/build_traces.py      # taskspecs -> static/js/traces.js
 ├── static/
 │   ├── css/style.css          # single stylesheet, light + dark
 │   ├── js/
 │   │   ├── viz.js             # shared canvas helpers + theme-aware palette
 │   │   ├── scene.js           # draws a task scene by parsing a memory string
 │   │   ├── traces.js          # GENERATED — real memory states, all 51 variants
+│   │   ├── hero.js            # manual introduction using the A2 task spec
 │   │   ├── inspector.js       # the memory inspector
 │   │   ├── charts.js          # success-rate chart + efficiency chart
 │   │   ├── arch.js            # animated architecture diagram
-│   │   └── main.js            # task grid, nav, theme, reveals
+│   │   └── main.js            # task discovery, nav and theme
 │   ├── figures/               # figures extracted from the paper PDF
 │   ├── images/                # video poster + social card
 │   └── videos/                # overview video
 └── .nojekyll
 ```
 
-## Diagrams are drawn, not exported
+## Theme-aware diagrams
 
-Every diagram except the photo-based figures is a `<canvas>` drawn at runtime. The
-reason is the theme toggle: a rasterised PDF crop can only ever sit on a forced white
-plate, which is what made the page look like a template.
+Interactive diagrams use runtime `<canvas>` rendering to support both light and
+dark themes. Paper figures are stored as static images.
 
 Two rules follow from that, and breaking either one is the likely cause of a diagram
 that looks wrong in one theme:
@@ -59,30 +58,33 @@ that looks wrong in one theme:
 `HelmViz.animate(el, step)` runs an rAF loop only while `el` is on screen, and paints
 one frame immediately so nothing below the fold shows an empty canvas.
 
-### Scroll reveals are gated on `.js`
+## Reading order and interaction
 
-An inline script in `<head>` sets `class="js"` on `<html>`, and the reveal styles are
-scoped to `.js .reveal`. Without that guard a script error would leave every section
-at `opacity: 0` and the page would read as blank rather than merely unanimated. Keep
-the guard if you touch the reveal CSS.
+The page introduces the problem through a button-sequence example, explains
+Detect → Update → Act, then opens the full memory explorer. Real-robot video,
+the task suite, results and repository links follow. Detailed research tables
+and additional figures are expandable so the introduction stays approachable.
+
+The hero uses the `press_RGB` states from `traces.js`. It advances only when a
+visitor selects a step. The memory explorer also starts paused. Task cards open
+the corresponding task in that explorer; keyboard controls and reduced-motion
+preferences are supported. Main content stays visible if JavaScript fails.
 
 ## The memory inspector
 
 `static/js/traces.js` is generated from `helm_datasets/taskspecs/` — the same task
-specifications used to synthesise the training data. All 51 variants from the paper
-are present, so nothing in the inspector is illustrative. Regenerate after editing a
-taskspec:
+specifications used to synthesise the training data. It includes 51 task variants.
+Regenerate from the repository root after editing a taskspec:
 
 ```bash
-python docs/tools/build_traces.py
+python tools/build_page_traces.py
 ```
 
 The scene beside the memory panel is drawn purely by parsing the memory string
-(`scene.js`) — no simulator, no scene graph. That is the paper's claim made literal:
-explicit language memory is enough to reconstruct the world state, and a latent memory
-vector could not drive the same picture. If you add a task, add a renderer there.
+(`scene.js`). These are schematic views of task-specification states, not recorded
+robot trajectories. Task renderers are defined in that file.
 
-Memory strings come in exactly three shapes, which is what makes the parsing tractable:
+Examples of memory strings:
 
 ```
 Count: 2 (Goal: 3)
@@ -90,21 +92,19 @@ Progress: blue, green (Goal: blue, green, red)
 task done (None)
 ```
 
-`?task=E2` deep-links the inspector to a task, which is also how the inter-episode
-behaviour gets checked without clicking.
+`?task=E2#memory` deep-links to a task in the explorer. Scenes and playback are
+schematic task-specification replays, not recorded robot inference.
 
 ## Numbers on this page
 
 All success rates come from the paper (Fig. 5, Tables 1, 3, 7, 10), not from the
 top-level `README.md`.
 
-**The efficiency chart is the exception.** The paper plots Fig. 7 without tabulating
-it, so `LAT` and `VRAM` in `charts.js` are digitised off that figure. The endpoints
-match the values stated in the text (~28 GB vs under 6 GB, 4.5× the memory), but the
-latency ratio lands at 2.3× rather than the 2.5× the abstract claims. The readout
-therefore prints absolute values instead of a latency ratio, so the page does not
-contradict its own prose. **If the exact measurements exist, put them in `charts.js`
-and the readout can state the ratio directly.**
+**Efficiency values are approximate.** `LAT` and `VRAM` in `charts.js` are
+digitised from paper Fig. 7, not raw benchmark measurements. At 8 events the
+estimates are 2.06 s / 6.16 GB for HeLM and 4.81 s / 28 GB for Keyframe-HLP:
+approximately 2.3× faster inference and 4.5× lower VRAM usage. The README,
+page summary, chart and social description use these estimates consistently.
 
 ## Social preview card
 
@@ -112,8 +112,7 @@ and the readout can state the ratio directly.**
 do not resolve relative paths. It is a JPEG, not the WebP source, because some
 scrapers (LinkedIn especially) still do not render WebP previews.
 
-It is generated from the teaser figure, which is already almost exactly the 1.91:1
-card ratio, so no cropping is needed:
+It is generated from the teaser figure. Run from `docs/`:
 
 ```bash
 python -c "
@@ -151,22 +150,6 @@ curl -so /dev/null -w '%{http_code}\n' \
 
 A `500` there means the tracker is not being served for that hash, which is a
 mapmyvisitors-side issue and not something the page can fix.
-
-## Still open
-
-Search `index.html` for `TODO(`:
-
-1. `TODO(authors)` — the `.authors` / `.affil` block is **commented out**. Fill in the
-   real author list and un-comment it.
-2. `TODO(paper)` / `TODO(arxiv)` — both buttons render as dashed, non-clickable "soon"
-   chips. Swap each back to an `<a>` with a real `href`.
-3. `TODO(bibtex)` — no author list, and the entry is `@misc` rather than a venue entry.
-   The venue is deliberately unclaimed anywhere on the page until the paper is
-   accepted; `static/images/demo_poster.jpg` still says "CoRL 2026 Demo Video" because
-   it is a frame of the video and would need re-rendering.
-
-Also: the personal site still lives at `kimhuni.github.io` (the expiring school
-account) and needs its own migration before linking to it is durable.
 
 ## Regenerating figures from the paper
 

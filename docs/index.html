@@ -12,154 +12,89 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kimspacehuni.github.io/HeLM/">
 <meta property="og:title" content="HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation">
-<meta property="og:description" content="Explicit language as a memory representation for VLA-based manipulation. +13% over baselines, 78% zero-shot, 4.5x more compute-efficient than keyframe memory.">
+<meta property="og:description" content="Explicit language as a memory representation for VLA-based manipulation. +13% over baselines, 78% zero-shot, approximately 4.5x lower VRAM usage than keyframe memory at 8 events.">
 <meta property="og:image" content="https://kimspacehuni.github.io/HeLM/static/images/og_card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="626">
 <meta property="og:image:alt" content="A vanilla VLA presses the red button twice and fails, while HeLM tracks progress in language memory and completes the red-green-blue sequence.">
 <meta name="twitter:card" content="summary_large_image">
 
-<!-- Gates the scroll-reveal styles. Set before the stylesheet applies so content that
-     depends on JS to become visible is only ever hidden when JS is actually running. -->
-<script>document.documentElement.classList.add('js');</script>
+<script>
+try { const theme = localStorage.getItem('helm-theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; } catch (_) {}
+</script>
 
 <link rel="stylesheet" href="static/css/style.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%23165e48'/%3E%3Cpath d='M14 12v24m20-24v24M14 24h20' stroke='white' stroke-width='5'/%3E%3C/svg%3E">
 </head>
 <body>
-
-<button id="theme-toggle" type="button" aria-label="Toggle color theme"></button>
-
-<!-- ============================= NAV ============================= -->
-<nav id="nav" aria-label="Section navigation">
+<a class="skip-link" href="#main">Skip to content</a>
+<nav id="nav" aria-label="Main navigation">
   <div class="nav-inner">
-    <span class="nav-brand">HeLM</span>
-    <span class="nav-links">
-      <a href="#memory">Memory</a>
-      <a href="#method">Method</a>
-      <a href="#tasks">Tasks</a>
-      <a href="#results">Results</a>
-      <a href="#video">Video</a>
-      <a href="#bibtex">BibTeX</a>
-    </span>
+    <a class="nav-brand" href="#top" aria-label="HeLM home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>HeLM<span class="brand-caption">ROBOT LEARNING</span></a>
+    <div class="nav-links">
+      <a href="#problem">The idea</a><a href="#method">How it works</a><a href="#memory">Explore</a><a href="#results">Results</a>
+    </div>
+    <a class="nav-code" href="https://github.com/kimspacehuni/HeLM">GitHub <span aria-hidden="true">↗</span></a>
+    <button id="theme-toggle" type="button" aria-label="Toggle color theme"></button>
   </div>
 </nav>
-
-<!-- ============================= HERO ============================= -->
-<header class="hero">
-  <div class="wrap">
-    <h1 class="title">HeLM: Hierarchical Explicit Language Memory</h1>
-    <p class="subtitle">for Non-Markovian Manipulation</p>
-
-    <!-- TODO(authors): fill in and un-comment before the page goes public.
-    <p class="authors">
-      <a href="">Name One</a><span class="sup">1</span>,
-      <a href="">Name Two</a><span class="sup">1</span>,
-      <a href="">Name Three</a><span class="sup">1,2</span>
-    </p>
-    <p class="affil">
-      <span class="sup">1</span>Affiliation One &nbsp;·&nbsp;
-      <span class="sup">2</span>Affiliation Two
-    </p>
-    -->
-
-    <div class="links">
-      <!-- TODO(paper): swap for <a class="btn" href="..."> once the PDF is hosted. -->
-      <span class="btn disabled" id="link-paper" aria-disabled="true">
-        <svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8 12h8v1.5H8V12zm0 4h8v1.5H8V16z"/></svg>
-        Paper <em>soon</em>
-      </span>
-      <!-- TODO(arxiv): swap for <a class="btn ghost" href="https://arxiv.org/abs/..."> after submission. -->
-      <span class="btn ghost disabled" id="link-arxiv" aria-disabled="true">
-        <svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-        arXiv <em>soon</em>
-      </span>
-      <a class="btn ghost" href="https://github.com/kimspacehuni/HeLM">
-        <svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3z"/></svg>
-        Code
-      </a>
-      <a class="btn ghost" href="#video">
-        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
-        Video
-      </a>
+<main id="main" tabindex="-1">
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="status-dot"></span> HIERARCHICAL EXPLICIT LANGUAGE MEMORY</p>
+      <h1>Memory makes<br>the <em>next move.</em></h1>
+      <p class="hero-lead">A robot can see what is happening.<br>HeLM helps it remember what already happened.</p>
+      <p class="hero-description">An explicit language memory connects a vision-language planner to a robot action policy—so each action follows progress through the whole task.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#video"><span class="play-icon" aria-hidden="true">▶</span> Watch the overview</a>
+        <a class="text-link" href="#method">Understand the method <span aria-hidden="true">↓</span></a>
+      </div>
+      <p class="research-title">HeLM: Hierarchical Explicit Language Memory<br>for Non-Markovian Manipulation</p>
+    </div>
+    <div class="hero-demo" role="region" aria-label="Button sequence example">
+      <div class="demo-topline"><span><span class="live-dot"></span> A SMALL TASK. A MEMORY PROBLEM.</span><span class="mono">A2 / RGB</span></div>
+      <div class="demo-instruction">“Press <span class="word-red">red</span>, <span class="word-green">green</span>, then <span class="word-blue">blue</span>.”</div>
+      <div class="hero-scene"><canvas id="hero-canvas" role="img" aria-label="Schematic of the button sequence and completed steps"></canvas><span class="scene-label">TASK-SPECIFICATION REPLAY</span></div>
+      <div class="hero-memory" aria-live="polite" aria-atomic="true">
+        <div class="memory-label"><span class="status-dot"></span> WHAT HeLM REMEMBERS</div>
+        <p id="hero-progress">Progress: red</p>
+        <div class="next-action"><span>Next action</span><strong id="hero-action">Press the green button <span aria-hidden="true">→</span></strong></div>
+      </div>
+      <div class="hero-stepper" role="group" aria-label="Example sequence step">
+        <button type="button" data-hero-step="0" aria-pressed="false">Start</button>
+        <button type="button" data-hero-step="1" aria-pressed="true">After red</button>
+        <button type="button" data-hero-step="2" aria-pressed="false">After green</button>
+        <button type="button" data-hero-step="3" aria-pressed="false">Done</button>
+      </div>
+      <p class="demo-hint">Select a step. The memory changes the next action.</p>
     </div>
   </div>
+  <div class="wrap scope-strip"><span>BUILT FOR TASKS THAT REQUIRE HISTORY</span><div><b>Count</b><i>/</i><b>Follow an order</b><i>/</i><b>Recall across episodes</b></div></div>
 </header>
 
-<!-- ============================= TEASER ============================= -->
-<section id="teaser">
-  <div class="wrap reveal">
-    <figure>
-      <img src="static/figures/fig1_teaser.webp"
-           alt="A vanilla VLA presses the red button twice and fails, while HeLM tracks progress in language memory and completes the red-green-blue sequence."
-           width="1800" height="939">
-      <figcaption>
-        <b>Non-Markovian manipulation.</b> A vanilla VLA loses track after pressing the red button and
-        presses it again. HeLM stores progress in explicit language memory, letting the high-level policy
-        guide the low-level policy through the correct sequence.
-      </figcaption>
-    </figure>
+<section id="problem" class="section">
+  <div class="wrap">
+    <div class="section-heading"><p class="eyebrow">01 / THE PROBLEM</p><h2>The same view.<br>A different thing to do.</h2><p>After a button is released, the scene can look almost unchanged. A policy that sees only the current observation can repeat a completed action.</p></div>
+    <div class="comparison-copy"><div><span class="comparison-label">CURRENT OBSERVATION ONLY</span><h3>“Which button is next?”</h3><p>The image alone does not tell the robot which steps it already completed.</p></div><div><span class="comparison-label is-ours">OBSERVATION + LANGUAGE MEMORY</span><h3>“Red is done. Green is next.”</h3><p>HeLM carries progress forward as text that guides the next action.</p></div></div>
+    <figure class="paper-figure"><img src="static/figures/fig1_teaser.webp" alt="A vanilla policy repeats the red-button press, while HeLM remembers completed presses and follows the red, green, blue order." width="1800" height="939" loading="lazy"><figcaption><span class="figure-tag">THE MOTIVATING EXAMPLE</span> A sequence needs a record of progress. This is the non-Markovian part: the correct action depends on history.</figcaption></figure>
   </div>
 </section>
 
-<!-- ============================= ABSTRACT ============================= -->
-<section id="abstract">
-  <div class="wrap reveal">
-    <h2>Abstract</h2>
-    <div class="abstract">
-      <p>
-        Recent advances in Vision-Language-Action (VLA) models have enabled fine manipulation
-        capabilities, yet performing tasks that require working memory remains a key challenge. Most
-        existing VLA architectures operate under a <strong>Markovian assumption</strong>, mapping only the
-        current observation to an action, which leads to failure in non-Markovian environments.
-      </p>
-      <p>
-        Inspired by the human <em>inner monologue</em>, we propose <strong>Hierarchical Explicit Language
-        Memory (HeLM)</strong>, a hierarchical framework that establishes explicit language as a memory
-        representation for VLA-based manipulation, with a working-episodic structure and event-triggered
-        updates.
-      </p>
-      <p>
-        We evaluate HeLM across <strong>10 non-Markovian real-world tasks with 51 variants</strong>,
-        including five newly introduced inter-episode tasks that require persistent context across task
-        boundaries. HeLM outperforms baselines by 13% on average and achieves 78% on zero-shot tasks,
-        while being up to 4.5&times; more computationally efficient and 2.5&times; lower in latency than
-        the keyframe baseline.
-      </p>
-    </div>
-
-    <div class="stats">
-      <div class="stat">
-        <div class="num">+13%</div>
-        <div class="lbl">average success rate<br>over baselines</div>
-      </div>
-      <div class="stat">
-        <div class="num">78%</div>
-        <div class="lbl">zero-shot HLP<br>generalization</div>
-      </div>
-      <div class="stat">
-        <div class="num">4.5&times;</div>
-        <div class="lbl">more compute-efficient<br>than keyframe memory</div>
-      </div>
-      <div class="stat">
-        <div class="num">2.5&times;</div>
-        <div class="lbl">lower inference<br>latency</div>
-      </div>
-    </div>
+<section id="method" class="section tinted">
+  <div class="wrap">
+    <div class="section-heading"><p class="eyebrow">02 / THE METHOD</p><h2>Remember in language.<br>Act through a robot policy.</h2><p>HeLM separates deciding what comes next from executing the movement. The high-level vision-language model (HLP) manages memory; the low-level action policy (LLP) controls the robot.</p></div>
+    <ol class="method-steps"><li><span class="step-number">01</span><h3>Notice an event</h3><p>Detect a meaningful change, such as a button press. If nothing happens, keep the memory.</p><span class="step-tag">DETECT</span></li><li><span class="step-number">02</span><h3>Update the memory</h3><p>Record the new progress and decide which action command should come next.</p><span class="step-tag">UPDATE</span></li><li><span class="step-number">03</span><h3>Execute the action</h3><p>The low-level policy turns the command and current observations into robot actions.</p><span class="step-tag">ACT</span></li></ol>
+    <div class="method-layout"><div class="method-explanation"><h3>Two kinds of remembering.</h3><div class="memory-definition"><span class="definition-index">a.</span><div><h4>Working memory</h4><p>Progress inside the current instruction.</p><code>Count: 2 (Goal: 3)</code></div></div><div class="memory-definition"><span class="definition-index">b.</span><div><h4>Episodic context</h4><p>Information carried to the next episode.</p><code>Previous_Count: 3</code></div></div><p class="small-note">Both are explicit text. You can inspect the state used to choose the next command.</p></div><div class="architecture-panel"><div class="panel-heading"><span>THE CONTROL LOOP</span><span class="mono">HLP → LLP</span></div><canvas id="chart-arch" role="img" aria-label="Event-triggered high-level memory updates guide a low-level action policy"></canvas><p class="diagram-note" id="chart-arch-note"></p><p class="small-note">Schematic timing. Detect and update share the same VLM parameters.</p></div></div>
+    <details class="research-detail"><summary>Go deeper: event-triggered updates <span aria-hidden="true">+</span></summary><div class="detail-content"><p>Detect mode emits a task-relevant event or <code>none</code>. Update mode runs when an event is detected or the global instruction changes. Working memory tracks the current task; episodic context carries information across task boundaries.</p><figure class="paper-figure"><img src="static/figures/fig3_loop.webp" alt="Detect and update calls across episodes, with working memory and episodic context updated at task events." width="1800" height="644" loading="lazy"><figcaption>The evaluation loop across intra-episode and inter-episode tasks.</figcaption></figure></div></details>
   </div>
 </section>
 
-<!-- ============================= MEMORY INSPECTOR ============================= -->
-<section id="memory">
-  <div class="wrap reveal">
-    <h2>Read the memory</h2>
-    <p class="section-sub">
-      HeLM's memory is not a vector — it is text the policy writes and reads back. So rather than
-      describe it, here it is: every state below is replayed from the real task specifications, across
-      all 51 variants.
-    </p>
-
-    <div class="inspector" id="inspector" tabindex="0">
+<section id="memory" class="section">
+  <div class="wrap">
+    <div class="section-heading heading-split"><div><p class="eyebrow">03 / LOOK INSIDE THE MEMORY</p><h2>Follow the task.<br>Read every update.</h2></div><p>Choose a task, then step through the sequence. The scene and memory panel replay states from the repository’s task specifications.</p></div>
+    <div class="explorer-guide"><span><b>A1–A5</b> Remember within one instruction</span><span><b>E1–E5</b> Carry context to the next episode</span></div>
+    <div class="inspector" id="inspector" tabindex="0" role="region" aria-label="Interactive task memory explorer">
       <div class="insp-tabs" id="insp-tabs"></div>
 
       <div class="insp-head">
@@ -174,141 +109,36 @@
 
       <div class="insp-timeline" id="insp-timeline"></div>
       <div class="insp-controls">
-        <button id="insp-play" type="button" aria-pressed="true" title="Pause">❚❚</button>
-        <span class="insp-hint">Drag the timeline to scrub, or use ← →. Switch task with the tabs above.</span>
+        <button id="insp-play" type="button" aria-pressed="false" title="Play" aria-label="Play memory sequence">▶</button>
+        <span class="insp-hint">Choose a task and variant. Play the sequence or select a step; use ← → when focused.</span>
       </div>
     </div>
-
-    <p class="diagram-note" style="min-height:0;max-width:720px">
-      The scene on the left is not a recording. It is drawn by parsing the memory string on the right —
-      nothing else is needed to reconstruct the world state, which is the property the paper is arguing
-      for. On the inter-episode tasks (E1–E5), watch working memory reset at the boundary while episodic
-      context is promoted and carries the answer forward.
-    </p>
+    <p class="small-note explorer-note">A schematic task-specification replay, not recorded robot inference. Animation timing is illustrative. For cross-episode memory, try E1 and follow the new-instruction marker.</p>
+    <noscript><p>The interactive explorer needs JavaScript. The method figures, video and result tables remain available below.</p></noscript>
   </div>
 </section>
 
-<!-- ============================= METHOD ============================= -->
-<section id="method">
-  <div class="wrap reveal">
-    <h2>Method</h2>
-    <p class="section-sub">
-      HeLM decouples semantic memory management from action generation through a two-level hierarchy.
-    </p>
-
-    <div class="diagram">
-      <canvas id="chart-arch"></canvas>
-    </div>
-    <p class="diagram-note" id="chart-arch-note"></p>
-    <figcaption style="margin-top:2px">
-      <b>Two modes, one VLM.</b> The high-level policy alternates between a <em>detect</em> mode that
-      watches for semantic events and an <em>update</em> mode that writes them into memory. Because the
-      update is event-triggered, most passes cost a single detect call and leave memory untouched.
-    </figcaption>
-
-    <h3>Structured language memory</h3>
-    <p>
-      The memory <em>M<sub>t</sub></em> is split into two components, organized by how long they persist.
-      Because the memory is plain text, every state the policy relies on is directly inspectable.
-    </p>
-
-    <div class="mem-grid">
-      <div class="mem-card">
-        <div class="mem-scope">Intra-episode</div>
-        <h4>Working Memory <em>m<sub>t</sub><sup>work</sup></em></h4>
-        <p>Tracks active progress within a single instruction. Updated whenever a visual event is detected.</p>
-        <pre>Count: 2 (Goal: 3)
-Progress: blue, green (Goal: blue, green, red)</pre>
-      </div>
-      <div class="mem-card">
-        <div class="mem-scope">Inter-episode</div>
-        <h4>Episodic Context <em>m<sub>t</sub><sup>epi</sup></em></h4>
-        <p>Preserves summarized information across task boundaries. Promoted from working memory at the end of each episode.</p>
-        <pre>Previous_Count: 3
-Previous_Progress: blue, green, red</pre>
-      </div>
-    </div>
-
-    <h3>Two-stage, event-triggered inference</h3>
-    <p>
-      Unlike prior approaches that update memory at every observation, HeLM only writes to memory when a
-      semantic event fires. Both modes share the same VLM parameters and are distinguished by their
-      system prompts. <b>Detect mode</b> emits a task-relevant event token or <code>none</code>;
-      <b>update mode</b> runs only when an event is detected or the global instruction changes. This
-      filters out redundant updates from visually similar frames and prevents drift in the memory state.
-    </p>
-
-    <figure>
-      <img src="static/figures/fig3_loop.webp"
-           alt="Timeline showing the HLP alternating between detect and update modes across two episodes, with working memory and episodic context updating at each detected event."
-           width="1800" height="644">
-      <figcaption>
-        <b>Detect / update transitions in the evaluation loop.</b> Memory updates across intra- and
-        inter-episode scenarios. Each action <em>a<sub>t</sub></em> is generated from
-        <em>M<sub>t−1</sub></em> and the current instruction.
-      </figcaption>
-    </figure>
-  </div>
+<section id="video" class="section video-section">
+  <div class="wrap video-layout"><div class="video-copy"><p class="eyebrow">SEE IT ON THE ROBOT</p><h2>From memory<br>to movement.</h2><p>A framework walkthrough and real-world examples of HeLM in action.</p><a class="text-link" href="#tasks">Explore the evaluation tasks <span aria-hidden="true">↓</span></a></div><div class="video-frame"><video controls preload="none" playsinline poster="static/images/og_card.jpg" aria-label="HeLM framework overview and real-world demonstrations"><source src="static/videos/helm_demo.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/helm_demo.mp4">Download the overview video.</a></video></div></div>
 </section>
 
-<!-- ============================= TASK SUITE ============================= -->
-<section id="tasks">
-  <div class="wrap reveal">
-    <h2>Non-Markovian Task Suite</h2>
-    <p class="section-sub">
-      10 real-world tasks with 51 variants, isolating count-dependent, order-sensitive, and object-centric
-      memory challenges under controlled visual conditions.
-    </p>
-
-    <figure style="margin-bottom:40px">
-      <img src="static/figures/fig4_tasksuite.webp"
-           alt="Ten real-world task scenes: five intra-episode tasks A1 to A5 on top and five inter-episode tasks E1 to E5 below."
-           width="1800" height="876">
-      <figcaption>
-        <b>The real-world evaluation suite.</b> (Top) Intra-episode tasks (A1–A5) evaluate working memory
-        within a single instruction. (Bottom) Inter-episode tasks (E1–E5) assess episodic context across
-        task boundaries.
-      </figcaption>
-    </figure>
-
-    <div class="tabs" role="tablist">
-      <button class="tab" role="tab" data-filter="all" aria-selected="true">All</button>
-      <button class="tab" role="tab" data-filter="intra" aria-selected="false">Intra-episode (A1–A5)</button>
-      <button class="tab" role="tab" data-filter="inter" aria-selected="false">Inter-episode (E1–E5)</button>
-    </div>
-
+<section id="tasks" class="section">
+  <div class="wrap">
+    <div class="section-heading heading-split"><div><p class="eyebrow">04 / THE EVALUATION SUITE</p><h2>Ten tasks.<br>Different ways to remember.</h2></div><p>51 variants test counting, ordering and object history. Five tasks use memory within an instruction; five require context across episodes.</p></div>
+    <div class="tabs" role="group" aria-label="Filter evaluation tasks"><button class="tab" type="button" data-filter="intra" aria-pressed="true">Within an episode <span>A1–A5</span></button><button class="tab" type="button" data-filter="inter" aria-pressed="false">Across episodes <span>E1–E5</span></button><button class="tab" type="button" data-filter="all" aria-pressed="false">All 10 tasks</button></div>
     <div class="task-grid" id="task-grid"></div>
+    <noscript><p>A1–A5: counting, button order, window wiping, drawer search and pick/place/press. E1–E5: cumulative counting, human-demonstrated order, remaining-window wiping, remembered object location and original-position restoration.</p></noscript>
+    <details class="research-detail"><summary>See the real-world task setups <span aria-hidden="true">+</span></summary><div class="detail-content"><figure class="paper-figure"><img src="static/figures/fig4_tasksuite.webp" alt="Real-world setups for five intra-episode tasks and five inter-episode tasks." width="1800" height="876" loading="lazy"><figcaption>Top: within-episode tasks. Bottom: tasks that carry context across episodes.</figcaption></figure></div></details>
   </div>
 </section>
 
-<!-- ============================= RESULTS ============================= -->
-<section id="results">
-  <div class="wrap reveal">
-    <h2>Results</h2>
-    <p class="section-sub">
-      Mean success rate per task over 15–30 trials (3–6 variants, 5 trials each).
-    </p>
-
-    <h3 style="margin-top:0">Intra-episode tasks</h3>
-    <div class="diagram">
-      <canvas id="chart-success"></canvas>
-    </div>
-    <div class="controls">
-      <div class="seg" role="group" aria-label="Success metric">
-        <button type="button" data-metric="0" aria-pressed="true">Subtask-level</button>
-        <button type="button" data-metric="1" aria-pressed="false">Strict</button>
-      </div>
-    </div>
-    <div class="legend">
-      <span><i style="background:var(--c-ours)"></i>HeLM (Ours)</span>
-      <span><i style="background:var(--c-keyframe)"></i>Keyframe-HLP</span>
-      <span><i style="background:var(--c-pcmb)"></i>PCMB-π₀</span>
-      <span><i style="background:var(--c-naive)"></i>Naïve-π₀</span>
-    </div>
-    <p class="diagram-note" id="chart-success-note"></p>
-
-    <h3>Inter-episode tasks</h3>
-    <div class="table-scroll">
+<section id="results" class="section tinted">
+  <div class="wrap">
+    <div class="section-heading"><p class="eyebrow">05 / THE EVIDENCE</p><h2>Memory that carries<br>through the task.</h2><p>Real-world evaluation across 10 tasks. Each task averages 15–30 trials, with 3–6 variants and 5 trials per variant.</p></div>
+    <div class="result-highlights"><div><span class="result-number">85.7<span>%</span></span><h3>Within an episode</h3><p>Mean subtask-level success.<br>Keyframe-HLP: 72.9%.</p></div><div><span class="result-number">89.2<span>%</span></span><h3>Across episodes</h3><p>Mean success on E1–E5.<br>Keyframe-HLP: 16.6%.</p></div><div><span class="result-number">78<span>%</span></span><h3>Zero-shot HLP</h3><p>Generalization to unseen variants.<br>Keyframe-HLP: 65.7%.</p></div></div>
+    <div class="result-chart-panel"><div class="chart-heading"><div><p class="eyebrow">WITHIN-EPISODE COMPARISON</p><h3>Progress is useful. Finishing matters.</h3></div><div class="seg" role="group" aria-label="Success metric"><button type="button" data-metric="0" aria-pressed="true">Subtask-level</button><button type="button" data-metric="1" aria-pressed="false">Strict completion</button></div></div><canvas id="chart-success" role="img" aria-label="Subtask and strict success rates for HeLM and three baselines across A1 to A5"></canvas><div class="legend"><span><i class="legend-ours"></i>HeLM</span><span><i class="legend-key"></i>Keyframe-HLP</span><span><i class="legend-pcmb"></i>PCMB-π₀</span><span><i class="legend-naive"></i>Naïve-π₀</span></div><p class="diagram-note" id="chart-success-note" aria-live="polite"></p></div>
+    <details class="research-detail"><summary>All within-episode scores <span aria-hidden="true">+</span></summary><div class="detail-content"><div class="table-scroll"><table><caption>Subtask-level success rate (%), paper Fig. 5</caption><thead><tr><th scope="col">Method</th><th scope="col">A1</th><th scope="col">A2</th><th scope="col">A3</th><th scope="col">A4</th><th scope="col">A5</th><th scope="col">Avg.</th></tr></thead><tbody><tr class="ours"><th scope="row">HeLM</th><td>100</td><td>92.2</td><td>96.6</td><td>66.6</td><td>73.3</td><td>85.7</td></tr><tr><th scope="row">Keyframe-HLP</th><td>90★</td><td>91.1</td><td>60</td><td>79.2★</td><td>44.4</td><td>72.9</td></tr><tr><th scope="row">PCMB-π₀</th><td>100</td><td>24.4</td><td>33.3</td><td>32.9</td><td>6.7</td><td>39.5</td></tr><tr><th scope="row">Naïve-π₀</th><td>31.1</td><td>6.6</td><td>33.3</td><td>8.3</td><td>4.4</td><td>16.7</td></tr></tbody></table></div><p class="footnote">★ Keyframe-HLP fails to detect termination. Subtask scores count partial progress; use the chart’s strict metric for ordered completion and stopping.</p></div></details>
+    <details class="research-detail"><summary>Across-episode scores <span aria-hidden="true">+</span></summary><div class="detail-content">    <div class="table-scroll">
       <table>
         <thead>
           <tr><th>Method</th><th>E1</th><th>E2</th><th>E3</th><th>E4</th><th>E5</th><th>Avg.</th></tr>
@@ -325,8 +155,8 @@ Previous_Progress: blue, green, red</pre>
       have no mechanism for cross-episode context.
     </p>
 
-    <h3>Zero-shot HLP generalization</h3>
-    <p>
+</div></details>
+    <details class="research-detail"><summary>Zero-shot HLP generalization <span aria-hidden="true">+</span></summary><div class="detail-content">    <p>
       The LLP is fine-tuned to execute specific action commands, but the HLP receives no task-specific
       finetuning for these compositions — e.g. counting to five when training only covered up to three,
       or grounding an object never seen during training.
@@ -344,22 +174,9 @@ Previous_Progress: blue, green, red</pre>
     </div>
     <p class="footnote">★ Keyframe-HLP fails to detect termination in A1′, A4′, and A5′.</p>
 
-    <h3>Efficiency and scalability</h3>
-    <p>
-      HeLM is initially slower due to autoregressive text generation, but becomes 2.5&times; faster than
-      Keyframe-HLP at long horizons — a crossover driven by accumulating visual tokens.
-    </p>
-    <div class="diagram">
-      <canvas id="chart-eff"></canvas>
-    </div>
-    <div class="controls">
-      <label for="eff-len">Task length</label>
-      <input type="range" id="eff-len" min="1" max="8" step="1" value="8">
-    </div>
-    <p class="diagram-note" id="chart-eff-note"></p>
-
-    <h3>Simulation: LIBERO-Mem</h3>
-    <p>
+</div></details>
+    <div class="efficiency-layout"><div><p class="eyebrow">MEMORY COST</p><h3>A compact record<br>as the task gets longer.</h3><p>At 8 events, digitised estimates show approximately 4.5× lower VRAM usage and 2.3× faster inference than Keyframe-HLP.</p><p class="small-note">Approximate values from paper Fig. 7, not raw benchmark measurements. HeLM is slightly slower at short horizons.</p></div><div class="efficiency-chart"><canvas id="chart-eff" role="img" aria-label="Estimated latency and VRAM usage as task length grows"></canvas><div class="controls"><label for="eff-len">Task length</label><input type="range" id="eff-len" min="1" max="8" step="1" value="8"></div><p class="diagram-note" id="chart-eff-note" aria-live="polite"></p></div></div>
+    <details class="research-detail"><summary>Additional simulation results: LIBERO-Mem <span aria-hidden="true">+</span></summary><div class="detail-content">    <p>
       As a complement to the real-robot experiments, we ran HeLM on the LIBERO-Mem benchmark against
       published memory-augmented baselines. We report these as exploratory evidence — see the paper for
       benchmark limitations we observed.
@@ -384,60 +201,30 @@ Previous_Progress: blue, green, red</pre>
     <p class="footnote">
       Baseline rows for <em>π</em><sub>0</sub>, SlotVLA, and Naive E-SlotSSM are taken from the
       LIBERO-Mem paper.
-    </p>
+    </p></div></details>
   </div>
 </section>
 
-<!-- ============================= VIDEO ============================= -->
-<section id="video">
-  <div class="wrap reveal">
-    <h2>Overview Video</h2>
-    <p class="section-sub">Framework walkthrough and real-world inference examples.</p>
-    <div class="video-frame">
-      <video controls preload="metadata" playsinline poster="static/images/demo_poster.jpg">
-        <source src="static/videos/helm_demo.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-    </div>
-  </div>
-</section>
-
-<!-- ============================= BIBTEX ============================= -->
-<section id="bibtex">
-  <div class="wrap reveal">
-    <h2>BibTeX</h2>
-    <!-- TODO(bibtex): fill in the author list, and swap to the venue entry once the
-         paper is accepted somewhere. Kept venue-neutral until then. -->
-    <pre class="bibtex">@misc{helm2026,
+<section id="resources" class="section resources-section">
+  <div class="wrap">
+    <div class="resource-layout"><div><p class="eyebrow">06 / EXPLORE THE PROJECT</p><h2>Take a closer look.</h2><p>Task specifications, the data pipeline, HLP training and robot evaluation code are available in the repository.</p><a class="btn primary" href="https://github.com/kimspacehuni/HeLM">Explore the code <span aria-hidden="true">↗</span></a><div class="publication-status"><span id="link-paper" aria-disabled="true">Paper <em>soon</em></span><span id="link-arxiv" aria-disabled="true">arXiv <em>soon</em></span></div></div><div class="repo-paths"><a href="https://github.com/kimspacehuni/HeLM#installation"><span>01</span><div><strong>Get started</strong><p>Installation and minimal validation</p></div><b aria-hidden="true">↗</b></a><a href="https://github.com/kimspacehuni/HeLM/tree/main/helm_datasets"><span>02</span><div><strong>Build the data</strong><p>Task specs → event and memory labels</p></div><b aria-hidden="true">↗</b></a><a href="https://github.com/kimspacehuni/HeLM/tree/main/train"><span>03</span><div><strong>Train the policies</strong><p>High-level memory and low-level actions</p></div><b aria-hidden="true">↗</b></a></div></div>
+    <details class="research-detail citation" id="bibtex"><summary>BibTeX <span aria-hidden="true">+</span></summary><div class="detail-content"><p class="small-note">Publication metadata will be updated when the paper is available.</p><pre class="bibtex">@misc{helm2026,
   title = {HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation},
   year  = {2026}
-}</pre>
+}</pre></div></details>
   </div>
 </section>
-
-<footer>
-  <div class="wrap">
-    <p>
-      Page template built for HeLM. Source on
-      <a href="https://github.com/kimspacehuni/HeLM">GitHub</a>.
-    </p>
-
-    <!-- Visitor map (mapmyvisitors.com). Two constraints worth knowing before editing:
-         1. map.js injects the widget where the tag sits, so it must stay here in the
-            body and must NOT get async/defer.
-         2. The widget renders on a white background (cl=ffffff), so it lives in a light
-            card. Do not duplicate the tag to theme-switch it — a hidden copy still
-            fires the request and double-counts every visitor. -->
+</main>
+<footer><div class="wrap"><div class="footer-line"><a class="footer-brand" href="#top">HeLM<span>Hierarchical Explicit Language Memory</span></a><div><a href="https://github.com/kimspacehuni/HeLM">GitHub ↗</a><a href="#bibtex">BibTeX</a><a href="#top">Back to top ↑</a></div></div>
     <div class="visitor-map">
       <script type="text/javascript" id="mapmyvisitors"
               src="https://mapmyvisitors.com/map.js?d=zyACUZDSkuwMUGC7j7OLKvxJfzu4zt9VYG7eCGiAVt4&cl=ffffff&w=a"></script>
     </div>
-  </div>
-</footer>
-
+</div></footer>
 <script src="static/js/viz.js"></script>
 <script src="static/js/scene.js"></script>
 <script src="static/js/traces.js"></script>
+<script src="static/js/hero.js"></script>
 <script src="static/js/inspector.js"></script>
 <script src="static/js/charts.js"></script>
 <script src="static/js/arch.js"></script>

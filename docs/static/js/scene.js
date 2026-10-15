@@ -1,17 +1,6 @@
-/* Scene renderer for the memory inspector.
- *
- * The point of this file is the point of the paper. Every scene below is drawn purely
- * by parsing HeLM's memory strings — no scene graph, no simulator state, nothing but
- * the text the policy actually carries. That is only possible because the memory is
- * explicit language; a latent memory vector could not drive a picture like this.
- *
- * The strings come in exactly three shapes (see helm_datasets/taskspecs/):
- *   Count: 2 (Goal: 3)
- *   Progress: blue, green (Goal: blue, green, red)
- *   task done (None)
- * and episodic context in two:
- *   Previous_Count: 3
- *   Previous_Progress: blue, green, red
+/* Schematic task renderer driven by TaskSpec working-memory and episodic strings.
+ * These drawings explain memory states; they are not recorded robot scenes or
+ * a reconstruction of the complete physical world.
  */
 window.HelmScene = (function () {
   'use strict';

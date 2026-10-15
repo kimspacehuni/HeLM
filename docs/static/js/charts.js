@@ -103,6 +103,7 @@
 
     function setMetric(v) {
       target = v;
+      if (V.reduceMotion()) { t = target; draw(); }
       btns.forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.metric === v)));
       if (readout) {
         readout.textContent = v === 0
@@ -125,9 +126,8 @@
 
   /* ----------------------------------------------------------- efficiency */
 
-  /* Digitised from Fig. 7 — the paper plots these rather than tabulating them. The
-     endpoints match the values stated in the text: Keyframe-HLP reaches ~28 GB on an
-     8-event episode while HeLM stays under 6, and HeLM ends ~2.5x faster. */
+  /* Approximate estimates digitised from Fig. 7, not raw measurements.
+     At 8 events: ~6.2 vs ~28 GB VRAM and ~2.06 vs ~4.81 seconds latency. */
   const LEN = [1, 2, 3, 4, 5, 6, 7, 8];
   const LAT = { ours: [2.05, 2.05, 2.04, 2.04, 2.05, 2.05, 2.06, 2.06],
                 key:  [1.90, 1.96, 2.25, 2.52, 3.00, 3.49, 4.22, 4.81] };
@@ -197,21 +197,17 @@
       }
     }
 
-    /* Absolute values rather than a latency ratio. These points are digitised off
-       Fig. 7, so a computed speed-up lands near but not exactly on the 2.5x the paper
-       states, and printing a slightly different number right under that sentence reads
-       as an error. The VRAM ratio does match, so it is worth stating. */
     function setN(v) {
       n = +v;
       if (readout) {
         const i = n - 1;
         const lean = VRAM.key[i] / VRAM.ours[i];
         readout.textContent = n <= 2
-          ? 'At short horizons HeLM is slightly slower — it generates its memory as text, token by token.'
-          : 'At task length ' + n + ', HeLM answers in ' + LAT.ours[i].toFixed(2) + ' s on '
+          ? 'Digitised estimates show slightly higher HeLM latency at short horizons.'
+          : 'Approximate values at task length ' + n + ', HeLM answers in ' + LAT.ours[i].toFixed(2) + ' s on '
             + VRAM.ours[i].toFixed(1) + ' GB, while Keyframe-HLP needs ' + LAT.key[i].toFixed(2)
             + ' s and ' + VRAM.key[i].toFixed(1) + ' GB — ' + lean.toFixed(1)
-            + '× the memory, because it pays for every image it keeps.';
+            + '× the VRAM usage.';
       }
       draw();
     }

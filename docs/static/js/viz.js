@@ -1,10 +1,4 @@
-/* Shared canvas helpers for the page's diagrams.
- *
- * Every diagram here is drawn rather than exported as an image, for one reason that
- * matters on this page specifically: it has a light/dark toggle, and a rasterised PDF
- * crop can only ever sit on a forced white plate. Canvas colours are read out of the
- * stylesheet at draw time, so a theme flip repaints instead of looking broken.
- */
+/* Shared canvas sizing, theme palette and viewport-aware animation helpers. */
 window.HelmViz = (function () {
   'use strict';
 

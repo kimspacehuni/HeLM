@@ -1,9 +1,5 @@
-/* Animated architecture diagram.
- *
- * The static figure in the paper can show the two modes but not the thing that makes
- * them worth having: most passes through DETECT find nothing and cost nothing, and the
- * memory is only rewritten when an event actually fires. So the loop runs here, idling
- * through two quiet cycles for every one that triggers an update.
+/* Schematic event-triggered control loop. Quiet detect steps preserve memory;
+ * update steps rewrite it. Animation timing does not represent measured latency.
  */
 (function () {
   'use strict';

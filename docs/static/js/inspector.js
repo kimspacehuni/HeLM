@@ -1,13 +1,4 @@
-/* Memory inspector — replays HeLM's real memory states step by step.
- *
- * Everything shown here is read straight out of static/js/traces.js, which is built
- * from helm_datasets/taskspecs/ by docs/tools/build_traces.py. All 51 task variants
- * from the paper are present; none of it is illustrative.
- *
- * Playback mirrors the paper's two-stage inference rather than just sliding a value:
- * each step dwells in DETECT while the HLP watches for its event, then flips briefly
- * to UPDATE when that event fires and the memory is rewritten.
- */
+/* Explore task-specification memory states. Playback timing is schematic. */
 (function () {
   'use strict';
 
@@ -34,8 +25,12 @@
   const wanted = new URLSearchParams(location.search).get('task');
   let task = (wanted && DATA.find((t) => t.id === wanted.toUpperCase())) ||
              DATA.find((t) => t.id === 'A2') || DATA[0];
-  let variant = task.variants[0], moments = [];
-  let idx = 0, phase = 0, playing = true, dragging = false;
+  let variant = defaultVariant(task), moments = [];
+  let idx = 0, phase = 0, playing = false, dragging = false;
+
+  function defaultVariant(t) {
+    return t.variants.find((v) => v.id === 'press_RGB') || t.variants[0];
+  }
 
   /* ------------------------------------------------------------- flattening */
 
@@ -75,7 +70,7 @@
       wrap.className = 'insp-tabgroup';
       const cap = document.createElement('span');
       cap.className = 'insp-tabcap';
-      cap.textContent = grp === 'intra' ? 'Intra-episode' : 'Inter-episode';
+      cap.textContent = grp === 'intra' ? 'Within an instruction' : 'Across episodes';
       wrap.appendChild(cap);
       DATA.filter((t) => t.group === grp).forEach((t) => {
         const b = document.createElement('button');
@@ -83,6 +78,7 @@
         b.type = 'button';
         b.textContent = t.id;
         b.title = t.name;
+        b.setAttribute('aria-label', t.id + ': ' + t.name);
         b.setAttribute('aria-pressed', String(t === task));
         b.addEventListener('click', () => selectTask(t));
         wrap.appendChild(b);
@@ -148,7 +144,7 @@
     const detecting = phase < DWELL;
     const atEnd = st.event == null;
 
-    instrBox.textContent = m.instruction;
+    instrBox.textContent = task.name + ' · ' + m.instruction;
     instrBox.dataset.ep = 'Episode ' + (m.ep + 1);
 
     const workChanged = prev && prev.step.work !== st.work;
@@ -162,10 +158,10 @@
         '<span class="mem-step">t = ' + m.si + '</span>' +
       '</div>' +
       memRow('Event', atEnd ? '—' : (detecting ? 'watching for “' + st.event + '”' : st.event), !detecting && !atEnd, 'event') +
-      memRow('Action_Command', st.cmd, prev && prev.step.cmd !== st.cmd) +
+      memRow('Next action', st.cmd, prev && prev.step.cmd !== st.cmd) +
       '<div class="mem-sep"><span>Language memory ' + (reset ? '· working resets, episodic is promoted' : '') + '</span></div>' +
-      memRow('Working_Memory', st.work, workChanged, 'work') +
-      memRow('Episodic_Context', st.epi, epiChanged, 'epi');
+      memRow('Working memory', st.work, workChanged, 'work') +
+      memRow('Episodic context', st.epi, epiChanged, 'epi');
 
     lineBox.querySelectorAll('.insp-dot').forEach((d) => {
       const i = +d.dataset.i;
@@ -195,10 +191,11 @@
     playBtn.setAttribute('aria-pressed', String(playing));
     playBtn.textContent = playing ? '❚❚' : '▶';
     playBtn.title = playing ? 'Pause' : 'Play';
+    playBtn.setAttribute('aria-label', playing ? 'Pause memory sequence' : 'Play memory sequence');
   }
 
   function selectTask(t) {
-    task = t; variant = t.variants[0];
+    task = t; variant = defaultVariant(t);
     moments = flatten(variant);
     buildVariants(); buildTimeline(); syncTabs(); goTo(0);
   }
@@ -210,7 +207,7 @@
     let best = 0, bestD = Infinity;
     dots.forEach((d, i) => {
       const r = d.getBoundingClientRect();
-      const dist = Math.abs(e.clientX - (r.left + r.width / 2));
+      const dist = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
       if (dist < bestD) { bestD = dist; best = i; }
     });
     goTo(best);
@@ -232,8 +229,14 @@
   });
 
   root.addEventListener('keydown', (e) => {
+    if (e.target.matches('select, input, textarea')) return;
     if (e.key === 'ArrowRight') { goTo(idx + 1); pause(); e.preventDefault(); }
     if (e.key === 'ArrowLeft') { goTo(idx - 1); pause(); e.preventDefault(); }
+  });
+
+  window.addEventListener('helm:select-task', (e) => {
+    const selected = DATA.find((t) => t.id === e.detail.id);
+    if (selected) { selectTask(selected); pause(); }
   });
 
   /* ------------------------------------------------------------------- boot */
