@@ -79,9 +79,10 @@ python tools/build_page_traces.py
 ```
 
 The explorer pairs a fixed setup photograph from paper Figure 4 with symbolic
-progress derived from the selected TaskSpec state (`scene.js`). SVG view boxes
-select each task photo from the existing figure; no extra photo downloads or
-generated robot imagery are needed. Completed steps, the next step and remembered
+progress derived from the selected TaskSpec state (`scene.js`). Each task photo is extracted once into `static/images/tasks/` at its native
+334 × 280 size. Native `<img>` elements use `width: 100%; height: auto` so the
+whole photo remains visible in cards, the explorer and the introductory example.
+No generated robot imagery is used. Completed steps, the next step and remembered
 context are displayed separately. Observation tasks reveal only events already
 in memory, not the future event sequence.
 

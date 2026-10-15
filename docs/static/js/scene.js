@@ -24,12 +24,9 @@ window.HelmScene = (function () {
     const text = s.replace(/^origin_/, 'original: ').replace('_to_', ' → ').replace('press_orange', 'orange button').replace(/_/g, ' ');
     return text.charAt(0).toUpperCase() + text.slice(1);
   };
-  const x = [0, 366, 732, 1098, 1465];
   function photo(id, name) {
-    const column = +id.slice(1) - 1;
-    if (column < 0 || column > 4 || !/^[AE][1-5]$/.test(id)) return '';
-    const y = id[0] === 'A' ? 82 : 507;
-    return '<svg class="task-photo" viewBox="' + x[column] + ' ' + y + ' 334 280" width="334" height="280" preserveAspectRatio="xMidYMax slice" role="img" aria-label="' + esc(name + ' — real-world experiment setup from paper Figure 4') + '" xmlns="http://www.w3.org/2000/svg"><image href="static/figures/fig4_tasksuite.webp" width="1800" height="876"/></svg>';
+    if (!/^[AE][1-5]$/.test(id)) return '';
+    return '<img class="task-photo" src="static/images/tasks/' + id.toLowerCase() + '.webp" width="334" height="280" alt="' + esc(name + ' — real-world experiment setup from paper Figure 4') + '" decoding="async" loading="lazy">';
   }
   function step(label, state, detail, color) {
     return '<div class="state-step is-' + state + '"><span class="state-symbol' + (color ? ' color-' + color : '') + '" aria-hidden="true">' +
