@@ -1,4 +1,4 @@
-/* Real setup photos from paper Fig. 4, paired with symbolic TaskSpec progress.
+/* Original experiment photographs paired with symbolic TaskSpec progress.
  * Photos are fixed illustrations of the setup, never live or replayed observations.
  */
 window.HelmScene = (function () {
@@ -26,7 +26,7 @@ window.HelmScene = (function () {
   };
   function photo(id, name) {
     if (!/^[AE][1-5]$/.test(id)) return '';
-    return '<img class="task-photo" src="static/images/tasks/' + id.toLowerCase() + '.webp" width="334" height="280" alt="' + esc(name + ' — real-world experiment setup from paper Figure 4') + '" decoding="async" loading="lazy">';
+    return '<img class="task-photo" src="static/images/tasks/' + id.toLowerCase() + '.webp" width="1200" height="900" alt="' + esc(name + ' — real-world experiment setup') + '" decoding="async" loading="lazy">';
   }
   function step(label, state, detail, color) {
     return '<div class="state-step is-' + state + '"><span class="state-symbol' + (color ? ' color-' + color : '') + '" aria-hidden="true">' +
@@ -81,7 +81,7 @@ window.HelmScene = (function () {
     }
     target.className = 'task-scene' + (compact ? ' is-compact' : '');
     if (target.dataset.task !== task.id || !target.querySelector('.scene-state')) {
-      target.innerHTML = '<div class="scene-photo">' + photo(task.id, task.name) + '<span class="scene-photo-label">EXPERIMENT SETUP · FIG. 4</span></div><div class="scene-state"></div>';
+      target.innerHTML = '<div class="scene-photo">' + photo(task.id, task.name) + '<span class="scene-photo-label">EXPERIMENT SETUP · REFERENCE PHOTO</span></div><div class="scene-state"></div>';
       target.dataset.task = task.id;
     }
     target.querySelector('.scene-state').innerHTML = '<div class="scene-state-heading"><strong>' + esc(title) + '</strong><span>' + esc(summary) + '</span></div>' +

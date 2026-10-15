@@ -78,13 +78,16 @@ Regenerate from the repository root after editing a taskspec:
 python tools/build_page_traces.py
 ```
 
-The explorer pairs a fixed setup photograph from paper Figure 4 with symbolic
-progress derived from the selected TaskSpec state (`scene.js`). Each task photo is extracted once into `static/images/tasks/` at its native
-334 × 280 size. Native `<img>` elements use `width: 100%; height: auto` so the
-whole photo remains visible in cards, the explorer and the introductory example.
-No generated robot imagery is used. Completed steps, the next step and remembered
-context are displayed separately. Observation tasks reveal only events already
-in memory, not the future event sequence.
+The explorer pairs a fixed reference photograph of the real experiment setup
+with symbolic progress derived from the selected TaskSpec state (`scene.js`).
+The photos in `static/images/tasks/` are resized from the supplied 4000 × 3000
+originals to 1200 × 900 WebP, with orientation applied and no cropping. Native
+`<img>` elements use `width: 100%; height: auto` so each photograph remains fully
+visible in cards, the explorer and the introductory example. EXIF data is not
+included in the web assets. No generated robot imagery is used.
+
+Completed steps, the next step and remembered context are displayed separately.
+Observation tasks reveal only events already in memory, not the future sequence.
 
 Examples of memory strings:
 
