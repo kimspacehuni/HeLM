@@ -58,12 +58,12 @@ serves as the favicon. Original large PNGs are kept local and ignored by Git.
 
 ## Reading order and interaction
 
-The page introduces the problem through a button-sequence example, explains
-Detect → Update → Act, then opens the full memory explorer. Real-robot video,
-the task suite, results and repository links follow. Detailed research tables
-and additional figures are expandable so the introduction stays approachable.
+The publication header leads with the full paper title, a short secondary subtitle,
+and Code / arXiv (coming soon) / Video links. An abstract precedes the problem,
+method, memory explorer, task suite and results. The optional button-sequence
+example and detailed tables are expandable.
 
-The hero uses the `press_RGB` states from `traces.js`. It advances only when a
+The introductory example uses the `press_RGB` states from `traces.js`. It advances only when a
 visitor selects a step. The memory explorer also starts paused. Task cards open
 the corresponding task in that explorer; keyboard controls and reduced-motion
 preferences are supported. Main content stays visible if JavaScript fails.
