@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 
 
-<link rel="stylesheet" href="static/css/style.css">
+<link rel="stylesheet" href="static/css/style.css?v=task-layout-2">
 <link rel="icon" type="image/png" href="static/images/favicon.png">
 </head>
 <body>
@@ -30,7 +30,7 @@
   <div class="nav-inner">
     <a class="nav-brand" href="#top" aria-label="HeLM home"><img class="brand-mascot" src="static/images/mascot-mark.webp" width="32" height="32" alt="">HeLM<span class="brand-caption">ROBOT LEARNING</span></a>
     <div class="nav-links">
-      <a href="#overview">Overview</a><a href="#method">Method</a><a href="#memory">Memory</a><a href="#tasks">Tasks</a><a href="#results">Results</a>
+      <a href="#overview">Overview</a><a href="#method">Method</a><a href="#tasks">Tasks</a><a href="#results">Results</a>
     </div>
     <a class="nav-code" href="https://github.com/kimspacehuni/HeLM">GitHub <span aria-hidden="true">↗</span></a>
   </div>
@@ -48,11 +48,8 @@
   </div>
 </header>
 
-<section id="video" class="section featured-demo" aria-labelledby="featured-demo-title">
-  <div class="wrap">
-    <div class="section-heading"><p class="eyebrow">REAL ROBOT / ACROSS EPISODES</p><h2 id="featured-demo-title">Observe the human. Remember the order.</h2><p>Press in Human Order: a human demonstration followed by the robot’s button presses.</p></div>
-    <figure class="recorded-demo"><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/press_in_human_order.webp" aria-label="Press in Human Order"><source src="static/videos/press_in_human_order.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/press_in_human_order.mp4">Download this demonstration.</a></video></div><figcaption><span>E2 · Full recording · 2:55</span><a class="text-link" href="#task-videos">More task demonstrations ↓</a></figcaption></figure>
-  </div>
+<section id="video" class="section featured-demo" aria-label="HeLM demo video">
+  <div class="wrap"><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/og_card.jpg" aria-label="HeLM demo video"><source src="static/videos/helm_demo.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/helm_demo.mp4">Download the demo video.</a></video></div></div>
 </section>
 
 
@@ -108,10 +105,18 @@
   </div>
 </section>
 
-<section id="memory" class="section">
+
+
+
+
+<section id="tasks" class="section">
   <div class="wrap">
-    <div class="section-heading heading-split"><div><p class="eyebrow">03 / LOOK INSIDE THE MEMORY</p><h2>Language memory explorer</h2></div><p>Choose a task, then step through the sequence. Action reference photos change with the selected subtask when available. The progress display and memory panel follow its task specification.</p></div>
-    <div class="explorer-guide"><span><b>A1–A5</b> Remember within one instruction</span><span><b>E1–E5</b> Carry context to the next episode</span></div>
+    <div class="section-heading heading-split"><div><p class="eyebrow">03 / TASKS</p><h2>Real-world tasks</h2></div><p>Watch recorded trials and inspect the memory for each task. The suite contains 10 tasks and 51 variants, covering both within-episode and across-episode memory.</p></div>
+    <div class="tabs" role="group" aria-label="Filter evaluation tasks"><button class="tab" type="button" data-filter="intra" aria-pressed="true">Within an episode <span>A1–A5</span></button><button class="tab" type="button" data-filter="inter" aria-pressed="false">Across episodes <span>E1–E5</span></button><button class="tab" type="button" data-filter="all" aria-pressed="false">All 10 tasks</button></div>
+    <div class="task-grid" id="task-grid"></div>
+    <noscript><p>A1–A5: counting, button order, window wiping, drawer search and pick/place/press. E1–E5: cumulative counting, human-demonstrated order, remaining-window wiping, remembered object location and original-position restoration.</p></noscript>
+
+    <details id="memory" class="research-detail task-memory"><summary>Inspect task-specification memory states <span aria-hidden="true">+</span></summary><div class="detail-content"><p class="small-note">Select “Inspect memory” on a task to see its instructions, progress and memory states. These are task-specification examples, separate from the recorded videos.</p>
     <div class="inspector" id="inspector" tabindex="0" role="region" aria-label="Interactive task memory explorer">
       <div class="insp-tabs" id="insp-tabs"></div>
 
@@ -132,38 +137,14 @@
       </div>
     </div>
     <p class="small-note explorer-note">Reference photographs switch to matching actions or outcomes when available; they are not synchronized rollout frames. Window regions use the robot’s frame. Missing drawer-specific photographs are marked as setup references. Progress and memory follow the task specifications. Playback timing is illustrative. For cross-episode memory, try E1 and follow the new-instruction marker.</p>
-    <noscript><p>The interactive explorer needs JavaScript. The method figures, video and result tables remain available below.</p></noscript>
-  </div>
-</section>
-
-
-
-<section id="tasks" class="section">
-  <div class="wrap">
-    <div class="section-heading heading-split"><div><p class="eyebrow">04 / THE EVALUATION SUITE</p><h2>Real-world task suite</h2></div><p>51 variants test counting, ordering and object history. Five tasks use memory within an instruction; five require context across episodes.</p></div>
-    <div class="tabs" role="group" aria-label="Filter evaluation tasks"><button class="tab" type="button" data-filter="intra" aria-pressed="true">Within an episode <span>A1–A5</span></button><button class="tab" type="button" data-filter="inter" aria-pressed="false">Across episodes <span>E1–E5</span></button><button class="tab" type="button" data-filter="all" aria-pressed="false">All 10 tasks</button></div>
-    <div class="task-grid" id="task-grid"></div>
-    <noscript><p>A1–A5: counting, button order, window wiping, drawer search and pick/place/press. E1–E5: cumulative counting, human-demonstrated order, remaining-window wiping, remembered object location and original-position restoration.</p></noscript>
-
-    <div id="task-videos" class="task-recordings" aria-labelledby="task-videos-title">
-      <h3 id="task-videos-title">Recorded demonstrations</h3>
-      <p class="small-note">Full recordings at their original playback speed. E2 is featured <a href="#video">above</a>. The memory explorer illustrates task specifications separately; it is not synchronized to these recordings.</p>
-      <div class="recording-grid">
-      <details class="task-recording"><summary><img src="static/images/videos/press_3_times.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">A1 · Within an episode · 1:40</span><span class="recording-title">Press Three Times</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>Count completed presses and stop after three.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/press_3_times.webp" aria-label="Press Three Times"><source src="static/videos/press_3_times.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/press_3_times.mp4">Download this demonstration.</a></video></div></div></details>
-      <details class="task-recording"><summary><img src="static/images/videos/wipe_bottom_middle_top.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">A3 · Within an episode · 2:04</span><span class="recording-title">Wipe Bottom, Middle, Top</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>Wipe the three window regions in order.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/wipe_bottom_middle_top.webp" aria-label="Wipe Bottom, Middle, Top"><source src="static/videos/wipe_bottom_middle_top.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/wipe_bottom_middle_top.mp4">Download this demonstration.</a></video></div></div></details>
-      <details class="task-recording"><summary><img src="static/images/videos/find_object.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">A4 · Within an episode · 1:11</span><span class="recording-title">Find the Object</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>Search the drawers for the object.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/find_object.webp" aria-label="Find the Object"><source src="static/videos/find_object.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/find_object.mp4">Download this demonstration.</a></video></div></div></details>
-      <details class="task-recording"><summary><img src="static/images/videos/pick_place_press.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">A5 · Within an episode · 1:16</span><span class="recording-title">Pick, Place and Press</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>Execute a sequence of object transfers and a button press.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/pick_place_press.webp" aria-label="Pick, Place and Press"><source src="static/videos/pick_place_press.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/pick_place_press.mp4">Download this demonstration.</a></video></div></div></details>
-      <details class="task-recording"><summary><img src="static/images/videos/wipe_middle_then_bottom_top.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">E3 · Across episodes · 4:00</span><span class="recording-title">Wipe Middle, Then Bottom and Top</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>A window-wiping example with the middle region followed by the bottom and top regions.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/wipe_middle_then_bottom_top.webp" aria-label="Wipe Middle, Then Bottom and Top"><source src="static/videos/wipe_middle_then_bottom_top.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/wipe_middle_then_bottom_top.mp4">Download this demonstration.</a></video></div></div></details>
-      </div>
-      <details class="research-detail overview-recording"><summary>Framework overview video <span aria-hidden="true">+</span></summary><div class="detail-content"><p>A framework walkthrough and additional real-world examples.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/og_card.jpg" aria-label="HeLM framework overview"><source src="static/videos/helm_demo.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/helm_demo.mp4">Download the overview video.</a></video></div></div></details>
-    </div>
+    </div></details>
     <details class="research-detail"><summary>See the real-world task setups <span aria-hidden="true">+</span></summary><div class="detail-content"><figure class="paper-figure"><img src="static/figures/fig4_tasksuite.webp" alt="Real-world setups for five intra-episode tasks and five inter-episode tasks." width="1800" height="876" loading="lazy"><figcaption>Top: within-episode tasks. Bottom: tasks that carry context across episodes.</figcaption></figure></div></details>
   </div>
 </section>
 
 <section id="results" class="section tinted">
   <div class="wrap">
-    <div class="section-heading"><p class="eyebrow">05 / THE EVIDENCE</p><h2>Evaluation results</h2><p>Real-world evaluation across 10 tasks. Each task averages 15–30 trials, with 3–6 variants and 5 trials per variant.</p></div>
+    <div class="section-heading"><p class="eyebrow">04 / THE EVIDENCE</p><h2>Evaluation results</h2><p>Real-world evaluation across 10 tasks. Each task averages 15–30 trials, with 3–6 variants and 5 trials per variant.</p></div>
     <div class="result-highlights"><div><span class="result-number">85.7<span>%</span></span><h3>Within an episode</h3><p>Mean subtask-level success.<br>Keyframe-HLP: 72.9%.</p></div><div><span class="result-number">89.2<span>%</span></span><h3>Across episodes</h3><p>Mean success on E1–E5.<br>Keyframe-HLP: 16.6%.</p></div><div><span class="result-number">78<span>%</span></span><h3>Zero-shot HLP</h3><p>Generalization to unseen variants.<br>Keyframe-HLP: 65.7%.</p></div></div>
     <div class="result-chart-panel"><div class="chart-heading"><div><p class="eyebrow">WITHIN-EPISODE COMPARISON</p><h3>Progress is useful. Finishing matters.</h3></div><div class="seg" role="group" aria-label="Success metric"><button type="button" data-metric="0" aria-pressed="true">Subtask-level</button><button type="button" data-metric="1" aria-pressed="false">Strict completion</button></div></div><canvas id="chart-success" role="img" aria-label="Subtask and strict success rates for HeLM and three baselines across A1 to A5"></canvas><div class="legend"><span><i class="legend-ours"></i>HeLM</span><span><i class="legend-key"></i>Keyframe-HLP</span><span><i class="legend-pcmb"></i>PCMB-π₀</span><span><i class="legend-naive"></i>Naïve-π₀</span></div><p class="diagram-note" id="chart-success-note" aria-live="polite"></p></div>
     <details class="research-detail"><summary>All within-episode scores <span aria-hidden="true">+</span></summary><div class="detail-content"><div class="table-scroll"><table><caption>Subtask-level success rate (%), paper Fig. 5</caption><thead><tr><th scope="col">Method</th><th scope="col">A1</th><th scope="col">A2</th><th scope="col">A3</th><th scope="col">A4</th><th scope="col">A5</th><th scope="col">Avg.</th></tr></thead><tbody><tr class="ours"><th scope="row">HeLM</th><td>100</td><td>92.2</td><td>96.6</td><td>66.6</td><td>73.3</td><td>85.7</td></tr><tr><th scope="row">Keyframe-HLP</th><td>90★</td><td>91.1</td><td>60</td><td>79.2★</td><td>44.4</td><td>72.9</td></tr><tr><th scope="row">PCMB-π₀</th><td>100</td><td>24.4</td><td>33.3</td><td>32.9</td><td>6.7</td><td>39.5</td></tr><tr><th scope="row">Naïve-π₀</th><td>31.1</td><td>6.6</td><td>33.3</td><td>8.3</td><td>4.4</td><td>16.7</td></tr></tbody></table></div><p class="footnote">★ Keyframe-HLP fails to detect termination. Subtask scores count partial progress; use the chart’s strict metric for ordered completion and stopping.</p></div></details>
@@ -236,7 +217,7 @@
 
 <section id="resources" class="section resources-section">
   <div class="wrap">
-    <div class="resource-layout"><div><p class="eyebrow">06 / EXPLORE THE PROJECT</p><h2>Code and resources</h2><p>Task specifications, the data pipeline, HLP training and robot evaluation code are available in the repository.</p><a class="btn primary" href="https://github.com/kimspacehuni/HeLM">Explore the code <span aria-hidden="true">↗</span></a><div class="publication-status"><span id="link-paper" aria-disabled="true">Paper <em>soon</em></span><span aria-disabled="true">arXiv <em>soon</em></span></div></div><div class="repo-paths"><a href="https://github.com/kimspacehuni/HeLM#installation"><span>01</span><div><strong>Get started</strong><p>Installation and minimal validation</p></div><b aria-hidden="true">↗</b></a><a href="https://github.com/kimspacehuni/HeLM/tree/main/helm_datasets"><span>02</span><div><strong>Build the data</strong><p>Task specs → event and memory labels</p></div><b aria-hidden="true">↗</b></a><a href="https://github.com/kimspacehuni/HeLM/tree/main/train"><span>03</span><div><strong>Train the policies</strong><p>High-level memory and low-level actions</p></div><b aria-hidden="true">↗</b></a></div></div>
+    <div class="resource-layout"><div><p class="eyebrow">05 / EXPLORE THE PROJECT</p><h2>Code and resources</h2><p>Task specifications, the data pipeline, HLP training and robot evaluation code are available in the repository.</p><a class="btn primary" href="https://github.com/kimspacehuni/HeLM">Explore the code <span aria-hidden="true">↗</span></a><div class="publication-status"><span id="link-paper" aria-disabled="true">Paper <em>soon</em></span><span aria-disabled="true">arXiv <em>soon</em></span></div></div><div class="repo-paths"><a href="https://github.com/kimspacehuni/HeLM#installation"><span>01</span><div><strong>Get started</strong><p>Installation and minimal validation</p></div><b aria-hidden="true">↗</b></a><a href="https://github.com/kimspacehuni/HeLM/tree/main/helm_datasets"><span>02</span><div><strong>Build the data</strong><p>Task specs → event and memory labels</p></div><b aria-hidden="true">↗</b></a><a href="https://github.com/kimspacehuni/HeLM/tree/main/train"><span>03</span><div><strong>Train the policies</strong><p>High-level memory and low-level actions</p></div><b aria-hidden="true">↗</b></a></div></div>
     <details class="research-detail citation" id="bibtex"><summary>BibTeX <span aria-hidden="true">+</span></summary><div class="detail-content"><p class="small-note">Publication metadata will be updated when the paper is available.</p><pre class="bibtex">@misc{helm2026,
   title = {HeLM: Hierarchical Explicit Language Memory for VLM-Guided Non-Markovian Manipulation},
   year  = {2026}
@@ -256,7 +237,7 @@
 <script src="static/js/hero.js"></script>
 <script src="static/js/inspector.js"></script>
 <script src="static/js/charts.js"></script>
-<script src="static/js/main.js"></script>
-<script src="static/js/videos.js"></script>
+<script src="static/js/main.js?v=task-layout-2"></script>
+<script src="static/js/videos.js?v=task-layout-2"></script>
 </body>
 </html>

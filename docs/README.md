@@ -59,13 +59,13 @@ serves as the favicon. Original large PNGs are kept local and ignored by Git.
 ## Reading order and interaction
 
 The publication header leads with the full paper title, a short secondary subtitle,
-and Code / arXiv (coming soon) / Video links. A full human-order robot demonstration follows the header. An abstract precedes the problem,
+and Code / arXiv (coming soon) / Video links. The original framework demo video follows the header. An abstract precedes the problem,
 method, memory explorer, task suite and results. The optional button-sequence
 example and detailed tables are expandable.
 
 The introductory example uses the `press_RGB` states from `traces.js`. It advances only when a
 visitor selects a step. The memory explorer also starts paused. Task cards open
-the corresponding task in that explorer; keyboard controls and reduced-motion
+the corresponding task in the expandable explorer; keyboard controls and reduced-motion
 preferences are supported. Main content stays visible if JavaScript fails.
 
 ## The memory inspector
@@ -178,16 +178,16 @@ to WebP; flat-color charts are often smaller as PNG — check both.
 
 ## Recorded task videos
 
-The header features E2 (Press in Human Order). The task section provides five
-expandable recordings: A1, A3, A4, A5 and the middle-then-bottom/top wiping
-example (E3). The existing framework overview remains expandable there as well.
-These are complete recordings at original playback speed, without added memory
-logs or inferred episode timestamps. The task-specification explorer is separate.
+The original `helm_demo.mp4` is the main demo below the paper title.
+There is one Real-world tasks section: task cards contain either a recorded
+trial with native playback controls or a reference photograph. The same card
+opens the corresponding task-specification memory example in an expandable
+panel below the grid. There is no separate recording gallery or explorer section.
 
-The six task MP4 files are web copies of local `HeLM_video` sources: H.264,
-1280 × 720, CRF 24, AAC 96 kbps, faststart, stripped container metadata.
-Their combined size is approximately 65.8 MiB; the originals remain local and
-ignored by Git. Posters are actual frames exported as 960 × 540 WebP.
-All players use `preload="none"`, native controls and inline playback.
-`static/js/videos.js` pauses other players on play and pauses a recording when
-its enclosing details panel closes. No automatic playback or new dependencies.
+Recordings map to A1, A3, A4, A5, E2 and E3. All are complete recordings at
+original playback speed; no inferred episode timestamps or memory logs are added.
+The six web copies total approximately 65.8 MiB: H.264, 1280 × 720, CRF 24,
+AAC 96 kbps, faststart. The originals remain local and ignored by Git.
+Posters are actual frames exported as 960 × 540 WebP. All players use
+`preload="none"`, controls and inline playback. Only one player can play at a
+time; changing the task filter pauses videos that become hidden.

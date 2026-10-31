@@ -15,14 +15,16 @@
     E4: 'Recall an object’s location and open the correct drawer directly.',
     E5: 'Remember the original plate and return the object to it.',
   };
+  const RECORDINGS = { A1: 'press_3_times', A3: 'wipe_bottom_middle_top', A4: 'find_object', A5: 'pick_place_press', E2: 'press_in_human_order', E3: 'wipe_middle_then_bottom_top' };
   const grid = document.getElementById('task-grid');
   const cards = [];
   const filters = document.querySelectorAll('[data-filter]');
   function filter(group) {
     filters.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === group)));
-    cards.forEach((c) => { c.el.hidden = group !== 'all' && c.task.group !== group; });
+    cards.forEach((c) => { c.el.hidden = group !== 'all' && c.task.group !== group; if (c.el.hidden) c.el.querySelectorAll('video').forEach((v) => v.pause()); });
   }
   function explore(task) {
+    document.getElementById('memory').open = true;
     window.dispatchEvent(new CustomEvent('helm:select-task', { detail: { id: task.id } }));
     const explorer = document.getElementById('inspector');
     if (explorer) {
@@ -36,13 +38,27 @@
       article.className = 'task-card';
       const media = document.createElement('div'); media.className = 'task-media';
       const badge = document.createElement('span'); badge.className = 'task-id'; badge.textContent = task.id;
-      media.innerHTML = S.photo(task.id, task.name);
+      if (RECORDINGS[task.id]) {
+        const name = RECORDINGS[task.id];
+        const video = document.createElement('video');
+        video.controls = true; video.preload = 'none'; video.playsInline = true;
+        video.width = 1280; video.height = 720;
+        video.poster = 'static/images/videos/' + name + '.webp';
+        video.setAttribute('aria-label', task.name + ' recorded trial');
+        const source = document.createElement('source');
+        source.src = 'static/videos/' + name + '.mp4'; source.type = 'video/mp4';
+        const download = document.createElement('a'); download.href = source.src;
+        download.textContent = 'Download recording';
+        video.append(source, download); media.append(video);
+      } else {
+        media.innerHTML = S.photo(task.id, task.name);
+      }
       media.append(badge);
       const body = document.createElement('div'); body.className = 'task-body';
       const title = document.createElement('h3'); title.className = 'task-name'; title.textContent = task.name;
       const description = document.createElement('p'); description.className = 'task-desc'; description.textContent = DESC[task.id];
       const button = document.createElement('button'); button.type = 'button'; button.className = 'task-explore';
-      button.textContent = 'Explore the memory ↗'; button.setAttribute('aria-label', 'Explore memory for ' + task.name);
+      button.textContent = 'Inspect memory →'; button.setAttribute('aria-label', 'Explore memory for ' + task.name);
       button.addEventListener('click', () => explore(task));
       body.append(title, description, button); article.append(media, body); grid.append(article);
       cards.push({ task, el: article });
