@@ -37,7 +37,7 @@ docs/
 │   │   └── main.js            # task discovery and nav
 │   ├── figures/               # figures extracted from the paper PDF
 │   ├── images/                # video poster + social card
-│   └── videos/                # overview video
+│   └── videos/                # overview and six task recordings
 └── .nojekyll
 ```
 
@@ -59,7 +59,7 @@ serves as the favicon. Original large PNGs are kept local and ignored by Git.
 ## Reading order and interaction
 
 The publication header leads with the full paper title, a short secondary subtitle,
-and Code / arXiv (coming soon) / Video links. An abstract precedes the problem,
+and Code / arXiv (coming soon) / Video links. A full human-order robot demonstration follows the header. An abstract precedes the problem,
 method, memory explorer, task suite and results. The optional button-sequence
 example and detailed tables are expandable.
 
@@ -175,3 +175,19 @@ magick fig.png -resize 1800x\> -strip -quality 88 docs/static/figures/fig.webp
 Adjust the `-crop WxH+X+Y` box per figure; `-trim` removes the surrounding
 whitespace so the box only needs to be close, not exact. Photo-heavy figures go
 to WebP; flat-color charts are often smaller as PNG — check both.
+
+## Recorded task videos
+
+The header features E2 (Press in Human Order). The task section provides five
+expandable recordings: A1, A3, A4, A5 and the middle-then-bottom/top wiping
+example (E3). The existing framework overview remains expandable there as well.
+These are complete recordings at original playback speed, without added memory
+logs or inferred episode timestamps. The task-specification explorer is separate.
+
+The six task MP4 files are web copies of local `HeLM_video` sources: H.264,
+1280 × 720, CRF 24, AAC 96 kbps, faststart, stripped container metadata.
+Their combined size is approximately 65.8 MiB; the originals remain local and
+ignored by Git. Posters are actual frames exported as 960 × 540 WebP.
+All players use `preload="none"`, native controls and inline playback.
+`static/js/videos.js` pauses other players on play and pauses a recording when
+its enclosing details panel closes. No automatic playback or new dependencies.

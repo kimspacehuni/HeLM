@@ -527,3 +527,32 @@ footer { border-top: 1px solid var(--border); padding: 35px 0; }
 /* Compact reference photos; cropping is baked into the assets, never CSS cover. */
 .task-media .task-photo { max-width: 260px; margin-inline: auto; }
 .scene-photo .task-photo { max-width: 320px; margin-inline: auto; }
+
+/* Recorded robot demonstrations: preserve the full camera frame. */
+.featured-demo { padding-top: 12px; padding-bottom: 48px; }
+.featured-demo .wrap { max-width: 1000px; }
+.featured-demo .section-heading { margin-bottom: 24px; }
+.featured-demo h2 { font-size: clamp(24px, 3vw, 34px); }
+.recorded-demo { margin: 0; }
+.recorded-demo figcaption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: 12px; color: var(--fg-muted); }
+.video-frame video { height: auto; }
+.task-recordings { margin-top: 48px; scroll-margin-top: 90px; }
+.task-recordings > h3 { font-size: 24px; margin-bottom: 12px; }
+.task-recordings > .small-note { margin-bottom: 24px; }
+.task-recordings .small-note a { text-decoration: underline; }
+.recording-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.task-recording { min-width: 0; border: 1px solid var(--border); background: var(--bg-card); }
+.task-recording > summary { cursor: pointer; list-style: none; }
+.task-recording > summary::-webkit-details-marker { display: none; }
+.task-recording > summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.task-recording > summary > img { display: block; width: 100%; height: auto; }
+.recording-heading { display: block; padding: 18px 20px; }
+.recording-meta { display: block; font-size: 11px; color: var(--fg-muted); }
+.recording-title { display: block; font-size: 19px; line-height: 1.35; font-weight: 600; margin-top: 8px; }
+.recording-toggle { display: flex; justify-content: space-between; margin-top: 14px; font-size: 12px; color: var(--accent); }
+.task-recording[open] .recording-toggle > span { transform: rotate(45deg); }
+.task-recording[open] > summary > img { display: none; }
+.recording-content { padding: 0 20px 20px; }
+.recording-content > p { font-size: 13px; line-height: 1.6; margin-bottom: 14px; }
+.overview-recording .detail-content > p { margin-bottom: 18px; }
+@media (max-width: 800px) { .recording-grid { grid-template-columns: 1fr; } }

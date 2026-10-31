@@ -30,7 +30,7 @@
   <div class="nav-inner">
     <a class="nav-brand" href="#top" aria-label="HeLM home"><img class="brand-mascot" src="static/images/mascot-mark.webp" width="32" height="32" alt="">HeLM<span class="brand-caption">ROBOT LEARNING</span></a>
     <div class="nav-links">
-      <a href="#overview">Overview</a><a href="#method">Method</a><a href="#memory">Memory</a><a href="#results">Results</a>
+      <a href="#overview">Overview</a><a href="#method">Method</a><a href="#memory">Memory</a><a href="#tasks">Tasks</a><a href="#results">Results</a>
     </div>
     <a class="nav-code" href="https://github.com/kimspacehuni/HeLM">GitHub <span aria-hidden="true">↗</span></a>
   </div>
@@ -47,6 +47,14 @@
     </div>
   </div>
 </header>
+
+<section id="video" class="section featured-demo" aria-labelledby="featured-demo-title">
+  <div class="wrap">
+    <div class="section-heading"><p class="eyebrow">REAL ROBOT / ACROSS EPISODES</p><h2 id="featured-demo-title">Observe the human. Remember the order.</h2><p>Press in Human Order: a human demonstration followed by the robot’s button presses.</p></div>
+    <figure class="recorded-demo"><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/press_in_human_order.webp" aria-label="Press in Human Order"><source src="static/videos/press_in_human_order.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/press_in_human_order.mp4">Download this demonstration.</a></video></div><figcaption><span>E2 · Full recording · 2:55</span><a class="text-link" href="#task-videos">More task demonstrations ↓</a></figcaption></figure>
+  </div>
+</section>
+
 
 <section id="overview" class="paper-overview">
   <div class="wrap abstract-content">
@@ -128,9 +136,7 @@
   </div>
 </section>
 
-<section id="video" class="section video-section">
-  <div class="wrap video-layout"><div class="video-copy"><p class="eyebrow">SEE IT ON THE ROBOT</p><h2>Overview video</h2><p>A framework walkthrough and real-world examples of HeLM in action.</p><a class="text-link" href="#tasks">Explore the evaluation tasks <span aria-hidden="true">↓</span></a></div><div class="video-frame"><video controls preload="none" playsinline poster="static/images/og_card.jpg" aria-label="HeLM framework overview and real-world demonstrations"><source src="static/videos/helm_demo.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/helm_demo.mp4">Download the overview video.</a></video></div></div>
-</section>
+
 
 <section id="tasks" class="section">
   <div class="wrap">
@@ -138,6 +144,19 @@
     <div class="tabs" role="group" aria-label="Filter evaluation tasks"><button class="tab" type="button" data-filter="intra" aria-pressed="true">Within an episode <span>A1–A5</span></button><button class="tab" type="button" data-filter="inter" aria-pressed="false">Across episodes <span>E1–E5</span></button><button class="tab" type="button" data-filter="all" aria-pressed="false">All 10 tasks</button></div>
     <div class="task-grid" id="task-grid"></div>
     <noscript><p>A1–A5: counting, button order, window wiping, drawer search and pick/place/press. E1–E5: cumulative counting, human-demonstrated order, remaining-window wiping, remembered object location and original-position restoration.</p></noscript>
+
+    <div id="task-videos" class="task-recordings" aria-labelledby="task-videos-title">
+      <h3 id="task-videos-title">Recorded demonstrations</h3>
+      <p class="small-note">Full recordings at their original playback speed. E2 is featured <a href="#video">above</a>. The memory explorer illustrates task specifications separately; it is not synchronized to these recordings.</p>
+      <div class="recording-grid">
+      <details class="task-recording"><summary><img src="static/images/videos/press_3_times.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">A1 · Within an episode · 1:40</span><span class="recording-title">Press Three Times</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>Count completed presses and stop after three.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/press_3_times.webp" aria-label="Press Three Times"><source src="static/videos/press_3_times.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/press_3_times.mp4">Download this demonstration.</a></video></div></div></details>
+      <details class="task-recording"><summary><img src="static/images/videos/wipe_bottom_middle_top.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">A3 · Within an episode · 2:04</span><span class="recording-title">Wipe Bottom, Middle, Top</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>Wipe the three window regions in order.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/wipe_bottom_middle_top.webp" aria-label="Wipe Bottom, Middle, Top"><source src="static/videos/wipe_bottom_middle_top.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/wipe_bottom_middle_top.mp4">Download this demonstration.</a></video></div></div></details>
+      <details class="task-recording"><summary><img src="static/images/videos/find_object.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">A4 · Within an episode · 1:11</span><span class="recording-title">Find the Object</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>Search the drawers for the object.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/find_object.webp" aria-label="Find the Object"><source src="static/videos/find_object.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/find_object.mp4">Download this demonstration.</a></video></div></div></details>
+      <details class="task-recording"><summary><img src="static/images/videos/pick_place_press.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">A5 · Within an episode · 1:16</span><span class="recording-title">Pick, Place and Press</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>Execute a sequence of object transfers and a button press.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/pick_place_press.webp" aria-label="Pick, Place and Press"><source src="static/videos/pick_place_press.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/pick_place_press.mp4">Download this demonstration.</a></video></div></div></details>
+      <details class="task-recording"><summary><img src="static/images/videos/wipe_middle_then_bottom_top.webp" width="960" height="540" loading="lazy" decoding="async" alt=""><span class="recording-heading"><span class="recording-meta">E3 · Across episodes · 4:00</span><span class="recording-title">Wipe Middle, Then Bottom and Top</span><span class="recording-toggle">Open recording <span aria-hidden="true">+</span></span></span></summary><div class="recording-content"><p>A window-wiping example with the middle region followed by the bottom and top regions.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/wipe_middle_then_bottom_top.webp" aria-label="Wipe Middle, Then Bottom and Top"><source src="static/videos/wipe_middle_then_bottom_top.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/wipe_middle_then_bottom_top.mp4">Download this demonstration.</a></video></div></div></details>
+      </div>
+      <details class="research-detail overview-recording"><summary>Framework overview video <span aria-hidden="true">+</span></summary><div class="detail-content"><p>A framework walkthrough and additional real-world examples.</p><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/og_card.jpg" aria-label="HeLM framework overview"><source src="static/videos/helm_demo.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/helm_demo.mp4">Download the overview video.</a></video></div></div></details>
+    </div>
     <details class="research-detail"><summary>See the real-world task setups <span aria-hidden="true">+</span></summary><div class="detail-content"><figure class="paper-figure"><img src="static/figures/fig4_tasksuite.webp" alt="Real-world setups for five intra-episode tasks and five inter-episode tasks." width="1800" height="876" loading="lazy"><figcaption>Top: within-episode tasks. Bottom: tasks that carry context across episodes.</figcaption></figure></div></details>
   </div>
 </section>
@@ -238,5 +257,6 @@
 <script src="static/js/inspector.js"></script>
 <script src="static/js/charts.js"></script>
 <script src="static/js/main.js"></script>
+<script src="static/js/videos.js"></script>
 </body>
 </html>
