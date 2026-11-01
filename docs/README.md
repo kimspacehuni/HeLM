@@ -33,7 +33,7 @@ docs/
 │   │   ├── traces.js          # GENERATED — real memory states, all 51 variants
 │   │   ├── hero.js            # manual introduction using the A2 task spec
 │   │   ├── inspector.js       # the memory inspector
-│   │   ├── charts.js          # success-rate chart + efficiency chart
+│   │   ├── charts.js          # subtask / strict task success chart
 │   │   └── main.js            # task discovery and nav
 │   ├── figures/               # figures extracted from the paper PDF
 │   ├── images/                # video poster + social card
@@ -58,7 +58,7 @@ serves as the favicon. Original large PNGs are kept local and ignored by Git.
 
 ## Reading order and interaction
 
-The publication header leads with the full paper title, a short secondary subtitle,
+The publication header leads with the full paper title, the authors and affiliation,
 and Code / arXiv (coming soon) / Video links. The original framework demo video follows the header. An abstract precedes the problem,
 method, memory explorer, task suite and results. The optional button-sequence
 example and detailed tables are expandable.
@@ -107,14 +107,26 @@ task-specification state. Playback is not recorded robot inference.
 
 ## Numbers on this page
 
-All success rates come from the paper (Fig. 5, Tables 1, 3, 7, 10), not from the
-top-level `README.md`.
+Content follows the manuscript supplied on 2026-11-01, titled
+“HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation”.
+Author order: Gyeonghun Kim, Donghoon Kim, Minsoo Choi, Suyun Lee;
+affiliation: Seoul National University. Gyeonghun Kim links to the supplied homepage.
 
-**Efficiency values are approximate.** `LAT` and `VRAM` in `charts.js` are
-digitised from paper Fig. 7, not raw benchmark measurements. At 8 events the
-estimates are 2.06 s / 6.16 GB for HeLM and 4.81 s / 28 GB for Keyframe-HLP:
-approximately 2.3× faster inference and 4.5× lower VRAM usage. The README,
-page summary, chart and social description use these estimates consistently.
+- Figure 5: intra-episode subtask success; Table 8: strict task success.
+  Strict PCMB-π₀ and Naïve-π₀ results are zero for all tasks.
+- Table 1: inter-episode subtask success.
+- Tables 2 and 3: memory / HLP fine-tuning and two-stage inference ablations.
+- Table 4: compositional generalization; Table 11: per-task LIBERO-Mem results.
+- Figure 6: original paper plot for task-length robustness and memory scaling.
+  The old digitized efficiency slider was removed. The text reports the paper's
+  up-to-4.5× memory and 2.5× inference claims; these are not new measurements.
+
+The paper evaluates **56 variants**. The repository explorer currently contains
+**51 task-specification variants**, explicitly labelled on the page. The missing
+five paper variants are not fabricated or counted as implemented examples.
+Task categories use “Intra-episode tasks” and “Inter-episode tasks”; individual
+names follow Table 6. Figure 2 was re-exported from the latest PDF with its entire
+right-hand label retained.
 
 ## Social preview card
 

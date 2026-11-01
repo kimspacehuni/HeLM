@@ -1,12 +1,4 @@
-/* The two result diagrams.
- *
- * 1. Success rates, with a toggle between the subtask-level score and the strict one.
- *    The strict metric is the interesting half of the story and the paper leaves it in
- *    an appendix table, so animating between the two makes the collapse legible:
- *    HeLM barely moves, every baseline falls off a cliff.
- *
- * 2. Inference cost against task length, driven by a slider.
- */
+/* Intra-episode results: Figure 5 and Table 8 of the latest manuscript. */
 (function () {
   'use strict';
   const V = window.HelmViz;
@@ -14,7 +6,7 @@
 
   /* ------------------------------------------------------- success rate chart */
 
-  /* Subtask-level from Fig. 5; strict from Tab. 7. */
+  /* Subtask-level from Fig. 5; strict from Table 8 of the latest manuscript. */
   const GROUPS = ['Average', 'A1', 'A2', 'A3', 'A4', 'A5'];
   const METHODS = [
     { key: 'ours', name: 'HeLM (Ours)',
@@ -25,10 +17,10 @@
       strict:  [29.3, 0, 86.7, 20, 0, 40] },
     { key: 'pcmb', name: 'PCMB-π₀',
       subtask: [39.5, 100, 24.4, 33.3, 32.9, 6.7],
-      strict:  [0.4, 0, 2.2, 0, 0, 0] },
+      strict:  [0, 0, 0, 0, 0, 0] },
     { key: 'naive', name: 'Naïve-π₀',
       subtask: [16.7, 31.1, 6.6, 33.3, 8.3, 4.4],
-      strict:  [0.4, 0, 2.2, 0, 0, 0] },
+      strict:  [0, 0, 0, 0, 0, 0] },
   ];
 
   function successChart() {
@@ -108,7 +100,7 @@
       if (readout) {
         readout.textContent = v === 0
           ? 'Subtask-level: the share of subtasks completed. Partial progress counts.'
-          : 'Strict: a trial counts only if every subtask completes, in order, and the agent then stops. HeLM gives up 4.4 points; Keyframe-HLP loses 43.6 and both π₀ baselines go to the floor.';
+          : 'Strict task success requires every subtask to complete in order with proper termination: HeLM 81.3%, Keyframe-HLP 29.3%, PCMB-π₀ 0%, Naïve-π₀ 0% (Table 8).';
       }
     }
 
@@ -123,99 +115,5 @@
     draw();
   }
 
-  /* ----------------------------------------------------------- efficiency */
-
-  /* Approximate estimates digitised from Fig. 7, not raw measurements.
-     At 8 events: ~6.2 vs ~28 GB VRAM and ~2.06 vs ~4.81 seconds latency. */
-  const LEN = [1, 2, 3, 4, 5, 6, 7, 8];
-  const LAT = { ours: [2.05, 2.05, 2.04, 2.04, 2.05, 2.05, 2.06, 2.06],
-                key:  [1.90, 1.96, 2.25, 2.52, 3.00, 3.49, 4.22, 4.81] };
-  const VRAM = { ours: [6.2, 6.15, 6.12, 6.12, 6.13, 6.15, 6.15, 6.16],
-                 key:  [6.3, 7.5, 9.0, 11.7, 14.5, 18.2, 23.0, 28.0] };
-
-  function efficiencyChart() {
-    const cv = document.getElementById('chart-eff');
-    if (!cv) return;
-    const ctx = cv.getContext('2d');
-    const slider = document.getElementById('eff-len');
-    const readout = document.getElementById('chart-eff-note');
-    let n = 8;
-
-    function panel(x0, w, pad, series, unit, maxY, titleText, pal, H) {
-      const padT = 26, padB = 34;
-      const plotH = H - padT - padB, plotW = w - pad * 2;
-      const X = (i) => x0 + pad + (i / (LEN.length - 1)) * plotW;
-      const Y = (v) => padT + plotH - (v / maxY) * plotH;
-
-      ctx.strokeStyle = pal.line; ctx.lineWidth = 1;
-      for (let g = 0; g <= 4; g++) {
-        const y = padT + plotH - (g / 4) * plotH;
-        ctx.beginPath(); ctx.moveTo(x0 + pad, y); ctx.lineTo(x0 + w - pad, y); ctx.stroke();
-      }
-
-      [['key', pal.key], ['ours', pal.ours]].forEach(([k, col]) => {
-        ctx.strokeStyle = col; ctx.lineWidth = 2.4;
-        ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-        ctx.beginPath();
-        series[k].slice(0, n).forEach((v, i) => (i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v))));
-        ctx.stroke();
-        const i = n - 1, v = series[k][i];
-        ctx.beginPath(); ctx.arc(X(i), Y(v), 4, 0, Math.PI * 2);
-        ctx.fillStyle = col; ctx.fill();
-        ctx.strokeStyle = pal.panel; ctx.lineWidth = 2; ctx.stroke();
-        ctx.fillStyle = col;
-        ctx.font = '700 12px ui-monospace, monospace';
-        ctx.textAlign = X(i) > x0 + w - 60 ? 'right' : 'left';
-        ctx.fillText(v.toFixed(unit === 'GB' ? 1 : 2) + ' ' + unit,
-          X(i) + (X(i) > x0 + w - 60 ? -8 : 8), Y(v) - 12);
-      });
-
-      ctx.fillStyle = pal.text;
-      ctx.font = '600 11px Inter, system-ui, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(titleText, x0 + pad, 12);
-      ctx.fillStyle = pal.faint;
-      ctx.font = '500 10px ui-monospace, monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('task length ' + n, x0 + w / 2, H - 10);
-    }
-
-    function draw() {
-      const pal = V.palette();
-      const stacked = cv.clientWidth < 560;
-      const { w: W, h: H } = V.fit(cv, stacked ? 380 : 210);
-      ctx.clearRect(0, 0, W, H);
-      if (stacked) {
-        panel(0, W, 16, LAT, 's', 5.2, 'Latency', pal, H / 2);
-        ctx.save(); ctx.translate(0, H / 2);
-        panel(0, W, 16, VRAM, 'GB', 30, 'VRAM', pal, H / 2);
-        ctx.restore();
-      } else {
-        panel(0, W / 2, 16, LAT, 's', 5.2, 'Latency', pal, H);
-        panel(W / 2, W / 2, 16, VRAM, 'GB', 30, 'VRAM', pal, H);
-      }
-    }
-
-    function setN(v) {
-      n = +v;
-      if (readout) {
-        const i = n - 1;
-        const lean = VRAM.key[i] / VRAM.ours[i];
-        readout.textContent = n <= 2
-          ? 'Digitised estimates show slightly higher HeLM latency at short horizons.'
-          : 'Approximate values at task length ' + n + ', HeLM answers in ' + LAT.ours[i].toFixed(2) + ' s on '
-            + VRAM.ours[i].toFixed(1) + ' GB, while Keyframe-HLP needs ' + LAT.key[i].toFixed(2)
-            + ' s and ' + VRAM.key[i].toFixed(1) + ' GB — ' + lean.toFixed(1)
-            + '× the VRAM usage.';
-      }
-      draw();
-    }
-
-    if (slider) { slider.addEventListener('input', (e) => setN(e.target.value)); setN(slider.value); }
-    else setN(8);
-    window.addEventListener('resize', draw);
-  }
-
   successChart();
-  efficiencyChart();
 })();

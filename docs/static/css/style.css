@@ -541,3 +541,11 @@ footer { border-top: 1px solid var(--border); padding: 35px 0; }
 .task-memory .detail-content > .small-note { margin-bottom: 20px; }
 .task-memory .inspector { margin-top: 20px; }
 @media (max-width: 760px) { .task-grid { grid-template-columns: 1fr; } }
+
+.paper-authors { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 26px; margin-top: 28px; font-size: 18px; line-height: 1.5; }
+.paper-authors a { text-decoration: underline; text-underline-offset: 4px; }
+.paper-affiliation { margin-top: 10px; font-size: 16px; }
+.paper-scaling { margin-top: 40px; }
+.paper-scaling > p { margin-top: 16px; max-width: 880px; font-size: 14px; }
+.paper-scaling .paper-figure { background: #fff; }
+@media (max-width: 560px) { .paper-authors { font-size: 15px; gap: 8px 18px; margin-top: 22px; } .paper-affiliation { font-size: 14px; } }

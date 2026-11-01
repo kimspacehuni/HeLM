@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>HeLM: Hierarchical Explicit Language Memory for VLM-Guided Non-Markovian Manipulation</title>
+<title>HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation</title>
 <meta name="description" content="HeLM establishes explicit natural language as a memory representation for VLA-based robot manipulation, with a working-episodic structure and event-triggered updates.">
 
 <!-- og:image must be an absolute URL — scrapers do not resolve relative paths.
@@ -12,8 +12,8 @@
      (LinkedIn in particular) still do not render WebP previews. -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kimspacehuni.github.io/HeLM/">
-<meta property="og:title" content="HeLM: Hierarchical Explicit Language Memory for VLM-Guided Non-Markovian Manipulation">
-<meta property="og:description" content="Explicit language as a memory representation for VLA-based manipulation. +13% over baselines, 78% zero-shot, approximately 4.5x lower VRAM usage than keyframe memory at 8 events.">
+<meta property="og:title" content="HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation">
+<meta property="og:description" content="Explicit language as a memory representation for VLA-based manipulation. 12.8 percentage points higher intra-episode subtask success than the strongest baseline, 78% compositional generalization, and up to 4.5x less memory at long horizons.">
 <meta property="og:image" content="https://kimspacehuni.github.io/HeLM/static/images/og_card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="626">
@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 
 
-<link rel="stylesheet" href="static/css/style.css?v=task-layout-2">
+<link rel="stylesheet" href="static/css/style.css?v=paper-20261101">
 <link rel="icon" type="image/png" href="static/images/favicon.png">
 </head>
 <body>
@@ -38,8 +38,8 @@
 <main id="main" tabindex="-1">
 <header class="hero" id="top">
   <div class="wrap paper-header">
-    <h1 class="paper-title"><span class="paper-title-line"><span class="paper-acronym">HeLM:</span> Hierarchical Explicit Language Memory</span> <span class="paper-title-line">for VLM-Guided Non-Markovian Manipulation</span></h1>
-    <p class="paper-subtitle">Memory makes the next move.</p>
+    <h1 class="paper-title"><span class="paper-title-line"><span class="paper-acronym">HeLM:</span> Hierarchical Explicit Language Memory</span> <span class="paper-title-line">for Non-Markovian Manipulation</span></h1>
+    <div class="paper-authors" aria-label="Authors"><a href="https://kimspacehuni.github.io/">Gyeonghun Kim</a><span>Donghoon Kim</span><span>Minsoo Choi</span><span>Suyun Lee</span></div><p class="paper-affiliation">Seoul National University</p>
     <div class="paper-links" aria-label="Paper resources">
       <a class="btn primary" href="https://github.com/kimspacehuni/HeLM"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m8 6-6 6 6 6M16 6l6 6-6 6M14 3l-4 18"/></svg>Code</a>
       <span class="btn unavailable" id="link-arxiv" role="link" aria-disabled="true">arXiv <span class="resource-status">Coming soon</span></span>
@@ -57,7 +57,7 @@
   <div class="wrap abstract-content">
     <h2>Abstract</h2>
     <p>HeLM introduces explicit language memory for VLM-guided non-Markovian manipulation. A high-level vision-language model maintains working memory within an episode and episodic context across episodes. Memory is updated when a task-relevant event occurs, and action commands guide a low-level robot policy.</p>
-    <p>We evaluate HeLM on 10 real-world tasks with 51 variants, covering counting, ordered actions and object history, including five inter-episode tasks that require persistent context. The evaluation also examines generalization to unseen variants and memory and inference costs.</p>
+    <p>We evaluate HeLM on 10 real-world tasks with 56 variants, covering counting, ordered actions and object history, including five inter-episode tasks that require persistent context across instruction boundaries. HeLM improves intra-episode subtask success by 12.8 percentage points over the strongest baseline and achieves 78% subtask success on compositional generalization tasks. The paper reports up to 4.5× less memory and 2.5× faster inference than the keyframe baseline at long horizons.</p>
   </div>
 </section>
 
@@ -96,7 +96,7 @@
     <ol class="method-steps"><li><span class="step-number">01</span><h3>Notice an event</h3><p>Detect a meaningful change, such as a button press. If nothing happens, keep the memory.</p><span class="step-tag">DETECT</span></li><li><span class="step-number">02</span><h3>Update the memory</h3><p>Record the new progress and decide which action command should come next.</p><span class="step-tag">UPDATE</span></li><li><span class="step-number">03</span><h3>Execute the action</h3><p>The low-level policy turns the command and current observations into robot actions.</p><span class="step-tag">ACT</span></li></ol>
     <figure class="method-figure">
       <div class="figure-scroll" tabindex="0" role="region" aria-label="Paper Figure 2: HeLM architecture. Scroll horizontally on smaller screens.">
-        <img src="static/figures/fig2_arch.webp" alt="HeLM architecture from the paper: the high-level policy reads the instruction, current observation and language memory, then sends action commands to the low-level VLA policy. Working memory tracks events; episodic context carries information across episodes. The shared VLM uses detect mode to watch for events and update mode to revise memory and the next command." width="1800" height="733" loading="lazy">
+        <img src="static/figures/fig2_arch.webp" alt="HeLM architecture from the paper: the high-level policy reads the instruction, current observation and language memory, then sends action commands to the low-level VLA policy. Working memory tracks events; episodic context carries information across episodes. The shared VLM uses detect mode to watch for events and update mode to revise memory and the next command." width="1800" height="746" loading="lazy">
       </div>
       <figcaption><div><span class="figure-tag">FIGURE 2 / THE HeLM ARCHITECTURE</span><p>The high-level policy maintains language memory and chooses an action command. The low-level policy turns that command into robot actions. Detect and update are two modes of the same VLM.</p><p class="figure-scroll-hint">Scroll horizontally to read the full figure.</p></div><a class="text-link" href="static/figures/fig2_arch.webp" target="_blank" rel="noopener">Open full-size figure <span aria-hidden="true">↗</span></a></figcaption>
     </figure>
@@ -111,12 +111,12 @@
 
 <section id="tasks" class="section">
   <div class="wrap">
-    <div class="section-heading heading-split"><div><p class="eyebrow">03 / TASKS</p><h2>Real-world tasks</h2></div><p>Watch recorded trials and inspect the memory for each task. The suite contains 10 tasks and 51 variants, covering both within-episode and across-episode memory.</p></div>
-    <div class="tabs" role="group" aria-label="Filter evaluation tasks"><button class="tab" type="button" data-filter="intra" aria-pressed="true">Within an episode <span>A1–A5</span></button><button class="tab" type="button" data-filter="inter" aria-pressed="false">Across episodes <span>E1–E5</span></button><button class="tab" type="button" data-filter="all" aria-pressed="false">All 10 tasks</button></div>
+    <div class="section-heading heading-split"><div><p class="eyebrow">03 / TASKS</p><h2>Real-world tasks</h2></div><p>Watch recorded trials and inspect the memory for each task. The suite contains 10 tasks and 56 variants, covering both intra-episode and inter-episode memory.</p></div>
+    <div class="tabs" role="group" aria-label="Filter evaluation tasks"><button class="tab" type="button" data-filter="intra" aria-pressed="true">Intra-episode tasks <span>A1–A5</span></button><button class="tab" type="button" data-filter="inter" aria-pressed="false">Inter-episode tasks <span>E1–E5</span></button><button class="tab" type="button" data-filter="all" aria-pressed="false">All tasks</button></div>
     <div class="task-grid" id="task-grid"></div>
     <noscript><p>A1–A5: counting, button order, window wiping, drawer search and pick/place/press. E1–E5: cumulative counting, human-demonstrated order, remaining-window wiping, remembered object location and original-position restoration.</p></noscript>
 
-    <details id="memory" class="research-detail task-memory"><summary>Inspect task-specification memory states <span aria-hidden="true">+</span></summary><div class="detail-content"><p class="small-note">Select “Inspect memory” on a task to see its instructions, progress and memory states. These are task-specification examples, separate from the recorded videos.</p>
+    <details id="memory" class="research-detail task-memory"><summary>Inspect task-specification memory states <span aria-hidden="true">+</span></summary><div class="detail-content"><p class="small-note">Select “Inspect memory” on a task to see its instructions, progress and memory states. These are task-specification examples, separate from the recorded videos. This explorer contains 51 repository variants; the paper evaluates 56 variants.</p>
     <div class="inspector" id="inspector" tabindex="0" role="region" aria-label="Interactive task memory explorer">
       <div class="insp-tabs" id="insp-tabs"></div>
 
@@ -138,17 +138,17 @@
     </div>
     <p class="small-note explorer-note">Reference photographs switch to matching actions or outcomes when available; they are not synchronized rollout frames. Window regions use the robot’s frame. Missing drawer-specific photographs are marked as setup references. Progress and memory follow the task specifications. Playback timing is illustrative. For cross-episode memory, try E1 and follow the new-instruction marker.</p>
     </div></details>
-    <details class="research-detail"><summary>See the real-world task setups <span aria-hidden="true">+</span></summary><div class="detail-content"><figure class="paper-figure"><img src="static/figures/fig4_tasksuite.webp" alt="Real-world setups for five intra-episode tasks and five inter-episode tasks." width="1800" height="876" loading="lazy"><figcaption>Top: within-episode tasks. Bottom: tasks that carry context across episodes.</figcaption></figure></div></details>
+    <details class="research-detail"><summary>See the real-world task setups <span aria-hidden="true">+</span></summary><div class="detail-content"><figure class="paper-figure"><img src="static/figures/fig4_tasksuite.webp" alt="Real-world setups for five intra-episode tasks and five inter-episode tasks." width="1800" height="876" loading="lazy"><figcaption>Top: Intra-episode tasks (A1–A5). Bottom: Inter-episode tasks (E1–E5).</figcaption></figure></div></details>
   </div>
 </section>
 
 <section id="results" class="section tinted">
   <div class="wrap">
-    <div class="section-heading"><p class="eyebrow">04 / THE EVIDENCE</p><h2>Evaluation results</h2><p>Real-world evaluation across 10 tasks. Each task averages 15–30 trials, with 3–6 variants and 5 trials per variant.</p></div>
-    <div class="result-highlights"><div><span class="result-number">85.7<span>%</span></span><h3>Within an episode</h3><p>Mean subtask-level success.<br>Keyframe-HLP: 72.9%.</p></div><div><span class="result-number">89.2<span>%</span></span><h3>Across episodes</h3><p>Mean success on E1–E5.<br>Keyframe-HLP: 16.6%.</p></div><div><span class="result-number">78<span>%</span></span><h3>Zero-shot HLP</h3><p>Generalization to unseen variants.<br>Keyframe-HLP: 65.7%.</p></div></div>
-    <div class="result-chart-panel"><div class="chart-heading"><div><p class="eyebrow">WITHIN-EPISODE COMPARISON</p><h3>Progress is useful. Finishing matters.</h3></div><div class="seg" role="group" aria-label="Success metric"><button type="button" data-metric="0" aria-pressed="true">Subtask-level</button><button type="button" data-metric="1" aria-pressed="false">Strict completion</button></div></div><canvas id="chart-success" role="img" aria-label="Subtask and strict success rates for HeLM and three baselines across A1 to A5"></canvas><div class="legend"><span><i class="legend-ours"></i>HeLM</span><span><i class="legend-key"></i>Keyframe-HLP</span><span><i class="legend-pcmb"></i>PCMB-π₀</span><span><i class="legend-naive"></i>Naïve-π₀</span></div><p class="diagram-note" id="chart-success-note" aria-live="polite"></p></div>
-    <details class="research-detail"><summary>All within-episode scores <span aria-hidden="true">+</span></summary><div class="detail-content"><div class="table-scroll"><table><caption>Subtask-level success rate (%), paper Fig. 5</caption><thead><tr><th scope="col">Method</th><th scope="col">A1</th><th scope="col">A2</th><th scope="col">A3</th><th scope="col">A4</th><th scope="col">A5</th><th scope="col">Avg.</th></tr></thead><tbody><tr class="ours"><th scope="row">HeLM</th><td>100</td><td>92.2</td><td>96.6</td><td>66.6</td><td>73.3</td><td>85.7</td></tr><tr><th scope="row">Keyframe-HLP</th><td>90★</td><td>91.1</td><td>60</td><td>79.2★</td><td>44.4</td><td>72.9</td></tr><tr><th scope="row">PCMB-π₀</th><td>100</td><td>24.4</td><td>33.3</td><td>32.9</td><td>6.7</td><td>39.5</td></tr><tr><th scope="row">Naïve-π₀</th><td>31.1</td><td>6.6</td><td>33.3</td><td>8.3</td><td>4.4</td><td>16.7</td></tr></tbody></table></div><p class="footnote">★ Keyframe-HLP fails to detect termination. Subtask scores count partial progress; use the chart’s strict metric for ordered completion and stopping.</p></div></details>
-    <details class="research-detail"><summary>Across-episode scores <span aria-hidden="true">+</span></summary><div class="detail-content">    <div class="table-scroll">
+    <div class="section-heading"><p class="eyebrow">04 / THE EVIDENCE</p><h2>Evaluation results</h2><p>Real-world evaluation across 10 tasks. The evaluation protocol uses 15–45 trials per task (3–9 variants, 5 trials each). Intra-episode results in Figure 5 use 15–30 trials per task. Subtask success and strict task success are reported separately.</p></div>
+    <div class="result-highlights"><div><span class="result-number">85.7<span>%</span></span><h3>Intra-episode</h3><p>Mean subtask-level success.<br>Keyframe-HLP: 72.9%.</p></div><div><span class="result-number">89.2<span>%</span></span><h3>Inter-episode</h3><p>Mean subtask-level success on E1–E5.<br>Keyframe-HLP: 16.6%.</p></div><div><span class="result-number">78<span>%</span></span><h3>Compositional generalization</h3><p>Subtask success on held-out variants.<br>Keyframe-HLP: 65.7%.</p></div></div>
+    <div class="result-chart-panel"><div class="chart-heading"><div><p class="eyebrow">INTRA-EPISODE COMPARISON</p><h3>Intra-episode subtask and strict task success</h3></div><div class="seg" role="group" aria-label="Success metric"><button type="button" data-metric="0" aria-pressed="true">Subtask success</button><button type="button" data-metric="1" aria-pressed="false">Strict task success</button></div></div><canvas id="chart-success" role="img" aria-label="Subtask and strict success rates for HeLM and three baselines across A1 to A5"></canvas><div class="legend"><span><i class="legend-ours"></i>HeLM</span><span><i class="legend-key"></i>Keyframe-HLP</span><span><i class="legend-pcmb"></i>PCMB-π₀</span><span><i class="legend-naive"></i>Naïve-π₀</span></div><p class="diagram-note" id="chart-success-note" aria-live="polite"></p></div>
+    <details class="research-detail"><summary>All intra-episode scores <span aria-hidden="true">+</span></summary><div class="detail-content"><div class="table-scroll"><table><caption>Subtask-level success rate (%), paper Fig. 5</caption><thead><tr><th scope="col">Method</th><th scope="col">A1</th><th scope="col">A2</th><th scope="col">A3</th><th scope="col">A4</th><th scope="col">A5</th><th scope="col">Avg.</th></tr></thead><tbody><tr class="ours"><th scope="row">HeLM</th><td>100</td><td>92.2</td><td>96.6</td><td>66.6</td><td>73.3</td><td>85.7</td></tr><tr><th scope="row">Keyframe-HLP</th><td>90★</td><td>91.1</td><td>60</td><td>79.2★</td><td>44.4</td><td>72.9</td></tr><tr><th scope="row">PCMB-π₀</th><td>100</td><td>24.4</td><td>33.3</td><td>32.9</td><td>6.7</td><td>39.5</td></tr><tr><th scope="row">Naïve-π₀</th><td>31.1</td><td>6.6</td><td>33.3</td><td>8.3</td><td>4.4</td><td>16.7</td></tr></tbody></table></div><p class="footnote">★ Keyframe-HLP fails to detect termination. Subtask scores count partial progress; use the chart’s strict metric for ordered completion and stopping.</p></div></details>
+    <details class="research-detail"><summary>Inter-episode scores <span aria-hidden="true">+</span></summary><div class="detail-content">    <div class="table-scroll">
       <table>
         <thead>
           <tr><th>Method</th><th>E1</th><th>E2</th><th>E3</th><th>E4</th><th>E5</th><th>Avg.</th></tr>
@@ -166,7 +166,7 @@
     </p>
 
 </div></details>
-    <details class="research-detail"><summary>Zero-shot HLP generalization <span aria-hidden="true">+</span></summary><div class="detail-content">    <p>
+    <details class="research-detail"><summary>Compositional generalization <span aria-hidden="true">+</span></summary><div class="detail-content">    <p>
       The LLP is fine-tuned to execute specific action commands, but the HLP receives no task-specific
       finetuning for these compositions — e.g. counting to five when training only covered up to three,
       or grounding an object never seen during training.
@@ -185,11 +185,13 @@
     <p class="footnote">★ Keyframe-HLP fails to detect termination in A1′, A4′, and A5′.</p>
 
 </div></details>
-    <div class="efficiency-layout"><div><p class="eyebrow">MEMORY COST</p><h3>A compact record<br>as the task gets longer.</h3><p>At 8 events, digitised estimates show approximately 4.5× lower VRAM usage and 2.3× faster inference than Keyframe-HLP.</p><p class="small-note">Approximate values from paper Fig. 7, not raw benchmark measurements. HeLM is slightly slower at short horizons.</p></div><div class="efficiency-chart"><canvas id="chart-eff" role="img" aria-label="Estimated latency and VRAM usage as task length grows"></canvas><div class="controls"><label for="eff-len">Task length</label><input type="range" id="eff-len" min="1" max="8" step="1" value="8"></div><p class="diagram-note" id="chart-eff-note" aria-live="polite"></p></div></div>
+<details class="research-detail"><summary>Memory and HLP fine-tuning ablations <span aria-hidden="true">+</span></summary><div class="detail-content"><div class="table-scroll"><table><caption>Table 2 · LIBERO-Mem task success (%)</caption><thead><tr><th scope="col">Method</th><th scope="col">T1–T2</th><th scope="col">T3–T8</th><th scope="col">T9–T10</th><th scope="col">Avg.</th></tr></thead><tbody><tr><th scope="row">π₀.₅</th><td>65</td><td>10</td><td>87.5</td><td>36.5</td></tr><tr><th scope="row">π₀.₅ + HLP (w/o memory)</th><td>27.5</td><td>0</td><td>32.5</td><td>12</td></tr><tr><th scope="row">π₀.₅ + HLP + memory (w/o FT)</th><td>5</td><td>0</td><td>37.5</td><td>8.5</td></tr><tr class="ours"><th scope="row">HeLM (Ours)</th><td>67.5</td><td>45.8</td><td>87.5</td><td>58.5</td></tr></tbody></table></div><p class="footnote">All configurations use π₀.₅ as LLP. T3–T8 require persistent temporal state tracking. A shared Qwen2.5-VL-7B HLP is trained using 100 demonstrations per task; evaluation uses 20 held-out rollouts per task.</p></div></details>
+<details class="research-detail"><summary>Two-stage inference ablation <span aria-hidden="true">+</span></summary><div class="detail-content"><div class="table-scroll"><table><caption>Table 3 · Real-world intra-episode subtask success (%)</caption><thead><tr><th scope="col">Method</th><th scope="col">A1</th><th scope="col">A2</th><th scope="col">A3</th><th scope="col">A4</th><th scope="col">A5</th><th scope="col">Avg.</th></tr></thead><tbody><tr><th scope="row">HeLM w/ one-stage inference</th><td>100</td><td>81.5</td><td>22.2</td><td>86.8</td><td>48.1</td><td>67.7</td></tr><tr class="ours"><th scope="row">HeLM (Ours)</th><td>100</td><td>92.2</td><td>96.6</td><td>66.6</td><td>73.3</td><td>85.7</td></tr></tbody></table></div></div></details>
+<details class="research-detail"><summary>Failure analysis and limitations <span aria-hidden="true">+</span></summary><div class="detail-content"><p>Among HeLM failures, Detection accounts for 64.1%, Low-Level Execution for 31.2%, and Order for 4.7%; no Termination failures were observed. Detection errors can cause incorrect memory updates that the framework cannot self-correct.</p><p>The evaluation uses predefined task-relevant events and focuses on discrete state changes. Synchronous HLP invocation may miss events within an LLP chunk. The benefit of separating working and episodic memory, relative to a single persistent memory, remains to be evaluated.</p></div></details>
+    <div class="paper-scaling"><h3>Task-length robustness and memory scaling</h3><p>The paper reports up to 4.5× less memory and 2.5× faster inference than Keyframe-HLP at long horizons. HeLM has additional HLP inference overhead and is initially slower at short horizons.</p><figure class="paper-figure"><img src="static/figures/fig6_scaling.webp" alt="Paper Figure 6: success across longer task sequences, inference latency and GPU memory as stored events increase." width="1800" height="520" loading="lazy"><figcaption>Figure 6 from the latest manuscript. A1 remains at 100% through seven subtasks; A2 ranges from 77% to 100%. The figure reports memory scaling against the same Qwen2.5-VL-7B HLP backbone.</figcaption></figure></div>
     <details class="research-detail"><summary>Additional simulation results: LIBERO-Mem <span aria-hidden="true">+</span></summary><div class="detail-content">    <p>
       As a complement to the real-robot experiments, we ran HeLM on the LIBERO-Mem benchmark against
-      published memory-augmented baselines. We report these as exploratory evidence — see the paper for
-      benchmark limitations we observed.
+      π₀.₅ and published memory-augmented baselines. Full per-task results are reported in Table 11; memory and HLP fine-tuning ablations are reported in Table 2.
     </p>
     <div class="table-scroll">
       <table>
@@ -203,6 +205,7 @@
           <tr class="ours"><td>HeLM (Ours)</td><td>75.0</td><td>60.0</td><td>75.0</td><td>55.0</td><td>65.0</td><td>25.0</td><td>45.0</td><td>10.0</td><td>85.0</td><td>90.0</td><td class="avg">58.5</td></tr>
           <tr><td><em>π</em><sub>0.5</sub></td><td>50.0</td><td>80.0</td><td>15.0</td><td>20.0</td><td>15.0</td><td>5.0</td><td>0.0</td><td>5.0</td><td>85.0</td><td>90.0</td><td class="avg">36.5</td></tr>
           <tr><td>Naive E-SlotSSM</td><td>50.0</td><td>0.0</td><td>33.3</td><td>0.0</td><td>14.3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>30.0</td><td>20.0</td><td class="avg">14.8</td></tr>
+          <tr><td>SlotVLA (h=1)</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="avg">0.0</td></tr>
           <tr><td>SlotVLA (h=8)</td><td>50.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="avg">5.0</td></tr>
           <tr><td><em>π</em><sub>0</sub> (h=1)</td><td>50.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="avg">5.0</td></tr>
         </tbody>
@@ -210,7 +213,7 @@
     </div>
     <p class="footnote">
       Baseline rows for <em>π</em><sub>0</sub>, SlotVLA, and Naive E-SlotSSM are taken from the
-      LIBERO-Mem paper.
+      LIBERO-Mem paper. In T9–T10, the wrist camera can reveal basket contents, weakening the intended memory requirement (Appendix F.3).
     </p></div></details>
   </div>
 </section>
@@ -218,8 +221,9 @@
 <section id="resources" class="section resources-section">
   <div class="wrap">
     <div class="resource-layout"><div><p class="eyebrow">05 / EXPLORE THE PROJECT</p><h2>Code and resources</h2><p>Task specifications, the data pipeline, HLP training and robot evaluation code are available in the repository.</p><a class="btn primary" href="https://github.com/kimspacehuni/HeLM">Explore the code <span aria-hidden="true">↗</span></a><div class="publication-status"><span id="link-paper" aria-disabled="true">Paper <em>soon</em></span><span aria-disabled="true">arXiv <em>soon</em></span></div></div><div class="repo-paths"><a href="https://github.com/kimspacehuni/HeLM#installation"><span>01</span><div><strong>Get started</strong><p>Installation and minimal validation</p></div><b aria-hidden="true">↗</b></a><a href="https://github.com/kimspacehuni/HeLM/tree/main/helm_datasets"><span>02</span><div><strong>Build the data</strong><p>Task specs → event and memory labels</p></div><b aria-hidden="true">↗</b></a><a href="https://github.com/kimspacehuni/HeLM/tree/main/train"><span>03</span><div><strong>Train the policies</strong><p>High-level memory and low-level actions</p></div><b aria-hidden="true">↗</b></a></div></div>
-    <details class="research-detail citation" id="bibtex"><summary>BibTeX <span aria-hidden="true">+</span></summary><div class="detail-content"><p class="small-note">Publication metadata will be updated when the paper is available.</p><pre class="bibtex">@misc{helm2026,
-  title = {HeLM: Hierarchical Explicit Language Memory for VLM-Guided Non-Markovian Manipulation},
+    <details class="research-detail citation" id="bibtex"><summary>BibTeX <span aria-hidden="true">+</span></summary><div class="detail-content"><p class="small-note">Author order and title follow the latest manuscript. The arXiv identifier will be added when available.</p><pre class="bibtex">@misc{helm2026,
+  author = {Kim, Gyeonghun and Kim, Donghoon and Choi, Minsoo and Lee, Suyun},
+  title = {HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation},
   year  = {2026}
 }</pre></div></details>
   </div>
@@ -233,11 +237,11 @@
 </div></footer>
 <script src="static/js/viz.js"></script>
 <script src="static/js/scene.js"></script>
-<script src="static/js/traces.js"></script>
+<script src="static/js/traces.js?v=paper-20261101"></script>
 <script src="static/js/hero.js"></script>
-<script src="static/js/inspector.js"></script>
-<script src="static/js/charts.js"></script>
-<script src="static/js/main.js?v=task-layout-2"></script>
-<script src="static/js/videos.js?v=task-layout-2"></script>
+<script src="static/js/inspector.js?v=paper-20261101"></script>
+<script src="static/js/charts.js?v=paper-20261101"></script>
+<script src="static/js/main.js?v=paper-20261101"></script>
+<script src="static/js/videos.js?v=paper-20261101"></script>
 </body>
 </html>

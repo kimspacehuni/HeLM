@@ -58,7 +58,7 @@
       wrap.className = 'insp-tabgroup';
       const cap = document.createElement('span');
       cap.className = 'insp-tabcap';
-      cap.textContent = grp === 'intra' ? 'Within an instruction' : 'Across episodes';
+      cap.textContent = grp === 'intra' ? 'Intra-episode tasks' : 'Inter-episode tasks';
       wrap.appendChild(cap);
       DATA.filter((t) => t.group === grp).forEach((t) => {
         const b = document.createElement('button');

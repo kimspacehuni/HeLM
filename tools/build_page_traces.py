@@ -34,7 +34,7 @@ TASKS = [
     ("A2", "intra", "Press in Order",        "press_button_in_order",              "seq"),
     ("A3", "intra", "Wipe the Window",       "wipe_the_window",                    "wipe_all"),
     ("A4", "intra", "Find the Object",       "find_object_in_drawer",              "drawer"),
-    ("A5", "intra", "Pick, Place and Press", "pick_place_press",                   "seq"),
+    ("A5", "intra", "Pick, Place, Press", "pick_place_press",                   "seq"),
     ("E1", "inter", "Cumulative Press",      "press_button_N_times_M_times_total", "total"),
     ("E2", "inter", "Human-Order Press",     "press_button_in_human_order",        "seq"),
     ("E3", "inter", "Remaining Wipe",        "wipe_the_remaining_window",          "wipe_rest"),
