@@ -549,3 +549,14 @@ footer { border-top: 1px solid var(--border); padding: 35px 0; }
 .paper-scaling > p { margin-top: 16px; max-width: 880px; font-size: 14px; }
 .paper-scaling .paper-figure { background: #fff; }
 @media (max-width: 560px) { .paper-authors { font-size: 15px; gap: 8px 18px; margin-top: 22px; } .paper-affiliation { font-size: 14px; } }
+
+/* One selected task at a time; inter-episode tasks use a compact text list. */
+.task-choices { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+.task-choice { padding: 10px 14px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-card); color: var(--fg-muted); text-align: left; font-size: 13px; line-height: 1.5; }
+.task-choice[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.task-choice[hidden] { display: none; }
+.task-stage { max-width: 840px; margin: 0 auto 34px; }
+.task-stage .task-card[hidden] { display: none; }
+.task-stage .task-name { font-size: 21px; }
+.task-stage .task-desc { font-size: 14px; }
+@media (max-width: 560px) { .task-choices { gap: 8px; } .task-choice { font-size: 12px; padding: 9px 11px; } }

@@ -15,13 +15,24 @@
     E4: 'Recall an object’s location and open the correct drawer directly.',
     E5: 'Remember the original plate and return the object to it.',
   };
-  const RECORDINGS = { A1: 'press_3_times', A3: 'wipe_bottom_middle_top', A4: 'find_object', A5: 'pick_place_press', E2: 'press_in_human_order', E3: 'wipe_middle_then_bottom_top' };
+  const RECORDINGS = { A1: 'press_3_times', A3: 'wipe_bottom_middle_top', A4: 'find_object', A5: 'pick_place_press', E2: 'press_in_human_order' };
   const grid = document.getElementById('task-grid');
   const cards = [];
+  const choices = document.getElementById('task-choices');
+  let selected = null;
   const filters = document.querySelectorAll('[data-filter]');
+  function select(id) {
+    selected = cards.find((c) => c.task.id === id);
+    cards.forEach((c) => {
+      c.el.hidden = c !== selected;
+      c.choice.setAttribute('aria-pressed', String(c === selected));
+      if (c.el.hidden) c.el.querySelectorAll('video').forEach((v) => v.pause());
+    });
+  }
   function filter(group) {
     filters.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === group)));
-    cards.forEach((c) => { c.el.hidden = group !== 'all' && c.task.group !== group; if (c.el.hidden) c.el.querySelectorAll('video').forEach((v) => v.pause()); });
+    cards.forEach((c) => { c.choice.hidden = c.task.group !== group; });
+    select(selected && selected.task.group === group ? selected.task.id : group === 'inter' ? 'E2' : 'A1');
   }
   function explore(task) {
     document.getElementById('memory').open = true;
@@ -32,10 +43,19 @@
       explorer.focus({ preventScroll: true });
     }
   }
-  if (grid && V && S) {
+  if (grid && choices && V && S) {
     traces.forEach((task) => {
       const article = document.createElement('article');
       article.className = 'task-card';
+      article.id = 'task-panel-' + task.id;
+      article.hidden = true;
+      const choice = document.createElement('button');
+      choice.type = 'button'; choice.className = 'task-choice';
+      choice.textContent = task.id + ' · ' + task.name;
+      choice.setAttribute('aria-controls', article.id);
+      choice.setAttribute('aria-pressed', 'false');
+      choice.addEventListener('click', () => select(task.id));
+      choices.append(choice);
       const media = document.createElement('div'); media.className = 'task-media';
       const badge = document.createElement('span'); badge.className = 'task-id'; badge.textContent = task.id;
       if (RECORDINGS[task.id]) {
@@ -50,7 +70,7 @@
         const download = document.createElement('a'); download.href = source.src;
         download.textContent = 'Download recording';
         video.append(source, download); media.append(video);
-      } else {
+      } else if (task.group === 'intra') {
         media.innerHTML = S.photo(task.id, task.name);
       }
       media.append(badge);
@@ -60,8 +80,10 @@
       const button = document.createElement('button'); button.type = 'button'; button.className = 'task-explore';
       button.textContent = 'Inspect memory →'; button.setAttribute('aria-label', 'Explore memory for ' + task.name);
       button.addEventListener('click', () => explore(task));
-      body.append(title, description, button); article.append(media, body); grid.append(article);
-      cards.push({ task, el: article });
+      body.append(title, description, button);
+      if (task.group === 'intra' || RECORDINGS[task.id]) article.append(media);
+      article.append(body); grid.append(article);
+      cards.push({ task, el: article, choice });
     });
     filter('intra');
     filters.forEach((button) => button.addEventListener('click', () => filter(button.dataset.filter)));

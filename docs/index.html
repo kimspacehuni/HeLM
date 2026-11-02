@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 
 
-<link rel="stylesheet" href="static/css/style.css?v=paper-20261101">
+<link rel="stylesheet" href="static/css/style.css?v=task-selector-20261102">
 <link rel="icon" type="image/png" href="static/images/favicon.png">
 </head>
 <body>
@@ -111,9 +111,10 @@
 
 <section id="tasks" class="section">
   <div class="wrap">
-    <div class="section-heading heading-split"><div><p class="eyebrow">03 / TASKS</p><h2>Real-world tasks</h2></div><p>Watch recorded trials and inspect the memory for each task. The suite contains 10 tasks and 56 variants, covering both intra-episode and inter-episode memory.</p></div>
-    <div class="tabs" role="group" aria-label="Filter evaluation tasks"><button class="tab" type="button" data-filter="intra" aria-pressed="true">Intra-episode tasks <span>A1–A5</span></button><button class="tab" type="button" data-filter="inter" aria-pressed="false">Inter-episode tasks <span>E1–E5</span></button><button class="tab" type="button" data-filter="all" aria-pressed="false">All tasks</button></div>
-    <div class="task-grid" id="task-grid"></div>
+    <div class="section-heading heading-split"><div><p class="eyebrow">03 / TASKS</p><h2>Real-world tasks</h2></div><p>Select a task to view its description and available recording. Inter-episode video is provided for Human-Order Press. The suite contains 10 tasks and 56 variants, covering both intra-episode and inter-episode memory.</p></div>
+    <div class="tabs" role="group" aria-label="Filter evaluation tasks"><button class="tab" type="button" data-filter="intra" aria-pressed="true">Intra-episode tasks <span>A1–A5</span></button><button class="tab" type="button" data-filter="inter" aria-pressed="false">Inter-episode tasks <span>E1–E5</span></button></div>
+    <div id="task-choices" class="task-choices" role="group" aria-label="Choose one task"></div>
+    <div class="task-stage" id="task-grid"></div>
     <noscript><p>A1–A5: counting, button order, window wiping, drawer search and pick/place/press. E1–E5: cumulative counting, human-demonstrated order, remaining-window wiping, remembered object location and original-position restoration.</p></noscript>
 
     <details id="memory" class="research-detail task-memory"><summary>Inspect task-specification memory states <span aria-hidden="true">+</span></summary><div class="detail-content"><p class="small-note">Select “Inspect memory” on a task to see its instructions, progress and memory states. These are task-specification examples, separate from the recorded videos. This explorer contains 51 repository variants; the paper evaluates 56 variants.</p>
@@ -237,11 +238,11 @@
 </div></footer>
 <script src="static/js/viz.js"></script>
 <script src="static/js/scene.js"></script>
-<script src="static/js/traces.js?v=paper-20261101"></script>
+<script src="static/js/traces.js?v=task-selector-20261102"></script>
 <script src="static/js/hero.js"></script>
-<script src="static/js/inspector.js?v=paper-20261101"></script>
-<script src="static/js/charts.js?v=paper-20261101"></script>
-<script src="static/js/main.js?v=paper-20261101"></script>
-<script src="static/js/videos.js?v=paper-20261101"></script>
+<script src="static/js/inspector.js?v=task-selector-20261102"></script>
+<script src="static/js/charts.js?v=task-selector-20261102"></script>
+<script src="static/js/main.js?v=task-selector-20261102"></script>
+<script src="static/js/videos.js?v=task-selector-20261102"></script>
 </body>
 </html>

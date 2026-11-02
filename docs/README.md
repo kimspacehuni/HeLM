@@ -191,15 +191,19 @@ to WebP; flat-color charts are often smaller as PNG — check both.
 ## Recorded task videos
 
 The original `helm_demo.mp4` is the main demo below the paper title.
-There is one Real-world tasks section: task cards contain either a recorded
-trial with native playback controls or a reference photograph. The same card
-opens the corresponding task-specification memory example in an expandable
-panel below the grid. There is no separate recording gallery or explorer section.
+The Real-world tasks section shows category buttons and a compact task-name list.
+Selecting a task reveals only that task's panel; changing category defaults to A1
+(intra-episode) or E2 (inter-episode). Switching tasks pauses the hidden recording.
+The memory example opens from the selected task's “Inspect memory” button.
 
-Recordings map to A1, A3, A4, A5, E2 and E3. All are complete recordings at
-original playback speed; no inferred episode timestamps or memory logs are added.
-The six web copies total approximately 65.8 MiB: H.264, 1280 × 720, CRF 24,
-AAC 96 kbps, faststart. The originals remain local and ignored by Git.
+Intra-episode recordings map to A1, A3, A4 and A5; A2 uses a reference photograph.
+Inter-episode tasks E1–E5 remain in the text list; E2 Human-Order Press is the only
+inter-episode recording. Other inter-episode panels contain text and the memory
+link, without photographs or videos. The E3 media files remain preserved but are
+not referenced by the task UI.
+
+Recordings are full speed and do not contain inferred memory logs or timestamps.
+Web copies use H.264, 1280 × 720, CRF 24, AAC 96 kbps and faststart.
 Posters are actual frames exported as 960 × 540 WebP. All players use
 `preload="none"`, controls and inline playback. Only one player can play at a
 time; changing the task filter pauses videos that become hidden.
