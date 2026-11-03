@@ -59,7 +59,7 @@ serves as the favicon. Original large PNGs are kept local and ignored by Git.
 ## Reading order and interaction
 
 The publication header leads with the full paper title, the authors and affiliation,
-and Code / arXiv (coming soon) / Video links. The original framework demo video follows the header. An abstract precedes the problem,
+and Code / arXiv / Video links. The original framework demo video follows the header. An abstract precedes the problem,
 method, memory explorer, task suite and results. The optional button-sequence
 example and detailed tables are expandable.
 
@@ -207,3 +207,6 @@ Web copies use H.264, 1280 × 720, CRF 24, AAC 96 kbps and faststart.
 Posters are actual frames exported as 960 × 540 WebP. All players use
 `preload="none"`, controls and inline playback. Only one player can play at a
 time; changing the task filter pauses videos that become hidden.
+
+The arXiv buttons link to https://arxiv.org/abs/2611.02660; the Paper PDF link
+uses https://arxiv.org/pdf/2611.02660. The BibTeX entry includes this identifier.
