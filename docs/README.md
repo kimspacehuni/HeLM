@@ -253,3 +253,5 @@ Figure 3 is re-extracted with the complete lower episodic-context row.
 The task introduction shares the task browser's bordered container and emphasizes
 “10 tasks and 56 variants” and “intra-episode and inter-episode tasks”.
 BibTeX is a permanently visible section, not a details disclosure.
+
+The interactive example places its explanation above the card, with memory and step controls on the left and the instruction and reference photograph on the right (stacked on narrow screens). The framework figure precedes the three explanatory steps. The expandable real-world setup figure uses 70% of its content width.

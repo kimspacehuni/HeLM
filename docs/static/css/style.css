@@ -641,3 +641,16 @@ footer { border-top: 1px solid var(--border); padding: 35px 0; }
 .citation-content > p { margin-bottom: 16px; }
 @media (max-width: 800px) { .example-layout { grid-template-columns: 1fr; gap: 24px; } .example-explanation { padding-top: 0; } }
 @media (max-width: 600px) { .hlp-steps { grid-template-columns: 1fr; } .hlp-steps > li + li { border-left: 0; border-top: 1px solid var(--border); } .policy-heading, .hlp-steps > li, .llp-policy { padding: 18px; } .llp-policy { grid-template-columns: auto minmax(0, 1fr); gap: 16px; } .llp-policy .step-tag { grid-column: 2; justify-self: start; } .task-browser { padding: 16px; } }
+
+/* Keep the explanation above the example; memory controls sit beside the photograph. */
+.example-content { padding-top: 18px; }
+.example-content .example-explanation { padding-top: 0; margin-bottom: 24px; text-align: left; }
+.example-content .sequence-demo { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 28px; max-width: none; align-items: center; }
+.example-visual { grid-column: 2; grid-row: 1; min-width: 0; }
+.example-controls { grid-column: 1; grid-row: 1; min-width: 0; }
+.example-controls .hero-memory { margin-top: 0; }
+.task-setups-figure { width: 70%; margin-inline: auto; }
+@media (max-width: 800px) {
+  .example-content .sequence-demo { grid-template-columns: 1fr; gap: 20px; }
+  .example-visual, .example-controls { grid-column: 1; grid-row: auto; }
+}
