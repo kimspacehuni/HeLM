@@ -48,8 +48,14 @@ previously saved theme setting. Diagram colours come from the CSS custom
 properties in `style.css` through `viz.js`.
 
 The main method illustration is paper Figure 2 (`static/figures/fig2_arch.webp`).
-It spans the content width. On smaller screens it scrolls horizontally to keep
-its labels readable; a full-size link is available below the figure.
+It uses 65% of the content width on desktop, 90% on tablets and the full width on
+phones. It scales without forced horizontal scrolling. The full-size link has been removed.
+Motivation and method use white section backgrounds so the paper figures blend
+into their surroundings. The motivation figure is capped at 820 px; the event
+update figure is capped at 900 px. The interactive example is centered in one column.
+Method labels follow manuscript Section 3.4: Visual Event Detection and Memory Update.
+The scaling plot and caption share one white card with a single outer border.
+The large evaluation statistic tiles have been removed; scores remain in the chart and tables.
 
 The paper mascots appear as small brand marks near the title and in the footer.
 `mascot-mark.webp` preserves transparency and `mascot-signature.webp` preserves
@@ -110,7 +116,8 @@ task-specification state. Playback is not recorded robot inference.
 Content follows the manuscript supplied on 2026-11-01, titled
 “HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation”.
 Author order: Gyeonghun Kim, Donghoon Kim, Minsoo Choi, Suyun Lee;
-affiliation: Seoul National University. Gyeonghun Kim links to the supplied homepage.
+affiliation: Seoul National University. Gyeonghun Kim links to the supplied homepage;
+Donghoon Kim links to the supplied Google Scholar profile.
 
 - Figure 5: intra-episode subtask success; Table 8: strict task success.
   Strict PCMB-π₀ and Naïve-π₀ results are zero for all tasks.
@@ -191,7 +198,9 @@ to WebP; flat-color charts are often smaller as PNG — check both.
 ## Recorded task videos
 
 The original `helm_demo.mp4` is the main demo below the paper title.
-The Real-world tasks section shows category buttons and a compact task-name list.
+The Real-world tasks section places category buttons and a compact task-name list
+in a left sidebar, with the selected recording capped at 640 px on the right.
+On phones, the controls stack above the recording.
 Selecting a task reveals only that task's panel; changing category defaults to A1
 (intra-episode) or E2 (inter-episode). Switching tasks pauses the hidden recording.
 The memory example opens from the selected task's “Inspect memory” button.
