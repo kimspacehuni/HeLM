@@ -65,7 +65,7 @@ serves as the favicon. Original large PNGs are kept local and ignored by Git.
 ## Reading order and interaction
 
 The publication header leads with the full paper title, the authors and affiliation,
-and Code / arXiv / Video links. The original framework demo video follows the header. An abstract precedes the problem,
+and Code / arXiv / Video links. The project-page demo video follows the header. An abstract precedes the problem,
 method, memory explorer, task suite and results. The optional button-sequence
 example and detailed tables are expandable.
 
@@ -197,7 +197,10 @@ to WebP; flat-color charts are often smaller as PNG — check both.
 
 ## Recorded task videos
 
-The original `helm_demo.mp4` is the main demo below the paper title.
+The main demo below the paper title is `helm_demo.mp4`, compressed from
+`HeLM_video/HeLM_demo_video_projectpage.mp4`. The source remains unchanged locally.
+This demo preserves 1920 × 1080, 29.97 fps and the original AAC audio, using
+H.264 (libx264, preset slow, CRF 20) and MP4 faststart for progressive playback.
 The Real-world tasks section places category buttons and a compact task-name list
 in a left sidebar, with the selected recording capped at 640 px on the right.
 On phones, the controls stack above the recording.
@@ -213,7 +216,8 @@ link, without photographs or videos. The E3 media files remain preserved but are
 not referenced by the task UI.
 
 Recordings are full speed and do not contain inferred memory logs or timestamps.
-Web copies use H.264, 1280 × 720, CRF 24, AAC 96 kbps and faststart.
+Task recording web copies use H.264, 1280 × 720, CRF 24, AAC 96 kbps and faststart;
+the main demo uses the higher-resolution settings described above.
 Posters are the first decoded frame of each recording, exported as 960 × 540 WebP.
 The overview uses `static/images/videos/helm_demo.webp` rather than the social card. All players use
 `preload="none"`, controls and inline playback. Only one player can play at a
