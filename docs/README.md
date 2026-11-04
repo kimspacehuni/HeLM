@@ -37,7 +37,7 @@ docs/
 │   │   └── main.js            # task discovery and nav
 │   ├── figures/               # figures extracted from the paper PDF
 │   ├── images/                # video poster + social card
-│   └── videos/                # overview and six task recordings
+│   └── videos/                # overview and task recordings
 └── .nojekyll
 ```
 
@@ -205,7 +205,8 @@ Selecting a task reveals only that task's panel; changing category defaults to A
 (intra-episode) or E2 (inter-episode). Switching tasks pauses the hidden recording.
 The memory example opens from the selected task's “Inspect memory” button.
 
-Intra-episode recordings map to A1, A3, A4 and A5; A2 uses a reference photograph.
+Intra-episode recordings cover all five tasks (A1–A5). A2 uses
+`press_button_in_RGB_order.mp4`, with a poster extracted from the recording.
 Inter-episode tasks E1–E5 remain in the text list; E2 Human-Order Press is the only
 inter-episode recording. Other inter-episode panels contain text and the memory
 link, without photographs or videos. The E3 media files remain preserved but are

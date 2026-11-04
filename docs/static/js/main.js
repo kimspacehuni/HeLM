@@ -15,7 +15,7 @@
     E4: 'Recall an object’s location and open the correct drawer directly.',
     E5: 'Remember the original plate and return the object to it.',
   };
-  const RECORDINGS = { A1: 'press_3_times', A3: 'wipe_bottom_middle_top', A4: 'find_object', A5: 'pick_place_press', E2: 'press_in_human_order' };
+  const RECORDINGS = { A1: 'press_3_times', A2: 'press_button_in_RGB_order', A3: 'wipe_bottom_middle_top', A4: 'find_object', A5: 'pick_place_press', E2: 'press_in_human_order' };
   const grid = document.getElementById('task-grid');
   const cards = [];
   const choices = document.getElementById('task-choices');
