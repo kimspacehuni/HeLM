@@ -255,3 +255,5 @@ The task introduction shares the task browser's bordered container and emphasize
 BibTeX is a permanently visible section, not a details disclosure.
 
 The interactive example places its explanation above the card, with memory and step controls on the left and the instruction and reference photograph on the right (stacked on narrow screens). The framework figure precedes the three explanatory steps. The expandable real-world setup figure uses 70% of its content width.
+
+The main demo shares the Abstract container width. Framework copy uses compact step headings and side-by-side memory definitions to reduce vertical scrolling between the architecture figure and its explanations.

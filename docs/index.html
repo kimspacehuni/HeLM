@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 
 
-<link rel="stylesheet" href="static/css/style.css?v=example-columns-20261104">
+<link rel="stylesheet" href="static/css/style.css?v=compact-method-20261104">
 <link rel="icon" type="image/png" href="static/images/favicon.png">
 </head>
 <body>
@@ -49,7 +49,7 @@
 </header>
 
 <section id="video" class="section featured-demo" aria-label="HeLM demo video">
-  <div class="wrap"><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/helm_demo.webp?v=first-frame-20261104" aria-label="HeLM demo video"><source src="static/videos/helm_demo.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/helm_demo.mp4">Download the demo video.</a></video></div></div>
+  <div class="wrap abstract-content"><div class="video-frame"><video controls preload="none" playsinline width="1280" height="720" poster="static/images/videos/helm_demo.webp?v=first-frame-20261104" aria-label="HeLM demo video"><source src="static/videos/helm_demo.mp4" type="video/mp4">Your browser does not support embedded video. <a href="static/videos/helm_demo.mp4">Download the demo video.</a></video></div></div>
 </section>
 
 
@@ -93,23 +93,23 @@
 
 <section id="method" class="section method-section">
   <div class="wrap">
-    <div class="section-heading"><p class="eyebrow">02 / THE METHOD</p><h2>HeLM framework</h2><p class="method-acronym">Hierarchical Explicit Language Memory</p><p>HeLM separates deciding what comes next from executing the movement. The high-level vision-language model (HLP) manages memory; the low-level action policy (LLP) controls the robot.</p></div>
+    <div class="section-heading"><p class="eyebrow">02 / THE METHOD</p><h2>HeLM framework</h2><p class="method-acronym">Hierarchical Explicit Language Memory</p><p>The high-level policy (HLP) detects events and updates language memory. Its commands guide the low-level policy (LLP), which controls the robot.</p></div>
     <figure class="method-figure">
       <div class="figure-scroll">
         <img src="static/figures/fig2_arch.webp" alt="HeLM architecture from the paper: the high-level policy reads the instruction, current observation and language memory, then sends action commands to the low-level VLA policy. Working memory tracks events; episodic context carries information across episodes. The shared VLM uses detect mode to watch for events and update mode to revise memory and the next command." width="1800" height="746" loading="lazy">
       </div>
-      <figcaption><div><span class="figure-tag">FIGURE 2 / THE HeLM ARCHITECTURE</span><p>The high-level policy maintains language memory and chooses an action command. The low-level policy turns that command into robot actions. Detect and update are two modes of the same VLM.</p></div></figcaption>
+      <figcaption><div><span class="figure-tag">FIGURE 2 / THE HeLM ARCHITECTURE</span><p>Language memory connects high-level task reasoning to low-level robot actions.</p></div></figcaption>
     </figure>
     <div class="policy-flow">
       <section class="hlp-policy" aria-labelledby="hlp-title">
-        <div class="policy-heading"><p class="eyebrow">HIGH-LEVEL POLICY · VLM</p><h3 id="hlp-title">HLP: detect events and maintain memory</h3><p>Detect and Update are two modes of the same vision-language model.</p></div>
+        <div class="policy-heading"><h3 id="hlp-title">High-Level Policy · VLM</h3><p>One model, two modes: Detect and Update.</p></div>
         <ol class="hlp-steps">
-          <li><span class="step-number">01</span><h4>Visual Event Detection</h4><p>At each action-chunk boundary, read the observation, memory and current command. Report a task-relevant event or <code>none</code>.</p><span class="step-tag">DETECT</span></li>
-          <li><span class="step-number">02</span><h4>Memory Update</h4><p>When an event is detected or the instruction changes, update language memory and choose the next action command. Otherwise, retain both.</p><dl class="update-memory"><div><dt>Working memory</dt><dd>Progress within the current instruction.<code>Count: 2 (Goal: 3)</code></dd></div><div><dt>Episodic context</dt><dd>Relevant history retained across instructions.<code>Previous_Count: 3</code></dd></div></dl><span class="step-tag">UPDATE</span></li>
+          <li><span class="step-number">01</span><h4>Visual Event Detection</h4><p>After each action chunk, check the observation, memory and command for a task-relevant event; output the event or <code>none</code>.</p><span class="step-tag">DETECT</span></li>
+          <li><span class="step-number">02</span><h4>Memory Update</h4><p>On an event or instruction change, update memory and the next command. Otherwise, keep both unchanged.</p><dl class="update-memory"><div><dt>Working memory</dt><dd>Progress within the current instruction.<code>Count: 2 (Goal: 3)</code></dd></div><div><dt>Episodic context</dt><dd>Relevant history retained across instructions.<code>Previous_Count: 3</code></dd></div></dl><span class="step-tag">UPDATE</span></li>
         </ol>
       </section>
       <div class="command-handoff">Action command <span aria-hidden="true">↓</span></div>
-      <section class="llp-policy" aria-labelledby="llp-title"><span class="step-number">03</span><div><p class="eyebrow">LOW-LEVEL POLICY · VLA</p><h3 id="llp-title">Low-Level Action Execution</h3><p>Use the HLP’s command and current observations to produce an action chunk for the robot. At the next chunk boundary, the HLP checks for a new event.</p></div><span class="step-tag">ACT</span></section>
+      <section class="llp-policy" aria-labelledby="llp-title"><span class="step-number">03</span><div><p class="eyebrow">LOW-LEVEL POLICY · VLA</p><h3 id="llp-title">Low-Level Action Execution</h3><p>Execute an action chunk from the command and current observations, then return to event detection.</p></div><span class="step-tag">ACT</span></section>
     </div>
     <details class="research-detail"><summary>Go deeper: event-triggered updates <span aria-hidden="true">+</span></summary><div class="detail-content"><p>Detect mode emits a task-relevant event or <code>none</code>. Update mode runs when an event is detected or the global instruction changes. Working memory tracks the current task; episodic context carries information across task boundaries.</p><figure class="paper-figure"><img src="static/figures/fig3_loop.webp?v=complete-20261104" alt="Detect and update calls across episodes, with working memory and episodic context updated at task events." width="1800" height="692" loading="lazy"><figcaption>The evaluation loop across intra-episode and inter-episode tasks.</figcaption></figure></div></details>
   </div>
