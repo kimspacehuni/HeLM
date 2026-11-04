@@ -214,7 +214,8 @@ not referenced by the task UI.
 
 Recordings are full speed and do not contain inferred memory logs or timestamps.
 Web copies use H.264, 1280 × 720, CRF 24, AAC 96 kbps and faststart.
-Posters are actual frames exported as 960 × 540 WebP. All players use
+Posters are the first decoded frame of each recording, exported as 960 × 540 WebP.
+The overview uses `static/images/videos/helm_demo.webp` rather than the social card. All players use
 `preload="none"`, controls and inline playback. Only one player can play at a
 time; changing the task filter pauses videos that become hidden.
 
@@ -240,3 +241,15 @@ Captions are supplied separately in HTML. Standard white panels are capped at
 620 px; the wider failure and full simulation tables use 820 px. Figure 6 also
 uses the 620 px panel. Images retain their aspect ratios and link to full size.
 The limitations text is omitted from this page's results section.
+
+## Explanation layout
+
+The interactive example places left-aligned explanatory text on the left and the
+photo, memory readout and step buttons on the right; it stacks on small screens.
+The method title spells out Hierarchical Explicit Language Memory. Detect and
+Update belong to a single HLP group; working memory and episodic context are
+explained inside Update. LLP execution is a separate downstream panel.
+Figure 3 is re-extracted with the complete lower episodic-context row.
+The task introduction shares the task browser's bordered container and emphasizes
+“10 tasks and 56 variants” and “intra-episode and inter-episode tasks”.
+BibTeX is a permanently visible section, not a details disclosure.

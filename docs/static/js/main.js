@@ -63,7 +63,7 @@
         const video = document.createElement('video');
         video.controls = true; video.preload = 'none'; video.playsInline = true;
         video.width = 1280; video.height = 720;
-        video.poster = 'static/images/videos/' + name + '.webp';
+        video.poster = 'static/images/videos/' + name + '.webp?v=first-frame-20261104';
         video.setAttribute('aria-label', task.name + ' recorded trial');
         const source = document.createElement('source');
         source.src = 'static/videos/' + name + '.mp4'; source.type = 'video/mp4';
