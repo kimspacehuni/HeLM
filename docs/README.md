@@ -220,3 +220,23 @@ time; changing the task filter pauses videos that become hidden.
 
 The arXiv buttons link to https://arxiv.org/abs/2611.02660; the Paper PDF link
 uses https://arxiv.org/pdf/2611.02660. The BibTeX entry includes this identifier.
+
+## Evaluation result presentation
+
+The interactive bar chart is retained. Intra-episode strict task success (Table 8)
+and inter-episode subtask success (Table 1) are grouped under “Main result”.
+The remaining collapsed experiments follow the paper's discussion order:
+1. Failure analysis (Sec. 5.3 / Table 7).
+2. Memory and HLP fine-tuning (Sec. 5.4 / Table 2).
+3. Two-stage inference (Sec. 5.4 / Table 3).
+4. Compositional generalization (Sec. 5.5 / Table 4).
+5. Task-length robustness and memory scaling (Sec. 5.6 / Figure 6).
+6. Additional LIBERO-Mem evaluation (Appendix F.3 / Table 11).
+
+Each numbered summary shows its title and an editorial research question describing
+the experiment. Original table artwork is extracted from the supplied manuscript
+into `static/figures/results/`, preserving headers, values, emphasis and rules.
+Captions are supplied separately in HTML. Standard white panels are capped at
+620 px; the wider failure and full simulation tables use 820 px. Figure 6 also
+uses the 620 px panel. Images retain their aspect ratios and link to full size.
+The limitations text is omitted from this page's results section.
