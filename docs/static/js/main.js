@@ -66,7 +66,7 @@
         video.poster = 'static/images/videos/' + name + '.webp?v=first-frame-20261104';
         video.setAttribute('aria-label', task.name + ' recorded trial');
         const source = document.createElement('source');
-        source.src = 'static/videos/' + name + '.mp4'; source.type = 'video/mp4';
+        source.src = 'static/videos/' + name + '.mp4?v=silent-20261108'; source.type = 'video/mp4';
         const download = document.createElement('a'); download.href = source.src;
         download.textContent = 'Download recording';
         video.append(source, download); media.append(video);

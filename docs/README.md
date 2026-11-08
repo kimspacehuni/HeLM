@@ -216,7 +216,8 @@ link, without photographs or videos. The E3 media files remain preserved but are
 not referenced by the task UI.
 
 Recordings are full speed and do not contain inferred memory logs or timestamps.
-Task recording web copies use H.264, 1280 × 720, CRF 24, AAC 96 kbps and faststart;
+Task recording web copies use H.264, 1280 × 720, CRF 24 and faststart.
+Their audio tracks are removed using stream copy, preserving the encoded video;
 the main demo uses the higher-resolution settings described above.
 Posters are the first decoded frame of each recording, exported as 960 × 540 WebP.
 The overview uses `static/images/videos/helm_demo.webp` rather than the social card. All players use
