@@ -1,4 +1,4 @@
-# HeLM: Hierarchical Explicit Language Memory for VLM-Guided Non-Markovian Manipulation
+# HeLM: Hierarchical Explicit Language Memory for Non-Markovian Manipulation
 
 **[Project Page](https://kimspacehuni.github.io/HeLM/)**
 
@@ -9,10 +9,10 @@ HeLM decouples memory management from action generation through a two-level hier
 - **LLP (Low-Level Policy)**: a VLA-based action policy (e.g., π0) that executes motor actions guided by HLP commands.
 
 **Key results on 10 real-world non-Markovian tasks:**
-- **+13%** average success rate over baselines
-- **78%** zero-shot success rate on unseen task variants
-- **~4.5x** lower VRAM usage than Keyframe-HLP at 8 events
-- **~2.3x** faster inference than Keyframe-HLP at 8 events (estimated from Fig. 7)
+- **+12.8 percentage points** in average intra-episode subtask success over the strongest baseline (85.7% vs. 72.9%)
+- **78% subtask success on compositional generalization tasks**
+- **Up to 4.5× less memory** than Keyframe-HLP at long horizons
+- **Up to 2.5× faster inference** than Keyframe-HLP at long horizons
 
 ---
 
@@ -49,7 +49,7 @@ The HLP maintains a structured memory `M_t = ⟨m_t^work, m_t^epi⟩`:
 
 ### Two-Stage HLP Inference
 
-1. **Detect Mode** (`π_det`): At every step, the VLM classifies whether the current observation is a task-relevant event (e.g., `"pressed red button"`, `"wiped the top window"`) or `"none"`.
+1. **Detect Mode** (`π_det`): At each action-chunk boundary, the VLM classifies whether the current observation is a task-relevant event (e.g., `"pressed red button"`, `"wiped the top window"`) or `"none"`.
 2. **Update Mode** (`π_upd`): Triggered only when an event is detected or the global instruction changes. Updates `M_t` and generates a new action command `z_t` for the LLP.
 
 This event-triggered design prevents redundant memory updates from visually similar frames and keeps the memory compact and interpretable.
@@ -86,7 +86,7 @@ The agent must retain information across task boundaries and episode resets.
 
 ## Results
 
-### Intra-Episode (Success Rate %)
+### Intra-Episode (Subtask Success Rate %)
 
 | Method | A1 | A2 | A3 | A4 | A5 | **Avg** |
 |---|---|---|---|---|---|---|
@@ -98,7 +98,7 @@ The agent must retain information across task boundaries and episode resets.
 \* Keyframe-HLP fails to detect termination in A1 and A4.
 \*\* PCMB-π0 and Naïve-π0 fail both sequencing and termination across all trials.
 
-### Inter-Episode (Success Rate %)
+### Inter-Episode (Subtask Success Rate %)
 
 | Method | E1 | E2 | E3 | E4 | E5 | **Avg** |
 |---|---|---|---|---|---|---|
@@ -109,7 +109,7 @@ The agent must retain information across task boundaries and episode resets.
 
 PCMB-π0 and Naïve-π0 are excluded from inter-episode comparison as they reset internal states at episode boundaries.
 
-### Zero-Shot Generalization (Success Rate %)
+### Compositional Generalization (Subtask Success Rate %)
 
 | Method | A1' | A2' | A3' | A4' | A5' | **Avg** |
 |---|---|---|---|---|---|---|
@@ -120,13 +120,7 @@ PCMB-π0 and Naïve-π0 are excluded from inter-episode comparison as they reset
 
 ### Computational Efficiency
 
-| Metric | HeLM | Keyframe-HLP |
-|---|---|---|
-| VRAM (8 events) | ~6.2 GB | ~28 GB |
-| Inference latency (8 events) | ~2.06 s | ~4.81 s |
-| Latency scaling | Stable | Grows sharply with task length |
-
-Efficiency values are approximate estimates digitised from Fig. 7, not raw benchmark measurements.
+The paper reports up to **4.5× less memory** and **2.5× faster inference** than Keyframe-HLP at long horizons (Fig. 6). See [the paper](https://arxiv.org/abs/2611.02660) for the evaluation setting.
 
 ---
 
